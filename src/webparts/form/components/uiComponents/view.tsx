@@ -219,7 +219,7 @@ export interface IViewFormState {
   commentsData: any;
   generalComments: any;
   commentsLog: any;
-  referComment:any;
+  referComment: any;
 
   currentApprover: any;
   pastApprover: any;
@@ -401,7 +401,7 @@ export default class ViewForm extends React.Component<
       commentsData: [],
       generalComments: [],
       commentsLog: [],
-      referComment:[],
+      referComment: [],
 
       currentApprover: [],
       pastApprover: [],
@@ -655,8 +655,6 @@ export default class ViewForm extends React.Component<
       }
     });
 
-   
-
     return approverfilterData;
   };
 
@@ -667,8 +665,6 @@ export default class ViewForm extends React.Component<
         return each;
       }
     });
-
-   
 
     return approverfilterData;
   };
@@ -726,10 +722,14 @@ export default class ViewForm extends React.Component<
   };
 
   private _getATRGridData = (data: any) => {
+
     const newATRGridData = JSON.parse(data)
 
       .map((each: any) => {
+        console.log(each)
         if (each.atrCreatorEmail === this._currentUserEmail) {
+          console.log(each)
+          this.setState({atrType:each.atrType})
           return {
             comments: each.noteApproverComments,
             assignedTo: each.atrAssigneeEmailName,
@@ -774,7 +774,7 @@ export default class ViewForm extends React.Component<
   private _getItemData = async (id: any, folderPath?: any) => {
     const item: any = await this._getItemDataSpList(id);
 
-    console.log(item,`Item .........${id}`)
+    console.log(item, `Item .........${id}`);
 
     const purposeData =
       item.Purpose !== null ? JSON.parse(item.Purpose) : ["", ""];
@@ -895,7 +895,9 @@ export default class ViewForm extends React.Component<
           : item.Status,
       statusNumber: item.StatusNumber,
       ApproverDetails: JSON.parse(item.NoteApproversDTO),
-      currentApprover: [{...item.CurrentApprover,id:item.CurrentApproverId}],
+      currentApprover: [
+        { ...item.CurrentApprover, id: item.CurrentApproverId },
+      ],
       ApproverOrder:
         item.CurrentApprover &&
         item.StatusNumber !== "4000" &&
@@ -973,7 +975,7 @@ export default class ViewForm extends React.Component<
     typeOfReferee: any
   ): any => {
     commentsData = JSON.parse(commentsData);
-    console.log(commentsData)
+    console.log(commentsData);
 
     const lenOfCommentData = commentsData.length;
     if (typeOfReferee === "to") {
@@ -989,7 +991,6 @@ export default class ViewForm extends React.Component<
     id: any
   ): any => {
     ApproverDetails = JSON.parse(ApproverDetails);
-  
 
     if (statusNumber === "4000") {
       return [
@@ -1001,23 +1002,18 @@ export default class ViewForm extends React.Component<
       ];
     }
 
-
     if (currentApproverData) {
       const filterApproverData = ApproverDetails.filter((each: any) => {
-       
         if ((each.email || each.approverEmail) === currentApproverData.EMail) {
           return { ...each, ...currentApproverData };
         }
       });
-     
-      console.log(filterApproverData)
+
+      console.log(filterApproverData);
       return filterApproverData;
     }
-    
-    return null;
 
-   
-    
+    return null;
   };
 
   private _formatDateTime = (date: string | number | Date) => {
@@ -1044,7 +1040,7 @@ export default class ViewForm extends React.Component<
     | boolean
     | null => {
     let result: boolean | null = null;
-    console.log(result)
+    console.log(result);
 
     this.state.ApproverDetails.forEach((each: any) => {
       if (
@@ -1052,7 +1048,7 @@ export default class ViewForm extends React.Component<
           this._currentUserEmail &&
         each.approverOrder === this.state.ApproverOrder
       ) {
-        console.log(each)
+        console.log(each);
         switch (this.state.statusNumber) {
           case "9000":
             result = false;
@@ -1075,7 +1071,7 @@ export default class ViewForm extends React.Component<
         }
       }
     });
-    console.log(result)
+    console.log(result);
     return result;
   };
 
@@ -1369,6 +1365,18 @@ export default class ViewForm extends React.Component<
     }
   }
 
+
+  private _getCurrentApproverDetailsFromApproverDTO = ():any=>{
+    const currentApproverDetails = this.state.ApproverDetails.filter(
+      (each: any) =>
+        each.userId ===
+        this.state.currentApprover[0].id
+    );
+
+    console.log(currentApproverDetails)
+    return currentApproverDetails
+  }
+
   private _updateDefaultNoteATRAssigneeDetails = async (): Promise<any> => {
     const currentAtrCreator = this.state.atrCreatorsList.filter(
       (each: any) =>
@@ -1377,15 +1385,21 @@ export default class ViewForm extends React.Component<
 
     this._atrJoinedCommentsToDTO();
 
+    const currentApproverDetailsFromApproverDTO =
+                                  this._getCurrentApproverDetailsFromApproverDTO()
+    
+
     const defaultNoteATRAssigneeDetails = [
       {
+        
+        atrType: "Default",
         atrAssigneeId: this.state.createdByID,
         atrCreatorId: currentAtrCreator[0].atrCreatorId,
         atrCreatorEmail: currentAtrCreator[0].atrCreatorEmail,
 
         atrAssigneeEmailName: this.state.createdByEmailName,
         atrAssigneeEmail: this.state.createdByEmail,
-        approverEmailName: this.state.currentApprover[0].text,
+        approverEmailName: currentApproverDetailsFromApproverDTO.approverEmailName,
         atrCreatorEmailName: currentAtrCreator[0].atrCreatorEmailName,
 
         createdDate: this._formatDateTime(new Date()),
@@ -1394,11 +1408,11 @@ export default class ViewForm extends React.Component<
         modifiedBy: this.props.context.pageContext.user.email,
         statusMessage: null,
         atrId: "",
-        noteApproverId: this.state.currentApprover[0].ApproversId,
-        approverType: this.state.currentApprover[0].approverType,
-        approverOrder: this.state.currentApprover[0].approverOrder,
+        noteApproverId:currentApproverDetailsFromApproverDTO.userId,
+        approverType: currentApproverDetailsFromApproverDTO.approverType,
+        approverOrder: currentApproverDetailsFromApproverDTO.approverOrder,
         approverStatus: 1,
-        approverEmail: this.state.currentApprover[0].EMail,
+        approverEmail: currentApproverDetailsFromApproverDTO.approverEmail,
         noteApproverComments: this._atrJoinedCommentsToDTO(),
         strATRStatus: "Submitted",
         atrStatus: 1,
@@ -1417,6 +1431,7 @@ export default class ViewForm extends React.Component<
 
   private _updateATRRequest = async (currentApproverId: any): Promise<void> => {
     this.state.noteATRAssigneeDetails.map(async (each: any) => {
+      console.log(each);
       try {
         const auditLog = [
           {
@@ -1432,7 +1447,8 @@ export default class ViewForm extends React.Component<
           .map(
             (each: any) => `${each?.pageNum} ${each?.page} ${each?.comment}`
           );
-        await this.props.sp.web.lists.getByTitle("ATRRequests").items.add({
+
+        const atrObj = {
           Title: this.state.title,
           NoteTo: "",
           Status: "Submitted",
@@ -1452,7 +1468,12 @@ export default class ViewForm extends React.Component<
           NoteApproversDTO: JSON.stringify(this.state.ApproverDetails),
           startProcessing: true,
           ATRType: this.state.atrType,
-        });
+        };
+
+        console.log(atrObj);
+        await this.props.sp.web.lists
+          .getByTitle("ATRRequests")
+          .items.add(atrObj);
       } catch (error) {
         return error;
       }
@@ -1499,6 +1520,8 @@ export default class ViewForm extends React.Component<
         ATRType: this.state.atrType,
       };
 
+      console.log(defaultAtrObj);
+
       await this.props.sp.web.lists
         .getByTitle("ATRRequests")
         .items.add(defaultAtrObj);
@@ -1514,28 +1537,77 @@ export default class ViewForm extends React.Component<
     statusNumber: string
   ) => {
     const item = await this._getItemDataSpList(this._itemId);
-    console.log(item)
+    console.log(item);
     const StatusNumber = item?.StatusNumber;
     this._closeDialog();
 
-      this.setState({ isLoading: true });
+    this.setState({ isLoading: true });
 
-    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId 
-    console.log(checkCurrentApproverIsCurrentUser,"In List Current Actioner")
+    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+    console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    const currentUserId = (await this.props.sp?.web.currentUser())?.Id
+    const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    console.log(currentUserId, "Current User Id")
-    if (currentUserId !== checkCurrentApproverIsCurrentUser){
-      this.setState({
-        hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg: "This request approver/referee has been changed by Requester",
-      });
+    console.log(currentUserId, "Current User Id");
 
-      return
+    // let currentUserActionDone = ''
+    // let allUserId: any[] = []
 
-    }
-    if (StatusNumber !== "200") {     
+    // const _checkCurrentUserIsTakenAction = ():any=>{
+    //   const approversDTO = JSON.parse(item.NoteApproversDTO)
+    //   console.log(approversDTO)
+
+    //   const checkCurrentUserIsActioned = approversDTO.filter(
+    //     (each:any)=>{
+    //       allUserId.push(each.userId)
+    //       if (each.userId === currentUserId){
+    //         currentUserActionDone = each.status
+
+    //       }
+    //       return each.userId === currentUserId
+    //     }
+    //   )[0].status!=='Pending'
+
+    //   console.log(checkCurrentUserIsActioned)
+    //   return checkCurrentUserIsActioned
+    // }
+
+    // _checkCurrentUserIsTakenAction()
+
+    // if (  _checkCurrentUserIsTakenAction()){
+
+    //   this.setState({
+    //     hideParellelActionAlertDialog: true,
+    //     parellelActionAlertMsg: `"This request has been already ${currentUserActionDone}."`,
+    //   });
+
+    //   return
+
+    // }
+
+   
+
+    // if (![allUserId,checkCurrentApproverIsCurrentUser].includes(currentUserId)){
+    //   this.setState({
+    //     hideParellelActionAlertDialog: true,
+    //     parellelActionAlertMsg: "This request approver/referee has been changed by requester or the request already action taken.",
+    //   });
+
+    //   return
+
+    // }
+
+    if (StatusNumber !== "200") {
+
+      if (currentUserId !== checkCurrentApproverIsCurrentUser) {
+        this.setState({
+          hideParellelActionAlertDialog: true,
+          parellelActionAlertMsg:
+            "This request approver/referee has been changed by requester or the request already action taken. or the request already action taken.",
+        });
+  
+        return;
+      }
       let previousApprover: any;
       const modifyApproveDetails = this.state.ApproverDetails.map(
         (each: any, index: number) => {
@@ -1565,7 +1637,7 @@ export default class ViewForm extends React.Component<
           if (each.approverOrder === this.state.ApproverOrder + 1) {
             return {
               ...each,
-              status: "pending",
+              status: "Pending",
               mainStatus:
                 each.approverType === "Approver"
                   ? "Pending with approver"
@@ -1578,7 +1650,7 @@ export default class ViewForm extends React.Component<
       );
       const _getCurrentApproverDetails = (): any => {
         const currentApproverdata = modifyApproveDetails.filter((each: any) => {
-          if (each.status === "pending") {
+          if (each.status === "Pending") {
             return each;
           }
         });
@@ -1788,20 +1860,20 @@ export default class ViewForm extends React.Component<
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
-    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId 
-    console.log(checkCurrentApproverIsCurrentUser,"In List Current Actioner")
+    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+    console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    const currentUserId = (await this.props.sp?.web.currentUser())?.Id
+    const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    console.log(currentUserId, "Current User Id")
-    if (currentUserId !== checkCurrentApproverIsCurrentUser){
+    console.log(currentUserId, "Current User Id");
+    if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg: "This request approver/referee has been changed by Requester",
+        parellelActionAlertMsg:
+          "This request approver/referee has been changed by requester or the request already action taken.",
       });
 
-      return
-
+      return;
     }
 
     if (StatusNumber !== "200") {
@@ -1911,20 +1983,20 @@ export default class ViewForm extends React.Component<
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
-    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId 
-    console.log(checkCurrentApproverIsCurrentUser,"In List Current Actioner")
+    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+    console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    const currentUserId = (await this.props.sp?.web.currentUser())?.Id
+    const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    console.log(currentUserId, "Current User Id")
-    if (currentUserId !== checkCurrentApproverIsCurrentUser){
+    console.log(currentUserId, "Current User Id");
+    if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg: "This request approver/referee has been changed by Requester",
+        parellelActionAlertMsg:
+          "This request approver/referee has been changed by requester or the request already action taken.",
       });
 
-      return
-
+      return;
     }
 
     if (StatusNumber !== "200") {
@@ -1967,12 +2039,12 @@ export default class ViewForm extends React.Component<
         NoteReferrerDTO: JSON.stringify([
           ...this.state.noteReferrerDTO,
           {
-
             approverEmail:
               this.state.referredFromDetails[0].EMail ||
               this.state.referredFromDetails[0].approverEmail,
             approverEmailName:
               this.state.referredFromDetails[0].Text ||
+              this.state.referredFromDetails[0].Title ||
               this.state.referredFromDetails[0].approverEmailName,
             approverType: this.state.referredFromDetails[0].approverType,
             createdBy:
@@ -1995,12 +2067,11 @@ export default class ViewForm extends React.Component<
               this.state.refferredToDetails[0].approverEmailName,
             referrerStatus: 1,
             referrerStatusType: this.state.refferredToDetails[0].status,
-            comments:this.state.referComment.comment
-          
+            comments: this.state.referComment.comment,
           },
         ]),
       };
-      console.log(obj)
+      console.log(obj);
 
       await this.props.sp.web.lists
         .getByTitle(this._listname)
@@ -2041,22 +2112,22 @@ export default class ViewForm extends React.Component<
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
-    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId 
-    console.log(checkCurrentApproverIsCurrentUser,"In List Current Actioner")
+    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+    console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    const currentUserId = (await this.props.sp?.web.currentUser())?.Id
+    const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    console.log(currentUserId, "Current User Id")
-    if (currentUserId !== checkCurrentApproverIsCurrentUser){
+    console.log(currentUserId, "Current User Id");
+    if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg: "This request approver/referee has been changed by Requester",
+        parellelActionAlertMsg:
+          "This request approver/referee has been changed by requester or the request already action taken.",
       });
 
-      return
-
+      return;
     }
-    
+
     if (StatusNumber !== "200") {
       this.setState({ isLoading: true });
       let currentApproverId = null;
@@ -2070,14 +2141,14 @@ export default class ViewForm extends React.Component<
               currentApproverId = each.userId;
               currentApproverAfterReferBack = {
                 ...each,
-                status: "pending",
+                status: "Pending",
                 statusNumber: "2000",
                 actionDate: this._formatDateTime(new Date()),
               };
 
               return {
                 ...each,
-                status: "pending",
+                status: "Pending",
                 statusNumber: "2000",
                 actionDate: this._formatDateTime(new Date()),
               };
@@ -2085,14 +2156,14 @@ export default class ViewForm extends React.Component<
               currentApproverId = each.userId;
               currentApproverAfterReferBack = {
                 ...each,
-                status: "pending",
+                status: "Pending",
                 statusNumber: "3000",
                 actionDate: this._formatDateTime(new Date()),
               };
 
               return {
                 ...each,
-                status: "pending",
+                status: "Pending",
                 statusNumber: "3000",
                 actionDate: this._formatDateTime(new Date()),
               };
@@ -2184,27 +2255,59 @@ export default class ViewForm extends React.Component<
   ) => {
     this._closeDialog();
 
-
-    
-
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
+    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+    console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId 
-    console.log(checkCurrentApproverIsCurrentUser,"In List Current Actioner")
+    const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    const currentUserId = (await this.props.sp?.web.currentUser())?.Id
+    console.log(currentUserId, "Current User Id");
 
-    console.log(currentUserId, "Current User Id")
-    if (currentUserId !== checkCurrentApproverIsCurrentUser){
+    // let currentUserActionDone = ''
+
+    // const _checkCurrentUserIsTakenAction = ():any=>{
+    //   const approversDTO = JSON.parse(item.NoteApproversDTO)
+    //   console.log(approversDTO)
+
+    //   const checkCurrentUserIsActioned = approversDTO.filter(
+    //     (each:any)=>{
+
+    //       if (each.userId === currentUserId){
+    //         currentUserActionDone = each.status
+
+    //       }
+
+    //       return each.userId === currentUserId
+    //     }
+    //   )[0].status!=='Pending'
+
+    //   console.log(checkCurrentUserIsActioned)
+    //   return checkCurrentUserIsActioned
+    // }
+
+    // _checkCurrentUserIsTakenAction()
+
+    // if (  _checkCurrentUserIsTakenAction()){
+
+    //   this.setState({
+    //     hideParellelActionAlertDialog: true,
+    //     parellelActionAlertMsg: `"This request has been already ${currentUserActionDone}."`,
+    //   });
+
+    //   return
+
+    // }
+
+    if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg: "This request approver/referee has been changed by Requester",
+        parellelActionAlertMsg:
+          "This request approver/referee has been changed by requester or the request already action taken.",
       });
 
-      return
-
+      return;
     }
 
     if (StatusNumber !== "200") {
@@ -2221,7 +2324,7 @@ export default class ViewForm extends React.Component<
           }
 
           if (each.approverOrder === this.state.ApproverOrder + 1) {
-            return { ...each, status: "pending" };
+            return { ...each, status: "Pending" };
           }
           return each;
         }
@@ -2345,7 +2448,7 @@ export default class ViewForm extends React.Component<
   ) => {
     this._closeDialog();
     this.setState({ isLoading: true });
-    
+
     if (this.state.statusNumber === "4000") {
       const updateAuditTrial = await this._getAuditTrail(statusFromEvent);
 
@@ -2374,6 +2477,8 @@ export default class ViewForm extends React.Component<
           return each;
         }
       );
+
+      console.log(updateNoteReferDTO)
 
       await this.props.sp.web.lists
         .getByTitle(this._listname)
@@ -2431,7 +2536,7 @@ export default class ViewForm extends React.Component<
           if (each.status === "Pending") {
             return {
               ...this.state.currentApprover,
-              status: "pending",
+              status: "Pending",
               actionDate: this._formatDateTime(new Date()),
               mainStatus: each.mainStatus,
               secretary:
@@ -2449,7 +2554,6 @@ export default class ViewForm extends React.Component<
 
       return [
         {
-          
           approverType: upatedCurrentApprover[0].approverType,
           approverEmail:
             this.state.currentApprover[0].email ||
@@ -2458,7 +2562,7 @@ export default class ViewForm extends React.Component<
           approverStatus: upatedCurrentApprover[0].approverStatus,
 
           srNo: this.state.currentApprover[0].srNo,
-          designation:this.state.currentApprover[0].optionalText,
+          designation: this.state.currentApprover[0].optionalText,
           approverEmailName: this.state.currentApprover[0].text,
           userId: this.state.currentApprover[0].id,
           status: "Pending",
@@ -2488,7 +2592,7 @@ export default class ViewForm extends React.Component<
         }
       }
     );
-    console.log(modifyApproverDetails)
+    console.log(modifyApproverDetails);
 
     const reviewerIds = modifyApproverDetails
       .filter((each: any) => each.approverType === "Reviewer")
@@ -2745,24 +2849,20 @@ export default class ViewForm extends React.Component<
     type: string = "",
     id: string = ""
   ) => {
-
     if (this.state.statusNumber === "4000") {
       this.setState((prevState) => ({
         noteReferrerCommentsDTO: [
           ...prevState.noteReferrerCommentsDTO,
           {
             ...commentsData,
-            approverEmailName:this.state.currentApprover[0].Title
-           
+            approverEmailName: this.state.currentApprover[0].Title,
           },
         ],
       }));
-    } 
+    }
 
     if (type === "add") {
       this.setState((prev) => {
-       
-
         return {
           commentsLog: [...prev.commentsLog, commentsData],
           commentsData: [...prev.commentsData, commentsData],
@@ -3338,7 +3438,7 @@ export default class ViewForm extends React.Component<
   };
 
   private _getReferBackAndApproverStageButtons = () => {
-    console.log("btn visablity")
+    console.log("btn visablity");
     return this.state.noteReferrerDTO.length > 0 &&
       this.state.noteReferrerDTO[this.state.noteReferrerDTO.length - 1]
         ?.referrerEmail === this._currentUserEmail &&
@@ -3391,7 +3491,7 @@ export default class ViewForm extends React.Component<
   };
 
   public render(): React.ReactElement<IViewFormProps> {
-    console.log(this.state)
+    console.log(this.state);
     const { expandSections } = this.state;
 
     return (
@@ -3892,12 +3992,20 @@ export default class ViewForm extends React.Component<
 
                                   const { assigneeDetails } = data;
 
+                                  const currentApproverDetailsFromApproverDTO =
+                                  this._getCurrentApproverDetailsFromApproverDTO()
+
+                                  console.log(
+                                    currentApproverDetailsFromApproverDTO
+                                  );
+
                                   this.setState((prevState) => ({
                                     atrGridData: data.comments,
 
                                     noteATRAssigneeDetails: [
                                       ...prevState.noteATRAssigneeDetails,
                                       {
+                                        atrType:data.atrType,
                                         atrAssigneeId: assigneeDetails.id,
                                         atrCreatorId:
                                           currentAtrCreator[0].atrCreatorId,
@@ -3908,10 +4016,10 @@ export default class ViewForm extends React.Component<
                                           assigneeDetails.text,
                                         atrAssigneeEmail: assigneeDetails.email,
                                         approverEmailName:
-                                          this.state.currentApprover[0].text,
+                                          currentApproverDetailsFromApproverDTO[0].approverEmailName,
+                                            
                                         atrCreatorEmailName:
-                                          currentAtrCreator[0]
-                                            .atrCreatorEmailName,
+                                          currentAtrCreator[0].atrCreatorEmailName,
 
                                         createdDate: this._formatDateTime(
                                           new Date()
@@ -3923,23 +4031,18 @@ export default class ViewForm extends React.Component<
                                           new Date()
                                         ),
                                         modifiedBy:
-                                          this.props.context.pageContext.user
-                                            .email,
+                                          this.props.context.pageContext.user.email,
                                         statusMessage: null,
                                         atrId: "",
                                         noteApproverId:
-                                          this.state.currentApprover[0]
-                                            .ApproversId,
+                                          currentApproverDetailsFromApproverDTO[0].userId,
                                         approverType:
-                                          this.state.currentApprover[0]
-                                            .approverType,
+                                          currentApproverDetailsFromApproverDTO[0].approverType,
                                         approverOrder:
-                                          this.state.currentApprover[0]
-                                            .approverOrder,
+                                          currentApproverDetailsFromApproverDTO[0].approverOrder,
                                         approverStatus: 1,
                                         approverEmail:
-                                          this.state.currentApprover[0]
-                                            .approverEmail,
+                                          currentApproverDetailsFromApproverDTO[0].approverEmail,
                                         noteApproverComments: "",
                                         strATRStatus: "Pending",
                                         atrStatus: 1,
@@ -4503,48 +4606,45 @@ export default class ViewForm extends React.Component<
         )}
         {!this.state.dialogFluent && (
           <DialogBlockingExample
-
             changeApproverDataMandatory={this._changeApproverDataMandatory}
-
             referCommentsAndDataMandatory={this._referCommentsAndDataMandatory}
-
             statusNumberForChangeApprover={this.state.statusNumber}
-
             referDto={
               this.state.noteReferrerDTO[this.state.noteReferrerDTO.length - 1]
             }
-
             requesterEmail={this.state.createdByEmail}
-
             isUserExistingDialog={() =>
               this.setState({ isUserExistsModalVisible: true })
             }
-
             dialogUserCheck={{
               peoplePickerApproverData: this.state.peoplePickerApproverData,
               peoplePickerData: this.state.peoplePickerData,
             }}
-
             hiddenProp={this.state.dialogFluent}
-
             dialogDetails={this.state.dialogDetails}
-
             sp={this.props.sp}
-
             context={this.props.context}
-
             fetchReferData={(data: any) => {
-              console.log(data,"Comments Data")
+              console.log(data, "Comments Data");
               this.setState((prevState) => ({
                 commentsData: [...prevState.commentsData, data],
                 commentsLog: [...prevState.commentsLog, data],
-                referComment:data
+                referComment: data,
               }));
             }}
+            fetchAnydata={(
+              data: any,
+              typeOfBtnTriggered: any,
+              status: any,
+              commentData: any
+            ) => {
+              console.log(
+                data,
+                "During Change Approver, Refer",
+                "Type Triggered - ",
+                typeOfBtnTriggered
+              );
 
-            fetchAnydata={(data: any, typeOfBtnTriggered: any, status: any, commentData:any) => {
-              console.log(data,"During Change Approver, Refer","Type Triggered - ",typeOfBtnTriggered)
-             
               this.setState({
                 peoplePickerSelectedDataWhileReferOrChangeApprover: data,
               });
@@ -4557,7 +4657,6 @@ export default class ViewForm extends React.Component<
                 this.setState({ currentApprover: data });
               }
             }}
-
           />
         )}
       </div>

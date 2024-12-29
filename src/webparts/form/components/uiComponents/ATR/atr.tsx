@@ -129,11 +129,12 @@ export class ATRAssignee extends React.Component<
     
 
     const newOptions = optionUptoATRCreator.map((each: any) => {
+      console.log(each)
       return ({
         key:  each.approverEmailName,
         text: each.approverEmailName,
-        id: each.id,
-        email: each.email,
+        id: each.userId,
+        email: each.approverEmail,
       })
       
     });
