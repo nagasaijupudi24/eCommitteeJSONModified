@@ -227,6 +227,10 @@ interface IMainFormState {
 
   isReviewerDialogHandel: boolean;
   commentsLog: any;
+
+  hideParellelActionAlertDialog:any;
+ 
+  parellelActionAlertMsg:any
 }
 
 export const FormContext = React.createContext<any>(null);
@@ -238,6 +242,70 @@ const getIdFromUrl = (): any => {
 
   return Id;
 };
+
+
+
+const Cutsomstyles = mergeStyleSets({
+  modal: {
+    padding: "10px",
+    minWidth: "300px",
+    maxWidth: "80vw",
+    width: "100%",
+    "@media (min-width: 768px)": {
+      maxWidth: "580px",
+    },
+    "@media (max-width: 767px)": {
+      maxWidth: "290px",
+    },
+    margin: "auto",
+    backgroundColor: "white",
+    borderRadius: "4px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.26)",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+
+    borderBottom: "1px solid #ddd",
+    height: "50px",
+  },
+  headerTitle: {
+    margin: "5px",
+    marginLeft: "0px",
+    fontSize: "16px",
+    fontWeight: "400",
+  },
+  body: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    padding: "20px 0",
+    height: "100%",
+    "@media (min-width: 768px)": {
+      marginLeft: "20px",
+      marginRight: "20px",
+    },
+    "@media (max-width: 767px)": {
+      marginLeft: "20px",
+      marginRight: "20px",
+    },
+  },
+  footer: {
+    display: "flex",
+    alignItem: "center",
+    justifyContent: "flex-end",
+
+    borderTop: "1px solid #ddd",
+    paddingTop: "12px",
+    height: "50px",
+  },
+  button: {
+    maxHeight: "32px",
+  },
+});
 
 
 
@@ -389,6 +457,10 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       autosave: true,
       autoSavedialog: true,
       commentsLog: [],
+
+      hideParellelActionAlertDialog:false,
+      
+      parellelActionAlertMsg:''
     };
     const listTitle = this.props.listId;
 
@@ -564,6 +636,8 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         .getFolderByServerRelativePath(`${this._folderName}/Pdf`)
         .files.select("*")
         .expand("Author", "Editor")();
+
+      console.log(folderItemsPdf)
 
     
       for (const file of folderItemsPdf) {
@@ -3393,6 +3467,10 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     statusOfForm: string,
     showAlert: boolean = true
   ): Promise<void> => {
+
+   
+
+
     if (statusOfForm === "Drafted" && this.state.successStatus === "") {
       let id;
 
@@ -3609,7 +3687,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     }
   }
 
-  private async updatePdfFolderItems(libraryName: any[], folderPath: string) {
+  private updatingDocuments =async (libraryName: any[], folderPath: string):Promise<any>=>{
     await this.clearFolder(libraryName, folderPath);
  
     try {
@@ -3625,60 +3703,60 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       }
      
     } catch (error) {
-      // console.error(`Error updating folder items: ${error}`);
+      return error
     }
+
+  }
+
+  private async updatePdfFolderItems(libraryName: any[], folderPath: string) {
+    await this.updatingDocuments(libraryName,folderPath)
+   
   }
 
   private async updateSupportingDocumentFolderItems(
     libraryName: any[],
     folderPath: string
   ) {
-    await this.clearFolder(libraryName, folderPath);
+    await this.updatingDocuments(libraryName,folderPath)
    
-  
-
-    try {
-      for (const file of libraryName) {
-       
-        const arrayBuffer = await this.getFileArrayBuffer(file);
-      
-        await this.props.sp.web
-          .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, arrayBuffer, {
-            Overwrite: true,
-          });
-      }
-    
-    } catch (error) { /* empty */ }
   }
 
   private async updateWordDocumentFolderItems(
     libraryName: any[],
     folderPath: string
   ) {
-    await this.clearFolder(libraryName, folderPath);
-    
-
-   
-    try {
-      for (const file of libraryName) {
-      
-        const arrayBuffer = await this.getFileArrayBuffer(file);
-       
-        await this.props.sp.web
-          .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, arrayBuffer, {
-            Overwrite: true,
-          });
-      }
-   
-    // eslint-disable-next-line no-empty
-    } catch (error) {
-     
-    }
+    await this.updatingDocuments(libraryName,folderPath)
   }
 
   private handleUpdate = async (showAlert: boolean = true): Promise<void> => {
+
+    const itemList = await this._getItemDataSpList(this._itemId);
+    console.log(itemList);
+    const StatusNumber = itemList?.StatusNumber;
+    this.setState({ showCancelDialog: false, isLoadingOnForm: true });
+
+    if (StatusNumber === '2000' || StatusNumber ==='3000') {
+      this.setState({
+        isConfirmationDialogVisible: false,
+        isLoadingOnForm:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been already submitted or action taken by requestor.",
+      });
+
+      return;
+    }else if (StatusNumber ==='300'){
+      this.setState({
+        isConfirmationDialogVisible: false,
+        isLoadingOnForm:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been already cancelled by requestor.",
+      });
+
+      return
+
+    }
 
     try {
       !this.state.autosave &&
@@ -3898,6 +3976,8 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       this.props.formType === "BoardNoteNew"
         ? `${this.state.departmentAlias}/${currentyear}-${nextYear}/B${id}`
         : `${this.state.departmentAlias}/${currentyear}-${nextYear}/C${id}`;
+
+      console.log(requesterNo)
    
     const folderName = requesterNo.replace(/\//g, "-");
     return folderName;
@@ -3910,8 +3990,10 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
     
 
+    
+
     const requesterNo =
-      this.props.formType === "BoardNoteView"
+      this.props.formType === "BoardNoteNew"
         ? `${this.state.title.split('/')[0]}/${currentyear}-${nextYear}/B${id}`
         : `${this.state.title.split('/')[0]}/${currentyear}-${nextYear}/C${id}`;
 
@@ -4031,12 +4113,69 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     this.setState({ showCancelDialog: true });
   };
 
+  private _getItemDataSpList = async (id: any) => {
+    const item: any = await this.props.sp.web.lists
+      .getByTitle(this._listname)
+      .items.getById(id)
+      .select(
+        "*",
+        "Author/Title",
+        "Author/EMail",
+        "Approvers",
+        "Approvers/Title",
+        "Reviewers/Title",
+        "Approvers/EMail",
+        "Reviewers/EMail",
+        "NoteMarkedInfoDTO/Title",
+        "NoteMarkedInfoDTO/EMail",
+        "CurrentApprover/Title",
+        "CurrentApprover/EMail"
+      )
+      .expand(
+        "Author",
+        "Approvers",
+        "Reviewers",
+        "CurrentApprover",
+        "NoteMarkedInfoDTO"
+      )();
+
+    return item;
+  };
+
  
   private handleCancel = async (
     statusFromEvent: string,
     statusNumber: string
   ) => {
     this.setState({ showCancelDialog: false, isLoadingOnForm: true });
+
+    const item = await this._getItemDataSpList(this._itemId);
+    console.log(item);
+    const StatusNumber = item?.StatusNumber;
+   
+
+    if (StatusNumber === '2000' || StatusNumber ==='3000') {
+      this.setState({
+        isLoadingOnForm:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been already submitted.",
+      });
+
+      return;
+    }else if (StatusNumber ==='300'){
+      this.setState({
+        isLoadingOnForm:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been already cancelled by requestor.",
+      });
+
+    }
+
+
+
+
     try {
       const updateAuditTrail = await this._getAuditTrail(statusFromEvent);
      
@@ -4359,9 +4498,29 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         type="button"
         className={`${styles.responsiveButton}`}
         iconProps={{ iconName: "Save" }}
-        onClick={(
+        onClick={async(
           e: React.MouseEvent<HTMLButtonElement, MouseEvent>
         ) => {
+
+          if (this._itemId){
+
+            const itemList = await this._getItemDataSpList(this._itemId);
+            console.log(itemList);
+            const StatusNumber = itemList?.StatusNumber;
+
+            if (StatusNumber === '2000' || StatusNumber ==='3000') {
+              this.setState({
+                isConfirmationDialogVisible: false,
+                isLoadingOnForm:false,
+                hideParellelActionAlertDialog: true,
+                parellelActionAlertMsg:
+                  "This request has been already submitted.",
+              });
+        
+              return;
+            }
+
+          }
           if (this.state.errorForCummulative) {
             this.setState({
               dialogboxForCummulativeError: true,
@@ -4438,6 +4597,46 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                 this.setState({ autoSavedialog: true });
               }}
             />
+
+             <Modal
+                          isOpen={this.state.hideParellelActionAlertDialog}
+                          onDismiss={() => {
+                            console.log("close triggered");
+                            this.setState({
+                              hideParellelActionAlertDialog:
+                                !this.state.hideParellelActionAlertDialog,
+                            });
+                          }}
+                          isBlocking={true}
+                          containerClassName={Cutsomstyles.modal}
+                        >
+                          <div className={Cutsomstyles.header}>
+                            <div style={{ display: "flex", alignItems: "center" }}>
+                              <IconButton iconProps={{ iconName: "Info" }} />
+                              <h4 className={Cutsomstyles.headerTitle}>Alert</h4>
+                            </div>
+                            <IconButton
+                              iconProps={{ iconName: "Cancel" }}
+                              onClick={() => {
+                                console.log("close triggered");
+                                this.setState({ hideParellelActionAlertDialog: false });
+                              }}
+                            />
+                          </div>
+                          <div className={Cutsomstyles.body}>
+                            <p>{this.state.parellelActionAlertMsg}</p>
+                          </div>
+                          <div className={Cutsomstyles.footer}>
+                            <PrimaryButton
+                              className={Cutsomstyles.button}
+                              iconProps={{ iconName: "ReplyMirrored" }}
+                              onClick={() =>
+                                this.setState({ hideParellelActionAlertDialog: false })
+                              }
+                              text="OK"
+                            />
+                          </div>
+                        </Modal>
             <CummulativeErrorDialog
               isVisibleAlter={this.state.dialogboxForCummulativeError}
               onCloseAlter={() => {
@@ -5365,9 +5564,33 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                           type="button"
                           className={`${styles.responsiveButton}`}
                           iconProps={{ iconName: "Save" }}
-                          onClick={(
+                          onClick={async (
                             e: React.MouseEvent<HTMLButtonElement, MouseEvent>
                           ) => {
+
+                            if (this._itemId){
+
+                              const itemList = await this._getItemDataSpList(this._itemId);
+                              console.log(itemList);
+                              const StatusNumber = itemList?.StatusNumber;
+  
+                              if (StatusNumber === '2000' || StatusNumber ==='3000') {
+                                this.setState({
+                                  isConfirmationDialogVisible: false,
+                                  isLoadingOnForm:false,
+                                  hideParellelActionAlertDialog: true,
+                                  parellelActionAlertMsg:
+                                    "This request has been already submitted.",
+                                });
+                          
+                                return;
+                              }
+
+                            }
+
+                          
+
+
                             if (this.state.errorForCummulative) {
                               this.setState({
                                 dialogboxForCummulativeError: true,

@@ -1517,7 +1517,7 @@ export default class ViewForm extends React.Component<
         CommitteeName: this.state.committeeNameFeildValue,
         NoteApproversDTO: JSON.stringify(this.state.ApproverDetails),
         startProcessing: true,
-        ATRType: this.state.atrType,
+        ATRType:"Default",
       };
 
       console.log(defaultAtrObj);
@@ -1702,6 +1702,7 @@ export default class ViewForm extends React.Component<
       }
     } else {
       this.setState({
+        isLoading:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg: "This request has been call back",
       });
@@ -1794,19 +1795,19 @@ export default class ViewForm extends React.Component<
     );
   };
 
-  private _checkLastCommentByCurrentUser = () => {
-    const { commentsData } = this.state;
-    const filteredComments = commentsData.filter(
-      (comment: any) => comment !== null
-    );
-    if (filteredComments.length === 0) {
-      return true;
-    }
+  // private _checkLastCommentByCurrentUser = () => {
+  //   const { commentsData } = this.state;
+  //   const filteredComments = commentsData.filter(
+  //     (comment: any) => comment !== null
+  //   );
+  //   if (filteredComments.length === 0) {
+  //     return true;
+  //   }
 
-    const lastComment = filteredComments[filteredComments.length - 1];
+  //   const lastComment = filteredComments[filteredComments.length - 1];
 
-    return !(lastComment.commentedByEmail === this._currentUserEmail);
-  };
+  //   return !(lastComment.commentedByEmail === this._currentUserEmail);
+  // };
 
   private handleReject = async (
     statusFromEvent: string,
@@ -1895,6 +1896,7 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
+        isLoading:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg: "This request has been call back",
       });
@@ -2061,6 +2063,7 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
+        isLoading:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg: "This request has been call back",
       });
@@ -2081,12 +2084,36 @@ export default class ViewForm extends React.Component<
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
+
+
     console.log(currentUserId, "Current User Id");
     if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
-          "This request approver/referee has been changed by requester or the request already action taken.",
+          "This request has been taken action by approver",
+      });
+
+      return;
+    }
+
+
+     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+
+    console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+
+    // const _NoteReferrerDTO =item?.NoteReferrerDTO!==null? JSON.parse(item?.NoteReferrerDTO) :[]
+    // const _refereeId =_NoteReferrerDTO.length > 0 ? _NoteReferrerDTO[_NoteReferrerDTO.length-1].referrerId:null
+    // console.log(_refereeId)
+
+   
+
+    if (_ApproverInfoDTOId.includes(currentUserId)) {
+      this.setState({
+        isLoading:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been taken action by approver.",
       });
 
       return;
@@ -2096,19 +2123,14 @@ export default class ViewForm extends React.Component<
       this.setState({ isLoading: true });
       let currentApproverId = null;
 
-      let currentApproverAfterReferBack: any;
+    
 
       const modifyApproveDetails = this.state.ApproverDetails.map(
         (each: any, index: number) => {
           if (each.statusNumber === "4000") {
             if (each.approverType === "Reviewer") {
               currentApproverId = each.userId;
-              currentApproverAfterReferBack = {
-                ...each,
-                status: "Pending",
-                statusNumber: "2000",
-                actionDate: this._formatDateTime(new Date()),
-              };
+             
 
               return {
                 ...each,
@@ -2118,12 +2140,7 @@ export default class ViewForm extends React.Component<
               };
             } else {
               currentApproverId = each.userId;
-              currentApproverAfterReferBack = {
-                ...each,
-                status: "Pending",
-                statusNumber: "3000",
-                actionDate: this._formatDateTime(new Date()),
-              };
+             
 
               return {
                 ...each,
@@ -2197,13 +2214,7 @@ export default class ViewForm extends React.Component<
         "Supporting documents"
       );
 
-      await this.props.sp.web.lists
-        .getByTitle(this._listname)
-        .items.getById(this._itemId)
-        .update({
-          Status: currentApproverAfterReferBack.mainStatus,
-          StatusNumber: currentApproverAfterReferBack.statusNumber,
-        });
+     
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
@@ -2303,6 +2314,7 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
+        isLoading:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg: "This request has been call back",
       });
@@ -2314,7 +2326,58 @@ export default class ViewForm extends React.Component<
     statusNumber: string
   ) => {
     this._closeDialog();
+
     const item = await this._getItemDataSpList(this._itemId);
+    const StatusNumber = item?.StatusNumber;
+
+    const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+    console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
+
+    
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+
+    console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+
+    const _NoteReferrerDTO =item?.NoteReferrerDTO!==null? JSON.parse(item?.NoteReferrerDTO) :[]
+    const _refereeId =_NoteReferrerDTO.length > 0 ? _NoteReferrerDTO[_NoteReferrerDTO.length-1].referrerId:null
+    console.log(_refereeId)
+
+    const _actionersIDs = [..._ApproverInfoDTOId,_refereeId]
+    console.log(_actionersIDs)
+
+
+  
+    const actionTakenOcurredOrNot = JSON.parse(item?.NoteApproversDTO)[0].actionDate
+
+    if (actionTakenOcurredOrNot!==''){
+      if (_actionersIDs.includes(checkCurrentApproverIsCurrentUser)) {
+        this.setState({
+          isLoading:false,
+          hideParellelActionAlertDialog: true,
+          parellelActionAlertMsg:
+            "This request has already action taken please reload the page to take further action.",
+        });
+  
+        return;
+      }
+
+    }
+   
+
+   
+
+    
+    if (StatusNumber === "200") {
+      this.setState({
+        isLoading:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been called back.",
+      });
+
+      return
+    }
+
     const _ApproverInfoDTO = JSON.parse(item?.NoteApproversDTO);
     if (
       _ApproverInfoDTO?.every(
@@ -2389,27 +2452,27 @@ export default class ViewForm extends React.Component<
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
     console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    const _ApproverInfoDTO = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+    // const _ApproverInfoDTO = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
 
-    console.log(_ApproverInfoDTO, "_ApproverInfoDTO's User Id");
+    // console.log(_ApproverInfoDTO, "_ApproverInfoDTO's User Id");
 
-    const _NoteReferrerDTO =item?.NoteReferrerDTO!==null? JSON.parse(item?.NoteReferrerDTO) :[]
-    const _refereeId =_NoteReferrerDTO.length > 0 ? _NoteReferrerDTO[_NoteReferrerDTO.length-1].referrerId:null
-    console.log(_refereeId)
+    // const _NoteReferrerDTO =item?.NoteReferrerDTO!==null? JSON.parse(item?.NoteReferrerDTO) :[]
+    // const _refereeId =_NoteReferrerDTO.length > 0 ? _NoteReferrerDTO[_NoteReferrerDTO.length-1].referrerId:null
+    // console.log(_refereeId)
 
-    const _actionersIDs = [..._ApproverInfoDTO,_refereeId]
-    console.log(_actionersIDs)
+    // const _actionersIDs = [..._ApproverInfoDTO,_refereeId]
+    // console.log(_actionersIDs)
 
-    if (_actionersIDs.includes(this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id)) {
-      this.setState({
-        isLoading:false,
-        hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg:
-          "This request has already action taken please reload the page to take further action.",
-      });
+    // if (_actionersIDs.includes(this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id)) {
+    //   this.setState({
+    //     isLoading:false,
+    //     hideParellelActionAlertDialog: true,
+    //     parellelActionAlertMsg:
+    //       "This request has already action taken please reload the page to take further action.",
+    //   });
 
-      return;
-    }
+    //   return;
+    // }
 
 
     const getStatusText = (code: any) => {
@@ -2638,6 +2701,8 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
       (each: any) => each.actionDate !== ""
     );
 
+    console.log(checkActionDateIsUpdated)
+
     return checkActionDateIsUpdated;
   };
 
@@ -2671,7 +2736,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
 
                   if (this.state.errorOfDocuments) {
                     this.setState({ isAutoSaveFailedDialog: true });
-                  } else if (this._checkLastCommentByCurrentUser()) {
+                  } else if (this.state.generalComments.length === 0) {
                     this.setState({
                       isNotedCommentsManidatoryAlterDialog: true,
                     });
@@ -2728,7 +2793,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
 
             if (this.state.errorOfDocuments) {
               this.setState({ isAutoSaveFailedDialog: true });
-            } else if (this._checkLastCommentByCurrentUser()) {
+            } else if (this.state.generalComments.length === 0) {
               this.setState({ isRejectCommentsCheckAlterDialog: true });
             } else {
               this.setState({ successStatus: "rejected" });
@@ -2785,7 +2850,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
               this.setState({ isAutoSaveFailedDialog: true });
               return;
             }
-            if (this._checkLastCommentByCurrentUser()) {
+            if (this.state.generalComments.length === 0) {
               this.setState({ isReturnCommentsCheckAlterDialog: true });
             } else {
               this.setState({ successStatus: "returned" });
@@ -3471,7 +3536,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
             this.setState({ isAutoSaveFailedDialog: true });
             return;
           }
-          if (this._checkLastCommentByCurrentUser()) {
+          if (this.state.generalComments.length === 0) {
             this.setState({ isReferBackAlterDialog: true });
           } else {
             if (!this.state.isPasscodeValidated) {
@@ -3492,9 +3557,26 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
     );
   };
 
+  private getMainStatus = (): any => {
+    const approver = this.state.ApproverDetails.find(
+      (detail: any) =>
+        (detail.approverEmail || detail.email || detail.secondaryText) ===
+        (this.state.currentApprover[0].approverEmail ||
+          this.state.currentApprover[0].EMail ||
+          this.state.currentApprover[0].secondaryText)
+    );
+    // console.log(approver);
+    return approver ? approver.mainStatus : undefined;
+  };
+
   public render(): React.ReactElement<IViewFormProps> {
     console.log(this.state);
     const { expandSections } = this.state;
+
+    const formTitle = this.props.formType === "BoardNoteView"
+    ? `Board Note - ${ this.state.title}`
+    :`eCommittee Note - ${ this.state.title}`;
+    console.log(formTitle)
 
     return (
       <div className={styles.viewForm}>
@@ -3769,13 +3851,15 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
               <h1
                 className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer} `}
               >
-                eCommittee Note - {this.state.title}
+                {formTitle}
               </h1>
 
               <h1
                 className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
               >
-                Status: {this.state.status}
+                Status:{" "}{this.state.statusNumber === "4900" //refered back
+                  ? this.getMainStatus()
+                  : this.state.status}
               </h1>
             </div>
 

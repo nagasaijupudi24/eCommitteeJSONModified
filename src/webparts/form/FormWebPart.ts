@@ -49,15 +49,14 @@ export default class FormWebPart extends BaseClientSideWebPart<IFormWebPartProps
   private _environmentMessage: string = '';
   private sp: ReturnType<typeof spfi>;
 
+  
+
   protected async onInit(): Promise<void> {
     await super.onInit();
     this.sp = spfi().using(SPFx(this.context));
 
     this._environmentMessage = await this._getEnvironmentMessage();
   }
-
-
-
 
 
   public render(): void {
@@ -95,32 +94,30 @@ export default class FormWebPart extends BaseClientSideWebPart<IFormWebPartProps
       existPageUrl:this.properties.existPageUrl
     }
 
+    const createForm = React.createElement(
+      Form,
+      newFormProps
+    );
+
+    const viewForm = React.createElement(
+      ViewForm,
+      viewFormProps
+    );
+
     if (this.properties.FormType === "New") {
-      element = React.createElement(
-        Form,
-        newFormProps
-      );
+      element = createForm
      
     }
     else if (this.properties.FormType === "View") {
-      element = React.createElement(
-        ViewForm,viewFormProps
-       
-      );
+      element = viewForm
      
     }
     else if (this.properties.FormType === "BoardNoteView") {
-      element = React.createElement(
-        ViewForm,
-        viewFormProps
-      );
+      element = viewForm
      
     }
     else if (this.properties.FormType === "BoardNoteNew") {
-      element = React.createElement(
-        Form,
-        newFormProps
-      );
+      element = createForm
      
     }
  
