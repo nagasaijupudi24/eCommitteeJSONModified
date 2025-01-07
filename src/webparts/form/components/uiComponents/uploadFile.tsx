@@ -41,105 +41,24 @@ const _randomFileIcon = (docType: string): any => {
   let doctype = "txt"; 
 
   switch (fileExtession.toLocaleLowerCase()) {
-    case "accdb":
-      doctype = "accdb";
-      break;
-    case "audio":
-      doctype = "audio";
-      break;
-    case "code":
-      doctype = "code";
-      break;
-    case "csv":
-      doctype = "csv";
-      break;
+ 
     case "docx":
       doctype = "docx";
       break;
     case "doc":
       doctype = "docx";
       break;
-    case "dotx":
-      doctype = "dotx";
-      break;
-    case "mpp":
-      doctype = "mpp";
-      break;
-    case "mpt":
-      doctype = "mpt";
-      break;
-    case "model":
-      doctype = "model";
-      break;
-    case "one":
-      doctype = "one";
-      break;
-    case "onetoc":
-      doctype = "onetoc";
-      break;
-    case "potx":
-      doctype = "potx";
-      break;
-    case "ppsx":
-      doctype = "ppsx";
-      break;
+   
+     
     case "pdf":
       doctype = "pdf";
       break;
-    case "photo":
-      doctype = "photo";
-      break;
-    case "pptx":
-      doctype = "pptx";
-      break;
-    case "presentation":
-      doctype = "presentation";
-      break;
-    case "pub":
-      doctype = "pub";
-      break;
-    case "rtf":
-      doctype = "rtf";
-      break;
-    case "spreadsheet":
-      doctype = "spreadsheet";
-      break;
-    case "txt":
-      doctype = "txt";
-      break;
-    case "vector":
-      doctype = "vector";
-      break;
-    case "vsdx":
-      doctype = "vsdx";
-      break;
-    case "vssx":
-      doctype = "vssx";
-      break;
-    case "vstx":
-      doctype = "vstx";
-      break;
+   
+     
     case "xlsx":
       doctype = "xlsx";
       break;
-    case "xltx":
-      doctype = "xltx";
-      break;
-    case "xsn":
-      doctype = "xsn";
-      break;
-    case "png":
-      doctype = "photo";
-      break;
-    case "jpeg":
-      doctype = "photo";
-      break;
-    case "jpg":
-      doctype = "photo";
-      break;
-    case "img":
-      doctype = "photo";
-      break;
+  
     default:
       doctype = "txt";
     

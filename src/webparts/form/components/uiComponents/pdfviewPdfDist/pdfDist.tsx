@@ -125,7 +125,7 @@ const PDFViewer: React.FC<{ pdfPath: string; noteNumber: string }> = (props) => 
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
       await renderPage(pageNum); 
     }
-    setCurrentPage(currentPage); 
+   
   };
 
   const handleZoomIn = () => {
@@ -135,7 +135,7 @@ const PDFViewer: React.FC<{ pdfPath: string; noteNumber: string }> = (props) => 
       setZoomLevel(newZoomLevel);
       resetAndRenderPages(newZoomLevel);
     }
-    setCurrentPage(currentPage); 
+    
   };
   
   const handleZoomOut = () => {
@@ -145,7 +145,7 @@ const PDFViewer: React.FC<{ pdfPath: string; noteNumber: string }> = (props) => 
       setZoomLevel(newZoomLevel);
       resetAndRenderPages(newZoomLevel);
     }
-    setCurrentPage(currentPage); 
+   
   };
 
   const handleNextPage = () => {

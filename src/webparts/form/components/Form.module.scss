@@ -555,7 +555,7 @@ h4{
 
 .warning {
   color: red;
-  margin-left: 3px;
+  margin: 0px 4px;
 }
 
 .label {
@@ -887,13 +887,7 @@ h4{
     }
   }
 }
-.pdfContainer {
- 
-  height: 88vh;
-  
-  
 
-}
  
 canvas {
   display: block;
@@ -1123,6 +1117,7 @@ canvas {
 }
 
 .notePdfCustom{
+  margin: 0px 4px;
   
   color: "[theme: themePrimary]";
  

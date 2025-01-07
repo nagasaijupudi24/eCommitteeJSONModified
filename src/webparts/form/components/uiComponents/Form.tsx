@@ -53,6 +53,7 @@ import {
   PrincipalType,
   IPeoplePickerContext,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
+// import { TimeCheckerTab } from "./timeChecker";
 import DraftSuccessDialog from "./dialogFluentUi/draftDialog";
 import CancelConfirmationDialog from "./dialogFluentUi/cancelDialog";
 import SuccessDialog from "./dialogFluentUi/endDialog";
@@ -306,6 +307,8 @@ const Cutsomstyles = mergeStyleSets({
     maxHeight: "32px",
   },
 });
+
+
 
 
 
@@ -1240,25 +1243,13 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       if (this.checkReviewer()) {
         this.setState({ isReviewerDialogHandel: false });
       } else {
-        const getSecretaryDetails =
-          this.state.approverIdsHavingSecretary.filter((each: any) => {
-            return each.ApproverId === this.state.reviewerInfo[0].id;
-          });
-
-          const updateState =  this.setState((prev) => ({
+       
+          this.setState((prev) => ({
             peoplePickerData: [
               ...prev.peoplePickerData,
               ...prev.reviewerInfo,
             ],
           }));
-
-        if (getSecretaryDetails.length > 0) {
-         
-          updateState
-
-        } else {
-          updateState
-        }
       }
 
       this._clearReviewerPeoplePicker();
@@ -1633,7 +1624,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
           }
         }
       }
-      // }
+     
 
       for (const { folderName, files } of filesDataArray) {
        
@@ -1677,7 +1668,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
      
         this.setState({ isLoadingOnForm: false, isVisibleAlter: true });
     } catch (error) {
-      // console.error(`Error creating folder: ${error}`);
+      return error
     }
   };
 
@@ -1712,7 +1703,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       // eslint-disable-next-line no-void
       await this.createSubFolder(siteUrl);
     } catch (error) {
-      // console.error(`Error creating folder: ${error}`);
+      return error
     }
   };
 
@@ -1730,16 +1721,6 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       (each: any, index: number) => {
 
 
-         //       "approverType": "Reviewer",
-    // "approverEmail": "ib.test1@xencia.com",
-    // "approverOrder": 1,
-    // "approverStatus": 1,
-    // "srNo": "ib.test1",
-    // "designation": "Chief Manager",
-    // "approverEmailName": "IB Test 1",
-    // "userId": 421,
-    // "status": "Pending",
-    // "secretaryEmail": ""
 
         
 
@@ -3594,7 +3575,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
        
       } catch (error) {
-        // console.error("Error adding item: ", error);
+        return error
       }
     }
   };
@@ -3735,7 +3716,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const StatusNumber = itemList?.StatusNumber;
     this.setState({ showCancelDialog: false, isLoadingOnForm: true });
 
-    if (StatusNumber === '2000' || StatusNumber ==='3000') {
+    if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'|| StatusNumber==='9000') {
       this.setState({
         isConfirmationDialogVisible: false,
         isLoadingOnForm:false,
@@ -4154,7 +4135,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const StatusNumber = item?.StatusNumber;
    
 
-    if (StatusNumber === '2000' || StatusNumber ==='3000') {
+    if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'|| StatusNumber==='9000') {
       this.setState({
         isLoadingOnForm:false,
         hideParellelActionAlertDialog: true,
@@ -4170,6 +4151,8 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         parellelActionAlertMsg:
           "This request has been already cancelled by requestor.",
       });
+
+    return
 
     }
 
@@ -4630,8 +4613,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                             <PrimaryButton
                               className={Cutsomstyles.button}
                               iconProps={{ iconName: "ReplyMirrored" }}
-                              onClick={() =>
+                              onClick={() =>{
+                                window.location.reload();
                                 this.setState({ hideParellelActionAlertDialog: false })
+                              }
+                                
                               }
                               text="OK"
                             />
