@@ -238,52 +238,42 @@ export default class SupportingDocumentsUploadFileComponent extends React.Compon
   
 
   private handleDeleteFile = (fileId: string): void => {
-    const updatedFiles = this.state.selectedFiles.filter(
-      (fileWithError) => fileWithError.id !== fileId
-    );
-
-
-    const { maxFileSizeMB } = this.props;
-    const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
-
-    let cumulativeError = null;
-    let currentTotalSize = 0;
-
-
-    for (let file  of updatedFiles){
+    this.setState((prevState) => {
+      const updatedFiles = prevState.selectedFiles.filter(
+        (fileWithError) => fileWithError.id !== fileId
+      );
       
-      
-
-      if (
-       
-        currentTotalSize + file.file.size >
-        maxFileSizeBytes
-      ) {
-        cumulativeError =
-          "Cumulative size of all the supporting documents should not exceed 25 MB.";
-      } else {
-        cumulativeError = null;
-      }
-
-    }
-    
-
-
-    
-    this.props.errorData([updatedFiles, this.props.typeOfDoc]);
-    this.props.cummulativeError(cumulativeError);
-
-    this.setState({ selectedFiles: updatedFiles }, () => {
-      this.validateFiles(updatedFiles.map((f) => f.file));
-    });
-
+      const { maxFileSizeMB } = this.props;
+      const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
+      let cumulativeError = null;
+      let currentTotalSize = 0;
   
-
-    this.props.onChange(
-      updatedFiles.map((f) => f.file),
-      this.props.typeOfDoc
-    );
+     
+      for (let file of updatedFiles) {
+        currentTotalSize += file.file.size;
+        if (currentTotalSize > maxFileSizeBytes) {
+          cumulativeError = "Cumulative size of all the supporting documents should not exceed 25 MB.";
+          break; 
+        }
+      }
+  
+     
+      this.props.errorData([updatedFiles, this.props.typeOfDoc]);
+      this.props.cummulativeError(cumulativeError);
+  
+      return { selectedFiles: updatedFiles };
+    }, () => {
+      
+      this.validateFiles(this.state.selectedFiles.map((f) => f.file));
+  
+    
+      this.props.onChange(
+        this.state.selectedFiles.map((f) => f.file),
+        this.props.typeOfDoc
+      );
+    });
   };
+  
 
   public render(): React.ReactElement<IUploadFileProps> {
     const { accept, typeOfDoc, multiple } = this.props;

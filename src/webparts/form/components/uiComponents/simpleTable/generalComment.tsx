@@ -162,8 +162,7 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
     if (this.props.data.length > 0) {
       return this.props.data?.filter(
         (each: any) =>
-          each?.commentedBy === this.props.currentUserDetails.displayName &&
-          each?.commentsFrom === "generalComments"
+          each?.approverEmailName === this.props.currentUserDetails.displayName 
       );
     } else {
       return [];
@@ -270,7 +269,7 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
     this.setState((prev)=>{
 
       
-    const updatedRows = this.state.rowsData.map((row) =>
+    const updatedRows = prev.rowsData.map((row) =>
       row.id === editRowId
         ? {
             ...row,
@@ -300,8 +299,10 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
 
 
   private handleDelete = (id: string) => {
-    const filteredRows = this.state.rowsData.filter((row) => row.id !== id);
-    this.setState({ rowsData: filteredRows });
+    this.setState((prevState) => {
+      const filteredRows = prevState.rowsData.filter((row) => row.id !== id);
+      return { rowsData: filteredRows };
+    });
 
   
     this.props.handleCommentDataFuntion(

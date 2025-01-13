@@ -189,7 +189,13 @@ export default class UploadFileComponent extends React.Component<
             ? [...this.state.selectedFiles, ...filesWithBuffers]
             : filesWithBuffers;
 
-          this.setState({ selectedFiles: updatedFiles }, () => {
+          this.setState((prevState) => {
+            const updatedFiles = this.props.multiple
+              ? [...prevState.selectedFiles, ...filesWithBuffers]
+              : filesWithBuffers;
+            
+            return { selectedFiles: updatedFiles };
+          }, () => {
             this.validateFiles(updatedFiles.map((f) => f.file));
           });
 
@@ -242,22 +248,29 @@ export default class UploadFileComponent extends React.Component<
   }
 
   private handleDeleteFile = (fileId: string): void => {
-    const updatedFiles = this.state.selectedFiles.filter(
-      (fileWithError) => fileWithError.id !== fileId
-    );
    
-    this.props.errorData([updatedFiles, this.props.typeOfDoc]);
-   
-
-    this.setState({ selectedFiles: updatedFiles }, () => {
-      this.validateFiles(updatedFiles.map((f) => f.file));
+    this.setState((prevState) => {
+      const updatedFiles = prevState.selectedFiles.filter(
+        (fileWithError) => fileWithError.id !== fileId
+      );
+  
+     
+      return { selectedFiles: updatedFiles };
+    }, () => {
+    
+      this.validateFiles(this.state.selectedFiles.map((f) => f.file));
     });
-
+  
+    
+    this.props.errorData([this.state.selectedFiles, this.props.typeOfDoc]);
+  
+   
     this.props.onChange(
-      updatedFiles.map((f) => f.file),
+      this.state.selectedFiles.map((f) => f.file),
       this.props.typeOfDoc
     );
   };
+  
 
  
 

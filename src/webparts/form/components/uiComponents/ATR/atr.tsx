@@ -205,12 +205,15 @@ export class ATRAssignee extends React.Component<
 
 
   private handleDeleteRow = (rowKey: number): void => {
-    const updatedTableData = this.state.tableData.filter(
-      (item: { key: number }) => item.key !== rowKey
-    );
-    this.setState({ tableData: updatedTableData });
-    this.props.deletedGridData(updatedTableData);
+    this.setState((prevState) => {
+      const updatedTableData = prevState.tableData.filter(
+        (item: { key: number }) => item.key !== rowKey
+      );
+      this.props.deletedGridData(updatedTableData);
+      return { tableData: updatedTableData };
+    });
   };
+  
 
   public _getDetailsFromPeoplePicker = (): any => {
     console.log("add btn triggered in ATR Assignee")
@@ -248,7 +251,7 @@ export class ATRAssignee extends React.Component<
    
       const joinedCommentsData = this.state.commentsData
         .filter((each: any) => !!each)
-        .map((each: any) => `${each?.pageNum} ${each?.page} ${each?.comment}`);
+        .map((each: any) =>`${each?.pageNumber} ${each?.docReference} ${each?.comments}`);
 
       
 
@@ -260,8 +263,17 @@ export class ATRAssignee extends React.Component<
 
         ...this.state.selectedValue,
       };
-      this.setState(
-        { atrJoinedComments: joinedCommentsData.join(",") },
+      this.setState((prevState)=>{
+
+        const joinedCommentsData = prevState.commentsData
+        .filter((each: any) => !!each)
+        .map((each: any) =>`${each?.pageNumber} ${each?.docReference} ${each?.comments}`);
+
+
+        return { atrJoinedComments: joinedCommentsData.join(",") }
+
+      }
+       ,
         this.props.getATRJoinedComments(joinedCommentsData.join(", "))
       );
       
@@ -322,6 +334,7 @@ export class ATRAssignee extends React.Component<
 
   public render(): React.ReactElement<IATRAssigneeProps> {
     console.log(this.state)
+    console.log(this.props)
     const { tableData } = this.state;
   
 

@@ -68,9 +68,7 @@ const ApproverAndReviewerTableInViewForm = (props: any) => {
               </div>
             );
           },
-        },
-        
-        
+        },      
         { key: 'actionDate', name: 'Action Date', fieldName: 'actionDate', minWidth: 100, maxWidth: 150, isResizable: true ,
             onRender: (item) => {
                

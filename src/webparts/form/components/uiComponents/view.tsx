@@ -128,54 +128,17 @@ const Cutsomstyles = mergeStyleSets({
   },
 });
 
-
-const GeneralSectionInViewForm = (props:any):any =>{
-  return  <div className={styles.sectionContainer}>
-  <button
-    className={styles.header}
-    onClick={() => props._onToggleSection(`generalSection`)}
-  >
-    <Text className={styles.sectionText}>
-      General Section
-    </Text>
-    <IconButton
-      iconProps={{
-        iconName: props.expandSections.generalSection
-          ? "ChevronUp"
-          : "ChevronDown",
-      }}
-      title="Expand/Collapse"
-      ariaLabel="Expand/Collapse"
-      className={styles.chevronIcon}
-    />
-  </button>
-  {props.expandSections.generalSection && (
-    <div className={`${styles.expansionPanelInside}`}>
-      <div style={{ padding: "15px", paddingTop: "4px" }}>
-        {props._renderTable(
-          props.state.eCommitteData[0].tableData
-        )}
-      </div>
-    </div>
-  )}
-</div>
-}
-
-const DraftResolutionInViewForm = (props:any):any =>{
-
-
-  return props.formType === "BoardNoteView" && (
+const GeneralSectionInViewForm = (props: any): any => {
+  return (
     <div className={styles.sectionContainer}>
       <button
         className={styles.header}
-        onClick={() => props._onToggleSection(`draftResolution`)}
+        onClick={() => props._onToggleSection(`generalSection`)}
       >
-        <Text className={styles.sectionText}>
-          Draft Resolution Section
-        </Text>
+        <Text className={styles.sectionText}>General Section</Text>
         <IconButton
           iconProps={{
-            iconName: props.expandSections.draftResolution
+            iconName: props.expandSections.generalSection
               ? "ChevronUp"
               : "ChevronDown",
           }}
@@ -184,60 +147,88 @@ const DraftResolutionInViewForm = (props:any):any =>{
           className={styles.chevronIcon}
         />
       </button>
-      {props.expandSections.draftResolution && (
+      {props.expandSections.generalSection && (
         <div className={`${styles.expansionPanelInside}`}>
           <div style={{ padding: "15px", paddingTop: "4px" }}>
-            <RichText
-              value={props.state.draftResolutionFieldValue}
-              isEditMode={false}
+            {props._renderTable(props.state.eCommitteData[0].tableData)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const DraftResolutionInViewForm = (props: any): any => {
+  return (
+    props.formType === "BoardNoteView" && (
+      <div className={styles.sectionContainer}>
+        <button
+          className={styles.header}
+          onClick={() => props._onToggleSection(`draftResolution`)}
+        >
+          <Text className={styles.sectionText}>Draft Resolution Section</Text>
+          <IconButton
+            iconProps={{
+              iconName: props.expandSections.draftResolution
+                ? "ChevronUp"
+                : "ChevronDown",
+            }}
+            title="Expand/Collapse"
+            ariaLabel="Expand/Collapse"
+            className={styles.chevronIcon}
+          />
+        </button>
+        {props.expandSections.draftResolution && (
+          <div className={`${styles.expansionPanelInside}`}>
+            <div style={{ padding: "15px", paddingTop: "4px" }}>
+              <RichText
+                value={props.state.draftResolutionFieldValue}
+                isEditMode={false}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  );
+};
+
+const ReviewerOrApproverSectionInViewForm = (props: any): any => {
+  return (
+    <div className={styles.sectionContainer}>
+      <button
+        className={styles.header}
+        onClick={() => props._onToggleSection(props.toggleParameter)}
+      >
+        <Text className={styles.sectionText}>{props.sectionName}</Text>
+        <IconButton
+          iconProps={{
+            iconName: props.expandSections[props.toggleParameter]
+              ? "ChevronUp"
+              : "ChevronDown",
+          }}
+          title="Expand/Collapse"
+          ariaLabel="Expand/Collapse"
+          className={styles.chevronIcon}
+        />
+      </button>
+      {props.expandSections[props.toggleParameter] && (
+        <div className={`${styles.expansionPanelInside}`}>
+          <div style={{ padding: "15px", paddingTop: "4px" }}>
+            <ApproverAndReviewerTableInViewForm
+              data={props.reviewerORApproverData}
+              reOrderData={props.reOrderData}
+            
+              type={props.type}
             />
           </div>
         </div>
       )}
     </div>
-  )
-
-}
-
-const ReviewerOrApproverSectionInViewForm = (props:any):any=>{
-
-  return <div className={styles.sectionContainer}>
-  <button
-    className={styles.header}
-    onClick={() => props._onToggleSection(props.toggleParameter)}
-  >
-    <Text className={styles.sectionText}>
-      {props.sectionName}
-    </Text>
-    <IconButton
-      iconProps={{
-        iconName: props.expandSections[props.toggleParameter]
-          ? "ChevronUp"
-          : "ChevronDown",
-      }}
-      title="Expand/Collapse"
-      ariaLabel="Expand/Collapse"
-      className={styles.chevronIcon}
-    />
-  </button>
-  {props.expandSections[props.toggleParameter] && (
-    <div className={`${styles.expansionPanelInside}`}>
-      <div style={{ padding: "15px", paddingTop: "4px" }}>
-        <ApproverAndReviewerTableInViewForm
-          data={props.reviewerORApproverData}
-          reOrderData={props.reOrderData}
-          removeDataFromGrid={props.removeDataFromGrid}
-          type={props.type}
-        />
-      </div>
-    </div>
-  )}
-</div>
-
-}
+  );
+};
 
 type FieldValueType = string | number | readonly string[];
-
 
 export interface IViewFormState {
   title: string;
@@ -419,9 +410,7 @@ export default class ViewForm extends React.Component<
   private _listname: any;
   private _libraryName: any;
 
-
-  private _folderNameAfterApproved:any;
-
+  private _folderNameAfterApproved: any;
 
   constructor(props: IViewFormProps) {
     super(props);
@@ -608,13 +597,13 @@ export default class ViewForm extends React.Component<
       "4900": "This request has already been refereed back",
       "5000": "This request has been already returned.",
     };
-  
+
     return statusMessages[statusNumber] || "Unknown status.";
   }
 
   private _getUserProperties = async (loginName: any): Promise<any> => {
-    let designation ;
-    let email ;
+    let designation;
+    let email;
 
     const profile = await this.props.sp.profiles.getPropertiesFor(loginName);
 
@@ -776,10 +765,8 @@ export default class ViewForm extends React.Component<
         ? `${this.state.title.split("/")[0]}/${currentyear}-${nextYear}/B${id}`
         : `${this.state.title.split("/")[0]}/${currentyear}-${nextYear}/C${id}`;
 
-  this._folderNameAfterApproved = requesterNo.replace(/\//g, "-");
-  // console.log(this._folderNameAfterApproved)
-
-
+    this._folderNameAfterApproved = requesterNo.replace(/\//g, "-");
+    // console.log(this._folderNameAfterApproved)
 
     const folderName = requesterNo.replace(/\//g, "-");
     return folderName;
@@ -860,14 +847,13 @@ export default class ViewForm extends React.Component<
   };
 
   private _getATRGridData = (data: any) => {
-
     const newATRGridData = JSON.parse(data)
 
       .map((each: any) => {
         // console.log(each)
         if (each.atrCreatorEmail === this._currentUserEmail) {
           // console.log(each)
-          this.setState({atrType:each.atrType})
+          this.setState({ atrType: each.atrType });
           return {
             comments: each.noteApproverComments,
             assignedTo: each.atrAssigneeEmailName,
@@ -906,14 +892,13 @@ export default class ViewForm extends React.Component<
         "NoteMarkedInfoDTO"
       )();
 
-      console.log(item)
+    console.log(item);
 
     return item;
   };
 
-
   private _generateTableData = (item: any, purposeData: any[]) => {
-    return  [
+    return [
       item.CommitteeName !== null && {
         column1: "Note Number",
         column2: `${item.Title}`,
@@ -981,81 +966,70 @@ export default class ViewForm extends React.Component<
         column1: "Others",
         column2: `${purposeData[1]}`,
       },
-    ]
+    ];
   };
-
-
 
   private _getAdditionalData = async (item: any) => {
-  
     return {
-
       committeeNameFeildValue:
-      item.CommitteeName !== null ? item.CommitteeName : "",
-    subjectFeildValue: item.Subject !== null ? item.Subject : "",
-    natureOfNoteFeildValue:
-      item.NatureOfNote !== null ? item.NatureOfNote : "",
-    noteTypeFeildValue: item.NoteType !== null ? item.NoteType : "",
-    natureOfApprovalOrSanctionFeildValue:
-      item.NatureOfApprovalOrSanction !== null
-        ? item.NatureOfApprovalOrSanction
-        : "",
-    typeOfFinancialNoteFeildValue:
-      item.FinancialType !== null ? item.FinancialType : "",
-    searchTextFeildValue:
-      item.SearchKeyword !== null
-        ? this._extractValueFromHtml(item.SearchKeyword)
-        : "",
-    amountFeildValue: item.Amount !== null ? item.Amount : null,
-    puroposeFeildValue:
-      item.Purpose !== null ?  item.Purpose.split(",")[0] : "",
-    othersFieldValue:
-      item.Purpose !== null ? item.Purpose.split(",")[1] : "",
+        item.CommitteeName !== null ? item.CommitteeName : "",
+      subjectFeildValue: item.Subject !== null ? item.Subject : "",
+      natureOfNoteFeildValue:
+        item.NatureOfNote !== null ? item.NatureOfNote : "",
+      noteTypeFeildValue: item.NoteType !== null ? item.NoteType : "",
+      natureOfApprovalOrSanctionFeildValue:
+        item.NatureOfApprovalOrSanction !== null
+          ? item.NatureOfApprovalOrSanction
+          : "",
+      typeOfFinancialNoteFeildValue:
+        item.FinancialType !== null ? item.FinancialType : "",
+      searchTextFeildValue:
+        item.SearchKeyword !== null
+          ? this._extractValueFromHtml(item.SearchKeyword)
+          : "",
+      amountFeildValue: item.Amount !== null ? item.Amount : null,
+      puroposeFeildValue:
+        item.Purpose !== null ? item.Purpose.split(",")[0] : "",
+      othersFieldValue: item.Purpose !== null ? item.Purpose.split(",")[1] : "",
 
-    peoplePickerData: this._getJsonifyReviewer(
-      item.NoteApproversDTO,
-      "Reviewer"
-    ),
-    peoplePickerApproverData: this._getJsonifyApprover(
-      item.NoteApproversDTO,
-      "Approver"
-    ),
-    auditTrail: JSON.parse(item.AuditTrail),
-    isDataLoading: false,
-    createdByEmail: item.Author.EMail,
-    createdByEmailName: item.Author.Title,
-    createdByID: item.AuthorId,
-     
+      peoplePickerData: this._getJsonifyReviewer(
+        item.NoteApproversDTO,
+        "Reviewer"
+      ),
+      peoplePickerApproverData: this._getJsonifyApprover(
+        item.NoteApproversDTO,
+        "Approver"
+      ),
+      auditTrail: JSON.parse(item.AuditTrail),
+      isDataLoading: false,
+      createdByEmail: item.Author.EMail,
+      createdByEmailName: item.Author.Title,
+      createdByID: item.AuthorId,
     };
   };
-
-
 
   private _getItemData = async (id: any, folderPath?: any) => {
     const item: any = await this._getItemDataSpList(id);
 
     console.log(item, `Item .........${id}`);
 
-    const purposeData =
-      item.Purpose !== null ? item.Purpose.split(",") : "";
+    const purposeData = item.Purpose !== null ? item.Purpose.split(",") : "";
 
-    console.log(purposeData,"Purpose data")
+    console.log(purposeData, "Purpose data");
 
-      const tableData = this._generateTableData(item, purposeData);
+    const tableData = this._generateTableData(item, purposeData);
 
-     
-  const additionalData = await this._getAdditionalData(item);
+    const additionalData = await this._getAdditionalData(item);
     this.setState({
       eCommitteData: [
         {
-          tableData
+          tableData,
         },
       ],
     });
     this.setState({
-
       ...additionalData,
-     
+
       status:
         item.Status === "Submitted"
           ? this._getStatus(item.NoteApproversDTO)
@@ -1129,9 +1103,6 @@ export default class ViewForm extends React.Component<
     });
     return item;
   };
-
-
-
 
   private _getStatus = (e: any): any => {
     e = JSON.parse(e);
@@ -1252,8 +1223,6 @@ export default class ViewForm extends React.Component<
       return `${formattedDate} ${formattedTime}`;
     };
 
-  
-
     const result = formatDateTime(data.TimeCreated);
 
     const filesObj = {
@@ -1283,104 +1252,85 @@ export default class ViewForm extends React.Component<
         .expand("Author", "Editor")()
         .then((res) => res);
 
+      // console.log(folderItemsPdf)
 
-        // console.log(folderItemsPdf)
+      // console.log(this._folderNameAfterApproved)
 
-
-        // console.log(this._folderNameAfterApproved)
-
-    
-
-        if (this.state.statusNumber === "9000") {
-          // Filter files based on `_folderNameAfterApproved` value in the file name
-          const filteredFolderItemsPdf = folderItemsPdf.filter((file) =>{
-            // console.log(file)
-            // console.log(file.Name)
-            return file.Name.toLowerCase().includes(this._folderNameAfterApproved.toLowerCase())
-
-
-          }
-            
+      if (this.state.statusNumber === "9000") {
+        // Filter files based on `_folderNameAfterApproved` value in the file name
+        const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
+          // console.log(file)
+          // console.log(file.Name)
+          return file.Name.toLowerCase().includes(
+            this._folderNameAfterApproved.toLowerCase()
           );
-          if (filteredFolderItemsPdf.length > 0){
-
-            const tempFilesPdf: IFileDetails[] = [];
-            filteredFolderItemsPdf.forEach((values) => {
-              const fileObj = this._getFileObj(values);
-              tempFilesPdf.push(fileObj);
-          
-              // Update state for the first file's link
-              if (!this.state.pdfLink) {
-                this.setState({ pdfLink: fileObj.fileUrl });
-              }
-            });
-          
-            // Update state with filtered files
-            this.setState({ noteTofiles: tempFilesPdf });
-
-          }else{
-
-            const filteredFolderItemsPdf = folderItemsPdf.filter((file) =>{
-              // console.log(file)
-              // console.log(file.Name)
-              return !file.Name.toLowerCase().includes(this._folderNameAfterApproved.toLowerCase())
-  
-  
-            }
-              
-            );
-          
-            // console.log("Filtered files:", filteredFolderItemsPdf);
-            const tempFilesPdf: IFileDetails[] = [];
-            filteredFolderItemsPdf.forEach((values) => {
-              const fileObj = this._getFileObj(values);
-              tempFilesPdf.push(fileObj);
-          
-              // Update state for the first file's link
-              if (!this.state.pdfLink) {
-                this.setState({ pdfLink: fileObj.fileUrl });
-              }
-            });
-          
-            // Update state with all files
-            this.setState({ noteTofiles: tempFilesPdf });
-
-          }
-        
-          // console.log("Filtered files:", filteredFolderItemsPdf);
-        
-         
-        } else {
-          // Original processing for all files
-
-          const filteredFolderItemsPdf = folderItemsPdf.filter((file) =>{
-            // console.log(file)
-            // console.log(file.Name)
-            return !file.Name.toLowerCase().includes(this._folderNameAfterApproved.toLowerCase())
-
-
-          }
-            
-          );
-        
-          // console.log("Filtered files:", filteredFolderItemsPdf);
+        });
+        if (filteredFolderItemsPdf.length > 0) {
           const tempFilesPdf: IFileDetails[] = [];
           filteredFolderItemsPdf.forEach((values) => {
             const fileObj = this._getFileObj(values);
             tempFilesPdf.push(fileObj);
-        
+
             // Update state for the first file's link
             if (!this.state.pdfLink) {
               this.setState({ pdfLink: fileObj.fileUrl });
             }
           });
-        
+
+          // Update state with filtered files
+          this.setState({ noteTofiles: tempFilesPdf });
+        } else {
+          const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
+            // console.log(file)
+            // console.log(file.Name)
+            return !file.Name.toLowerCase().includes(
+              this._folderNameAfterApproved.toLowerCase()
+            );
+          });
+
+          // console.log("Filtered files:", filteredFolderItemsPdf);
+          const tempFilesPdf: IFileDetails[] = [];
+          filteredFolderItemsPdf.forEach((values) => {
+            const fileObj = this._getFileObj(values);
+            tempFilesPdf.push(fileObj);
+
+            // Update state for the first file's link
+            if (!this.state.pdfLink) {
+              this.setState({ pdfLink: fileObj.fileUrl });
+            }
+          });
+
           // Update state with all files
           this.setState({ noteTofiles: tempFilesPdf });
         }
 
+        // console.log("Filtered files:", filteredFolderItemsPdf);
+      } else {
+        // Original processing for all files
 
-        
+        const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
+          // console.log(file)
+          // console.log(file.Name)
+          return !file.Name.toLowerCase().includes(
+            this._folderNameAfterApproved.toLowerCase()
+          );
+        });
+
+        // console.log("Filtered files:", filteredFolderItemsPdf);
+        const tempFilesPdf: IFileDetails[] = [];
+        filteredFolderItemsPdf.forEach((values) => {
+          const fileObj = this._getFileObj(values);
+          tempFilesPdf.push(fileObj);
+
+          // Update state for the first file's link
+          if (!this.state.pdfLink) {
+            this.setState({ pdfLink: fileObj.fileUrl });
+          }
+        });
+
+        // Update state with all files
+        this.setState({ noteTofiles: tempFilesPdf });
+      }
 
       const folderItemsWordDocument = await this.props.sp.web
         .getFolderByServerRelativePath(`${this._folderName}/WordDocument`)
@@ -1488,25 +1438,12 @@ export default class ViewForm extends React.Component<
     this.setState({ peoplePickerData: reOrderData });
   };
 
-  public removeDataFromGrid = (dataItem: any, typeOfTable: string): void => {
-    if (typeOfTable === "Reviewer") {
-      const filterData = this.state.peoplePickerData.filter(
-        (item: any) => item.id !== dataItem.id
-      );
-      this.setState({ peoplePickerData: filterData });
-    } else {
-      const filterData = this.state.peoplePickerApproverData.filter(
-        (item: any) => item.id !== dataItem.id
-      );
-      this.setState({ peoplePickerApproverData: filterData });
-    }
-  };
+  
 
   private _getAuditTrail = async (status: any) => {
-
     const item = await this._getItemDataSpList(this._itemId);
     // console.log(item);
-    const auditTrail= JSON.parse(item.AuditTrail)
+    const auditTrail = JSON.parse(item.AuditTrail);
     if (status === "gistDocuments") {
       const auditLog = [
         {
@@ -1628,17 +1565,14 @@ export default class ViewForm extends React.Component<
     }
   }
 
-
-  private _getCurrentApproverDetailsFromApproverDTO = ():any=>{
+  private _getCurrentApproverDetailsFromApproverDTO = (): any => {
     const currentApproverDetails = this.state.ApproverDetails.filter(
-      (each: any) =>
-        each.userId ===
-        this.state.currentApprover[0].id
+      (each: any) => each.userId === this.state.currentApprover[0].id
     );
 
     // console.log(currentApproverDetails)
-    return currentApproverDetails
-  }
+    return currentApproverDetails;
+  };
 
   private _updateDefaultNoteATRAssigneeDetails = async (): Promise<any> => {
     const currentAtrCreator = this.state.atrCreatorsList.filter(
@@ -1649,20 +1583,22 @@ export default class ViewForm extends React.Component<
     this._atrJoinedCommentsToDTO();
 
     const currentApproverDetailsFromApproverDTO =
-                                  this._getCurrentApproverDetailsFromApproverDTO()
+      this._getCurrentApproverDetailsFromApproverDTO();
+
+    
     
 
-    const defaultNoteATRAssigneeDetails = [
+    const defaultNoteATRAssigneeDetails =(stateValue:any)=> [
       {
-        
         atrType: "Default",
-        atrAssigneeId: this.state.createdByID,
+        atrAssigneeId: stateValue.createdByID,
         atrCreatorId: currentAtrCreator[0].atrCreatorId,
         atrCreatorEmail: currentAtrCreator[0].atrCreatorEmail,
 
-        atrAssigneeEmailName: this.state.createdByEmailName,
-        atrAssigneeEmail: this.state.createdByEmail,
-        approverEmailName: currentApproverDetailsFromApproverDTO.approverEmailName,
+        atrAssigneeEmailName: stateValue.createdByEmailName,
+        atrAssigneeEmail: stateValue.createdByEmail,
+        approverEmailName:
+          currentApproverDetailsFromApproverDTO.approverEmailName,
         atrCreatorEmailName: currentAtrCreator[0].atrCreatorEmailName,
 
         createdDate: this._formatDateTime(new Date()),
@@ -1671,7 +1607,7 @@ export default class ViewForm extends React.Component<
         modifiedBy: this.props.context.pageContext.user.email,
         statusMessage: null,
         atrId: "",
-        noteApproverId:currentApproverDetailsFromApproverDTO.userId,
+        noteApproverId: currentApproverDetailsFromApproverDTO.userId,
         approverType: currentApproverDetailsFromApproverDTO.approverType,
         approverOrder: currentApproverDetailsFromApproverDTO.approverOrder,
         approverStatus: 1,
@@ -1682,13 +1618,17 @@ export default class ViewForm extends React.Component<
         noteId: this._itemId,
       },
     ];
-    this.setState({
-      noteATRAssigneeDetails: defaultNoteATRAssigneeDetails,
-    });
+    this.setState((prevState)=>{
+
+     
+      
+      return {
+      noteATRAssigneeDetails: defaultNoteATRAssigneeDetails(prevState),
+    }});
 
     return [
       ...this.state.noteATRAssigneeDetailsAllUser,
-      ...defaultNoteATRAssigneeDetails,
+      ...defaultNoteATRAssigneeDetails(this.state),
     ];
   };
 
@@ -1780,7 +1720,7 @@ export default class ViewForm extends React.Component<
         CommitteeName: this.state.committeeNameFeildValue,
         NoteApproversDTO: JSON.stringify(this.state.ApproverDetails),
         startProcessing: true,
-        ATRType:"Default",
+        ATRType: "Default",
       };
 
       // console.log(defaultAtrObj);
@@ -1795,8 +1735,9 @@ export default class ViewForm extends React.Component<
     return defaultAtrObj;
   };
 
-
-  private  _getCurrentApproverDetailsInHandleApprover = (modifyApproveDetails:any): any => {
+  private _getCurrentApproverDetailsInHandleApprover = (
+    modifyApproveDetails: any
+  ): any => {
     const currentApproverdata = modifyApproveDetails.filter((each: any) => {
       if (each.status === "Pending") {
         return each;
@@ -1807,9 +1748,12 @@ export default class ViewForm extends React.Component<
     return currentApproverdata[0];
   };
 
-  private _modifiedApproverInHandleApprover = (_ApproverDTO:any,statusFromEvent:any):any=>{
+  private _modifiedApproverInHandleApprover = (
+    _ApproverDTO: any,
+    statusFromEvent: any
+  ): any => {
     let previousApprover: any;
-    const modifyApproveDetails =   _ApproverDTO.map(
+    const modifyApproveDetails = _ApproverDTO.map(
       (each: any, index: number) => {
         if (
           each.approverEmail === this._currentUserEmail ||
@@ -1849,15 +1793,16 @@ export default class ViewForm extends React.Component<
       }
     );
 
-    return [previousApprover,modifyApproveDetails]
+    return [previousApprover, modifyApproveDetails];
+  };
 
-  }
-
-  private _checkCurrentUserInApproverDto = (_ApproverInfoDTOId:any,currentUserId:any)=>{
-
-    if (!_ApproverInfoDTOId.includes(currentUserId) ) {
+  private _checkCurrentUserInApproverDto = (
+    _ApproverInfoDTOId: any,
+    currentUserId: any
+  ) => {
+    if (!_ApproverInfoDTOId.includes(currentUserId)) {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
           "This request has been taken action by approver.",
@@ -1865,12 +1810,16 @@ export default class ViewForm extends React.Component<
 
       return null;
     }
+  };
 
-  }
-
-
-  private _updateItemInHandleApproverBtn =async (modifyApproveDetails:any,currentApproverDetail:any,previousApprover:any,updateNoteATRAssigneeDTO:any,updateAuditTrial:any,_CommentsLog:any):Promise<any>=>{
-
+  private _updateItemInHandleApproverBtn = async (
+    modifyApproveDetails: any,
+    currentApproverDetail: any,
+    previousApprover: any,
+    updateNoteATRAssigneeDTO: any,
+    updateAuditTrial: any,
+    _CommentsLog: any
+  ): Promise<any> => {
     let noteATRAssigneeDTO;
 
     // Determine the value of NoteATRAssigneeDTO
@@ -1881,7 +1830,8 @@ export default class ViewForm extends React.Component<
           ...updateNoteATRAssigneeDTO,
         ]);
       } else {
-        const defaultDetails = await this._updateDefaultNoteATRAssigneeDetails();
+        const defaultDetails =
+          await this._updateDefaultNoteATRAssigneeDetails();
         noteATRAssigneeDTO = JSON.stringify(defaultDetails);
       }
     } else {
@@ -1896,7 +1846,10 @@ export default class ViewForm extends React.Component<
       Status: currentApproverDetail?.mainStatus,
       StatusNumber: currentApproverDetail?.statusNumber,
       AuditTrail: updateAuditTrial,
-      NoteApproverCommentsDTO: JSON.stringify([..._CommentsLog,...this.state.generalComments]),
+      NoteApproverCommentsDTO: JSON.stringify([
+        ..._CommentsLog,
+        ...this.state.generalComments,
+      ]),
       CurrentApproverId:
         this.state.ApproverOrder === modifyApproveDetails.length
           ? null
@@ -1907,13 +1860,12 @@ export default class ViewForm extends React.Component<
       PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
       startProcessing: true,
     };
+  };
 
-  }
-
-
-
-  private _EndStatusNumberUpdate =async (statusFromEvent:any,statusNumber:any) :Promise<any>=>{
-
+  private _EndStatusNumberUpdate = async (
+    statusFromEvent: any,
+    statusNumber: any
+  ): Promise<any> => {
     if (this.state.ApproverDetails.length === this.state.ApproverOrder) {
       this.setState({ status: statusFromEvent });
       await this.props.sp.web.lists
@@ -1924,8 +1876,7 @@ export default class ViewForm extends React.Component<
           StatusNumber: statusNumber,
         });
     }
-
-  }
+  };
 
   private _handleApproverButton = async (
     statusFromEvent: string,
@@ -1941,21 +1892,31 @@ export default class ViewForm extends React.Component<
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
-    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
-    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
+      (each: any) => each.userId
+    );
     const _CommentsLog =
-    item.NoteApproverCommentsDTO !== null
-      ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
-      : []
-    if (StatusNumber !== "200" && currentUserId === checkCurrentApproverIsCurrentUser) {
+      item.NoteApproverCommentsDTO !== null
+        ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
+        : [];
+    if (
+      StatusNumber !== "200" &&
+      currentUserId === checkCurrentApproverIsCurrentUser
+    ) {
+      this._checkCurrentUserInApproverDto(_ApproverInfoDTOId, currentUserId);
 
-      this._checkCurrentUserInApproverDto(_ApproverInfoDTOId,currentUserId)
+      const previousApprover = this._modifiedApproverInHandleApprover(
+        _ApproverDTO,
+        statusFromEvent
+      )[0];
+      const modifyApproveDetails = this._modifiedApproverInHandleApprover(
+        _ApproverDTO,
+        statusFromEvent
+      )[1];
 
-      const previousApprover= this._modifiedApproverInHandleApprover(_ApproverDTO,statusFromEvent)[0];
-      const modifyApproveDetails = this._modifiedApproverInHandleApprover(_ApproverDTO,statusFromEvent)[1]
-     
-     
-      const currentApproverDetail = this._getCurrentApproverDetailsInHandleApprover(modifyApproveDetails);
+      const currentApproverDetail =
+        this._getCurrentApproverDetailsInHandleApprover(modifyApproveDetails);
       const currentApproverId =
         this.state.ApproverOrder === modifyApproveDetails.length
           ? null
@@ -1973,9 +1934,15 @@ export default class ViewForm extends React.Component<
           this._checkCurrentUserIsAATRAssignee() ? "Noted" : "Approved"
         );
 
-
-        const updateItems = await this._updateItemInHandleApproverBtn(modifyApproveDetails,currentApproverDetail,previousApprover,updateNoteATRAssigneeDTO,updateAuditTrial,_CommentsLog)
-         console.log(updateItems)
+        const updateItems = await this._updateItemInHandleApproverBtn(
+          modifyApproveDetails,
+          currentApproverDetail,
+          previousApprover,
+          updateNoteATRAssigneeDTO,
+          updateAuditTrial,
+          _CommentsLog
+        );
+        console.log(updateItems);
 
         await this.props.sp.web.lists
           .getByTitle(this._listname)
@@ -1993,7 +1960,7 @@ export default class ViewForm extends React.Component<
           "Supporting documents"
         );
 
-       this._EndStatusNumberUpdate(statusFromEvent,statusNumber)
+        this._EndStatusNumberUpdate(statusFromEvent, statusNumber);
 
         this.setState({ isLoading: false, isVisibleAlter: true });
       } catch (error) {
@@ -2001,9 +1968,12 @@ export default class ViewForm extends React.Component<
       }
     } else {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg:currentUserId !== checkCurrentApproverIsCurrentUser? "This request has been taken action by approver.":"This request has been call back",
+        parellelActionAlertMsg:
+          currentUserId !== checkCurrentApproverIsCurrentUser
+            ? "This request has been taken action by approver."
+            : "This request has been call back",
       });
     }
   };
@@ -2045,9 +2015,7 @@ export default class ViewForm extends React.Component<
 
     const currentUserIsFromSecDTOAndHeIsSECOrApp =
       this.state.noteSecretaryDetails.some((each: any) => {
-        if (
-          each.approverEmail === this._currentUserEmail 
-        ) {
+        if (each.approverEmail === this._currentUserEmail) {
           return true;
         }
       });
@@ -2093,8 +2061,6 @@ export default class ViewForm extends React.Component<
     );
   };
 
- 
-
   private handleReject = async (
     statusFromEvent: string,
     statusNumber: string
@@ -2110,18 +2076,20 @@ export default class ViewForm extends React.Component<
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
     // console.log(currentUserId, "Current User Id");
-    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
+    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
     const _CommentsLog =
-    item.NoteApproverCommentsDTO !== null
-      ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
-      : []
-    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+      item.NoteApproverCommentsDTO !== null
+        ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
+        : [];
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
+      (each: any) => each.userId
+    );
 
     // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
 
-    if (StatusNumber === "8000" ) {
+    if (StatusNumber === "8000") {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
           "This request has been taken action by approver.",
@@ -2129,18 +2097,19 @@ export default class ViewForm extends React.Component<
 
       return;
     }
-   
 
-    if (StatusNumber !== "200" && currentUserId === checkCurrentApproverIsCurrentUser) {
-     
-      if (!_ApproverInfoDTOId.includes(currentUserId) ) {
+    if (
+      StatusNumber !== "200" &&
+      currentUserId === checkCurrentApproverIsCurrentUser
+    ) {
+      if (!_ApproverInfoDTOId.includes(currentUserId)) {
         this.setState({
-          isLoading:false,
+          isLoading: false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
             "This request has been taken action by approver.",
         });
-  
+
         return;
       }
       const modifyApproveDetails = _ApproverDTO.map(
@@ -2169,7 +2138,10 @@ export default class ViewForm extends React.Component<
           Status: statusFromEvent,
           StatusNumber: statusNumber,
           AuditTrail: updateAuditTrial,
-          NoteApproverCommentsDTO: JSON.stringify([..._CommentsLog,...this.state.generalComments]),
+          NoteApproverCommentsDTO: JSON.stringify([
+            ..._CommentsLog,
+            ...this.state.generalComments,
+          ]),
 
           PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
           startProcessing: true,
@@ -2201,9 +2173,12 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg:currentUserId !== checkCurrentApproverIsCurrentUser? "This request has been taken action by approver.":"This request has been call back",
+        parellelActionAlertMsg:
+          currentUserId !== checkCurrentApproverIsCurrentUser
+            ? "This request has been taken action by approver."
+            : "This request has been call back",
       });
     }
   };
@@ -2232,7 +2207,6 @@ export default class ViewForm extends React.Component<
 
   private _referCommentsAndDataMandatory = (): any => {
     this.setState({ dialogFluent: true, isReferDataAndCommentsNeeded: true });
-   
   };
 
   private handleRefer = async (
@@ -2240,42 +2214,46 @@ export default class ViewForm extends React.Component<
     statusNumber: string,
     commentsObj: any
   ) => {
-    console.log(commentsObj)
-    console.log(this.state)
+    console.log(commentsObj);
+    console.log(this.state);
     this._closeDialog();
     this.setState({ isLoading: true });
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
-    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
-    const _ReferDTO = item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : []
+    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
+    const _ReferDTO =
+      item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : [];
 
     const _CommentsLog =
-    item.NoteApproverCommentsDTO !== null
-      ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
-      : []
+      item.NoteApproverCommentsDTO !== null
+        ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
+        : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
     // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
-    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
+      (each: any) => each.userId
+    );
 
     // console.log(currentUserId, "Current User Id");
-   
 
-    if (StatusNumber !== "200" && currentUserId === checkCurrentApproverIsCurrentUser) {
-
-      if (!_ApproverInfoDTOId.includes(currentUserId) ) {
+    if (
+      StatusNumber !== "200" &&
+      currentUserId === checkCurrentApproverIsCurrentUser
+    ) {
+      if (!_ApproverInfoDTOId.includes(currentUserId)) {
         this.setState({
-          isLoading:false,
+          isLoading: false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
             "This request has been taken action by approver.",
         });
-  
+
         return;
       }
-      
+
       const modifyApproveDetails = _ApproverDTO.map(
         (each: any, index: number) => {
           if (
@@ -2304,7 +2282,7 @@ export default class ViewForm extends React.Component<
         AuditTrail: updateAuditTrial,
         NoteApproverCommentsDTO: JSON.stringify([
           ..._CommentsLog,
-         ...this.state.generalComments
+          ...this.state.generalComments,
         ]),
 
         CurrentApproverId: this.state.refferredToDetails[0].id,
@@ -2373,9 +2351,12 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg:currentUserId !== checkCurrentApproverIsCurrentUser? "This request has been taken action by approver.":"This request has been call back",
+        parellelActionAlertMsg:
+          currentUserId !== checkCurrentApproverIsCurrentUser
+            ? "This request has been taken action by approver."
+            : "This request has been call back",
       });
     }
   };
@@ -2390,18 +2371,16 @@ export default class ViewForm extends React.Component<
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
-    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
+    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
     const _CommentsLog =
-    item.NoteApproverCommentsDTO !== null
-      ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
-      : []
+      item.NoteApproverCommentsDTO !== null
+        ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
+        : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
     // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
-
-
 
     // console.log(currentUserId, "Current User Id");
     if (currentUserId !== checkCurrentApproverIsCurrentUser) {
@@ -2414,17 +2393,15 @@ export default class ViewForm extends React.Component<
       return;
     }
 
-
-     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
+      (each: any) => each.userId
+    );
 
     // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
 
-   
-   
-
     if (_ApproverInfoDTOId.includes(currentUserId)) {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
           "This request has been taken action by approver.",
@@ -2437,14 +2414,11 @@ export default class ViewForm extends React.Component<
       this.setState({ isLoading: true });
       let currentApproverId = null;
 
-    
-
       const modifyApproveDetails = _ApproverDTO.map(
         (each: any, index: number) => {
           if (each.statusNumber === "4000") {
             if (each.approverType === "Reviewer") {
               currentApproverId = each.userId;
-             
 
               return {
                 ...each,
@@ -2454,7 +2428,6 @@ export default class ViewForm extends React.Component<
               };
             } else {
               currentApproverId = each.userId;
-             
 
               return {
                 ...each,
@@ -2469,7 +2442,6 @@ export default class ViewForm extends React.Component<
         }
       );
 
-   
       const updateAuditTrial = await this._getAuditTrail(statusFromEvent);
 
       const obj = {
@@ -2478,11 +2450,13 @@ export default class ViewForm extends React.Component<
         StatusNumber: statusNumber,
         CurrentApproverId: currentApproverId,
         AuditTrail: updateAuditTrial,
-        NoteApproverCommentsDTO:JSON.stringify([..._CommentsLog,...this.state.generalComments]),
+        NoteApproverCommentsDTO: JSON.stringify([
+          ..._CommentsLog,
+          ...this.state.generalComments,
+        ]),
         NoteReferrerCommentsDTO: JSON.stringify(
           this.state.noteReferrerCommentsDTO
         ),
-      
 
         startProcessing: true,
         PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
@@ -2499,11 +2473,10 @@ export default class ViewForm extends React.Component<
         "Supporting documents"
       );
 
-     
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg: "This request has been call back",
       });
@@ -2520,11 +2493,11 @@ export default class ViewForm extends React.Component<
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
-    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
+    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
     const _CommentsLog =
-    item.NoteApproverCommentsDTO !== null
-      ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
-      : []
+      item.NoteApproverCommentsDTO !== null
+        ? this._getCommentsData(JSON.parse(item.NoteApproverCommentsDTO))
+        : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
     // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
@@ -2533,27 +2506,27 @@ export default class ViewForm extends React.Component<
 
     // console.log(currentUserId, "Current User Id");
 
-    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
+      (each: any) => each.userId
+    );
 
     // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
 
-  
-
-  
-
-    if (StatusNumber !== "200" && currentUserId === checkCurrentApproverIsCurrentUser ) {
-
-      if (!_ApproverInfoDTOId.includes(currentUserId) ) {
+    if (
+      StatusNumber !== "200" &&
+      currentUserId === checkCurrentApproverIsCurrentUser
+    ) {
+      if (!_ApproverInfoDTOId.includes(currentUserId)) {
         this.setState({
-          isLoading:false,
+          isLoading: false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
             "This request has been taken action by approver.",
         });
-  
+
         return;
       }
-     
+
       const modifyApproveDetails = _ApproverDTO.map(
         (each: any, index: number) => {
           if (each.approverEmail === this._currentUserEmail) {
@@ -2585,7 +2558,10 @@ export default class ViewForm extends React.Component<
           Status: statusFromEvent,
           StatusNumber: statusNumber,
           AuditTrail: updateAuditTrial,
-          NoteApproverCommentsDTO: JSON.stringify([..._CommentsLog,...this.state.generalComments]),
+          NoteApproverCommentsDTO: JSON.stringify([
+            ..._CommentsLog,
+            ...this.state.generalComments,
+          ]),
 
           startProcessing: true,
           PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
@@ -2610,9 +2586,12 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg:currentUserId !== checkCurrentApproverIsCurrentUser? "This request has been taken action by approver.":"This request has been call back",
+        parellelActionAlertMsg:
+          currentUserId !== checkCurrentApproverIsCurrentUser
+            ? "This request has been taken action by approver."
+            : "This request has been call back",
       });
     }
   };
@@ -2630,49 +2609,47 @@ export default class ViewForm extends React.Component<
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
     // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
 
-    
-    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
+    const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
+      (each: any) => each.userId
+    );
 
     // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
 
-    const _NoteReferrerDTO =item?.NoteReferrerDTO!==null? JSON.parse(item?.NoteReferrerDTO) :[]
-    const _refereeId =_NoteReferrerDTO.length > 0 ? _NoteReferrerDTO[_NoteReferrerDTO.length-1].referrerId:null
+    const _NoteReferrerDTO =
+      item?.NoteReferrerDTO !== null ? JSON.parse(item?.NoteReferrerDTO) : [];
+    const _refereeId =
+      _NoteReferrerDTO.length > 0
+        ? _NoteReferrerDTO[_NoteReferrerDTO.length - 1].referrerId
+        : null;
     // console.log(_refereeId)
 
-    const _actionersIDs = [..._ApproverInfoDTOId,_refereeId]
+    const _actionersIDs = [..._ApproverInfoDTOId, _refereeId];
     // console.log(_actionersIDs)
 
+    const actionTakenOcurredOrNot = JSON.parse(item?.NoteApproversDTO)[0]
+      .actionDate;
 
-  
-    const actionTakenOcurredOrNot = JSON.parse(item?.NoteApproversDTO)[0].actionDate
-
-    if (actionTakenOcurredOrNot!==''){
+    if (actionTakenOcurredOrNot !== "") {
       if (_actionersIDs.includes(checkCurrentApproverIsCurrentUser)) {
         this.setState({
-          isLoading:false,
+          isLoading: false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
             "This request has been taken action by approver.",
         });
-  
+
         return;
       }
-
     }
-   
 
-   
-
-    
     if (StatusNumber === "200") {
       this.setState({
-        isLoading:false,
+        isLoading: false,
         hideParellelActionAlertDialog: true,
-        parellelActionAlertMsg:
-          "This request has been called back.",
+        parellelActionAlertMsg: "This request has been called back.",
       });
 
-      return
+      return;
     }
 
     const _ApproverInfoDTO = JSON.parse(item?.NoteApproversDTO);
@@ -2706,8 +2683,6 @@ export default class ViewForm extends React.Component<
   };
 
   private _getNoteMarkedId = (): any => {
-
-    
     const ids = this.state.noteMarkedInfoDTOState.map((each: any) => {
       return each.id;
     });
@@ -2746,107 +2721,145 @@ export default class ViewForm extends React.Component<
     this._closeDialog();
     this.setState({ isLoading: true });
     const item = await this._getItemDataSpList(this._itemId);
-    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
+    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
     // console.log(item);
-    const _ReferDTO = item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : []
+    const _ReferDTO =
+      item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : [];
 
-    const StatusNumber = item?.StatusNumber
+    const StatusNumber = item?.StatusNumber;
 
-    
-  
-  
-  
+    if (
+      item?.StatusNumber !== "9000" &&
+      item?.StatusNumber !== "5000" &&
+      item?.StatusNumber !== "8000" &&
+      item?.StatusNumber !== "200"
+    ) {
+      if (this.state.statusNumber === "4000") {
+        const updateAuditTrial = await this._getAuditTrail(statusFromEvent);
 
+        const updateLastNoteReferDTO = {
+          ..._ReferDTO[_ReferDTO.length - 1],
+          referrerEmail:
+            this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+              .email,
+          referrerEmailName:
+            this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+              .text,
+          referrerId:
+            this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id,
+        };
 
+        const updateNoteReferDTO = _ReferDTO.map((each: any, index: any) => {
+          if (each.noteReferrerId === updateLastNoteReferDTO.noteReferrerId) {
+            return {
+              ...each,
+              referrerEmail:
+                this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                  .email,
+              referrerEmailName:
+                this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                  .text,
+              referrerId:
+                this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                  .id,
+            };
+          }
+          return each;
+        });
 
+        // console.log(updateNoteReferDTO)
 
-    
-if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusNumber!=='8000'&& item?.StatusNumber !=='200'){
-
-  if (this.state.statusNumber === "4000") {
-    const updateAuditTrial = await this._getAuditTrail(statusFromEvent);
-
-    const updateLastNoteReferDTO = {
-      ..._ReferDTO[_ReferDTO.length - 1],
-      referrerEmail:
-        this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
-          .email,
-      referrerEmailName:
-        this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].text,
-        referrerId:
-        this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id,
-    };
-
-    const updateNoteReferDTO = _ReferDTO.map(
-      (each: any, index: any) => {
-        if (each.noteReferrerId === updateLastNoteReferDTO.noteReferrerId) {
-          return {
-            ...each,
-            referrerEmail:
+        await this.props.sp.web.lists
+          .getByTitle(this._listname)
+          .items.getById(this._itemId)
+          .update({
+            startProcessing: true,
+            CurrentApproverId:
               this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
-                .email,
-            referrerEmailName:
+                .id,
+            AuditTrail: updateAuditTrial,
+            NoteReferrerDTO: JSON.stringify(updateNoteReferDTO),
+            PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
+          });
+
+        this.setState({ isVisibleAlter: true, isLoading: false });
+
+        return;
+      }
+
+      const checkSelectedApproverHasSecretary =
+        this.state.approverIdsHavingSecretary.filter(
+          (each: any) =>
+            each.ApproverId ===
+            this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id
+        );
+
+      const secretaryObj = {
+        noteSecretarieId:
+          checkSelectedApproverHasSecretary[0]?.noteSecretarieId,
+        noteApproverId: checkSelectedApproverHasSecretary[0]?.noteApproverId,
+        noteId: this._itemId,
+        secretaryEmail: checkSelectedApproverHasSecretary[0]?.secretaryEmail,
+        approverEmail: checkSelectedApproverHasSecretary[0]?.approverEmail,
+        approverEmailName:
+          checkSelectedApproverHasSecretary[0]?.approverEmailName,
+        secretaryEmailName:
+          checkSelectedApproverHasSecretary[0]?.secretaryEmailName,
+        createdBy: "",
+        modifiedDate: "",
+        modifiedBy: "",
+      };
+
+      const updateCurrentApprover = (): any => {
+        const upatedCurrentApprover = _ApproverDTO.filter((each: any) => {
+          // console.log(this.state.peoplePickerSelectedDataWhileReferOrChangeApprover);
+
+          if (each.status === "Pending") {
+            return {
+              ...this.state.peoplePickerSelectedDataWhileReferOrChangeApprover,
+              status: "Pending",
+              actionDate: this._formatDateTime(new Date()),
+              mainStatus: each.mainStatus,
+              secretary:
+                checkSelectedApproverHasSecretary.length > 0
+                  ? checkSelectedApproverHasSecretary[0].secretaryEmailName
+                  : "",
+              secretaryEmail:
+                checkSelectedApproverHasSecretary.length > 0
+                  ? checkSelectedApproverHasSecretary[0].secretaryEmail
+                  : "",
+            };
+          }
+        });
+
+        return [
+          {
+            approverType: upatedCurrentApprover[0].approverType,
+            approverEmail:
+              this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                .email ||
+              this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                .secondaryText,
+            approverOrder: upatedCurrentApprover[0].approverOrder,
+            approverStatus: upatedCurrentApprover[0].approverStatus,
+
+            srNo: this.state
+              .peoplePickerSelectedDataWhileReferOrChangeApprover[0].srNo,
+            designation:
+              this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                .optionalText,
+            approverEmailName:
               this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
                 .text,
-                referrerId:
-                this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id,
-          };
-        }
-        return each;
-      }
-    );
-
-    // console.log(updateNoteReferDTO)
-
-    await this.props.sp.web.lists
-      .getByTitle(this._listname)
-      .items.getById(this._itemId)
-      .update({
-        startProcessing: true,
-        CurrentApproverId:
-          this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id,
-        AuditTrail: updateAuditTrial,
-        NoteReferrerDTO: JSON.stringify(updateNoteReferDTO),
-        PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
-      });
-
-    this.setState({ isVisibleAlter: true, isLoading: false });
-
-    return;
-  }
-
-  const checkSelectedApproverHasSecretary =
-    this.state.approverIdsHavingSecretary.filter(
-      (each: any) => each.ApproverId === this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id
-    );
-
-  const secretaryObj = {
-    noteSecretarieId: checkSelectedApproverHasSecretary[0]?.noteSecretarieId,
-    noteApproverId: checkSelectedApproverHasSecretary[0]?.noteApproverId,
-    noteId: this._itemId,
-    secretaryEmail: checkSelectedApproverHasSecretary[0]?.secretaryEmail,
-    approverEmail: checkSelectedApproverHasSecretary[0]?.approverEmail,
-    approverEmailName:
-      checkSelectedApproverHasSecretary[0]?.approverEmailName,
-    secretaryEmailName:
-      checkSelectedApproverHasSecretary[0]?.secretaryEmailName,
-    createdBy: "",
-    modifiedDate: "",
-    modifiedBy: "",
-  };
-
-  const updateCurrentApprover = (): any => {
-    const upatedCurrentApprover = _ApproverDTO.filter(
-      (each: any) => {
-        // console.log(this.state.peoplePickerSelectedDataWhileReferOrChangeApprover);
-
-
-        if (each.status === "Pending") {
-          return {
-            ...this.state.peoplePickerSelectedDataWhileReferOrChangeApprover,
+            userId:
+              this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0]
+                .id,
             status: "Pending",
-            actionDate: this._formatDateTime(new Date()),
-            mainStatus: each.mainStatus,
+            statusNumber: upatedCurrentApprover[0].statusNumber,
+
+            mainStatus: upatedCurrentApprover[0].mainStatus,
+            actionDate: upatedCurrentApprover[0].actionDate,
+
             secretary:
               checkSelectedApproverHasSecretary.length > 0
                 ? checkSelectedApproverHasSecretary[0].secretaryEmailName
@@ -2855,100 +2868,69 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
               checkSelectedApproverHasSecretary.length > 0
                 ? checkSelectedApproverHasSecretary[0].secretaryEmail
                 : "",
-          };
+          },
+        ];
+      };
+
+      const modifyApproverDetails = _ApproverDTO.map((each: any) => {
+        if (each.status === "Pending") {
+          return { ...updateCurrentApprover()[0] };
+        } else {
+          return each;
         }
-      }
-    );
+      });
+      // console.log(modifyApproverDetails);
 
-    return [
-      {
-        approverType: upatedCurrentApprover[0].approverType,
-        approverEmail:
-          this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].email ||
-          this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].secondaryText,
-        approverOrder: upatedCurrentApprover[0].approverOrder,
-        approverStatus: upatedCurrentApprover[0].approverStatus,
+      const reviewerIds = modifyApproverDetails
+        .filter((each: any) => each.approverType === "Reviewer")
+        .map((each: any) => each.userId);
+      const approverId = modifyApproverDetails
+        .filter((each: any) => each.approverType === "Approver")
+        .map((each: any) => each.userId);
+      const currentApproverId =
+        this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id;
 
-        srNo: this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].srNo,
-        designation: this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].optionalText,
-        approverEmailName: this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].text,
-        userId: this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id,
-        status: "Pending",
-        statusNumber: upatedCurrentApprover[0].statusNumber,
+      const updateAuditTrial = await this._getAuditTrail(statusFromEvent);
 
-        mainStatus: upatedCurrentApprover[0].mainStatus,
-        actionDate: upatedCurrentApprover[0].actionDate,
+      await this.props.sp.web.lists
+        .getByTitle(this._listname)
+        .items.getById(this._itemId)
+        .update({
+          startProcessing: true,
+          CurrentApproverId: currentApproverId,
+          AuditTrail: updateAuditTrial,
+          NoteApproversDTO: JSON.stringify(modifyApproverDetails),
+          PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
+          FinalApproverId:
+            modifyApproverDetails[modifyApproverDetails.length - 1].id,
+          NoteSecretaryDTO:
+            checkSelectedApproverHasSecretary.length > 0
+              ? JSON.stringify([
+                  ...this.state.noteSecretaryDetails,
+                  secretaryObj,
+                ])
+              : JSON.stringify([...this.state.noteSecretaryDetails]),
+          ReviewersId: reviewerIds,
+          ApproversId: approverId,
+        });
 
-        secretary:
-          checkSelectedApproverHasSecretary.length > 0
-            ? checkSelectedApproverHasSecretary[0].secretaryEmailName
-            : "",
-        secretaryEmail:
-          checkSelectedApproverHasSecretary.length > 0
-            ? checkSelectedApproverHasSecretary[0].secretaryEmail
-            : "",
-      },
-    ];
-  };
+      this.setState({ isVisibleAlter: true, isLoading: false });
 
-  const modifyApproverDetails = _ApproverDTO.map(
-    (each: any) => {
-      if (each.status === "Pending") {
-        return { ...updateCurrentApprover()[0] };
-      } else {
-        return each;
-      }
+      checkSelectedApproverHasSecretary.length > 0 &&
+        this.setState((prevState) => ({
+          noteSecretaryDetails: [
+            ...prevState.noteSecretaryDetails,
+            secretaryObj,
+          ],
+        }));
+    } else {
+      this.setState({
+        isLoading: false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          this.getMessageBasedOnStatusNumber(StatusNumber),
+      });
     }
-  );
-  // console.log(modifyApproverDetails);
-
-  const reviewerIds = modifyApproverDetails
-    .filter((each: any) => each.approverType === "Reviewer")
-    .map((each: any) => each.userId);
-  const approverId = modifyApproverDetails
-    .filter((each: any) => each.approverType === "Approver")
-    .map((each: any) => each.userId);
-  const currentApproverId = this.state.peoplePickerSelectedDataWhileReferOrChangeApprover[0].id;
-
-  const updateAuditTrial = await this._getAuditTrail(statusFromEvent);
-
-  await this.props.sp.web.lists
-    .getByTitle(this._listname)
-    .items.getById(this._itemId)
-    .update({
-      startProcessing: true,
-      CurrentApproverId: currentApproverId,
-      AuditTrail: updateAuditTrial,
-      NoteApproversDTO: JSON.stringify(modifyApproverDetails),
-      PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
-      FinalApproverId:
-        modifyApproverDetails[modifyApproverDetails.length - 1].id,
-      NoteSecretaryDTO:
-        checkSelectedApproverHasSecretary.length > 0
-          ? JSON.stringify([...this.state.noteSecretaryDetails, secretaryObj])
-          : JSON.stringify([...this.state.noteSecretaryDetails]),
-      ReviewersId: reviewerIds,
-      ApproversId: approverId,
-    });
-
-  this.setState({ isVisibleAlter: true, isLoading: false });
-
-  checkSelectedApproverHasSecretary.length > 0 &&
-    this.setState((prevState) => ({
-      noteSecretaryDetails: [...prevState.noteSecretaryDetails, secretaryObj],
-    }));
-
-}else{
-
-  this.setState({
-    isLoading:false,
-    hideParellelActionAlertDialog: true,
-    parellelActionAlertMsg:
-    this.getMessageBasedOnStatusNumber(StatusNumber),
-  });
-
-}
-    
   };
 
   private _checkApproveredStatusIsFound = (): any => {
@@ -3123,8 +3105,6 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
     );
   };
 
-
-
   private _closeDialog = () => {
     this.setState({ dialogFluent: true });
   };
@@ -3158,14 +3138,14 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
     type: string = "",
     id: string = ""
   ) => {
-    console.log(commentsData)
+    console.log(commentsData);
     if (this.state.statusNumber === "4000") {
       this.setState((prevState) => ({
         noteReferrerCommentsDTO: [
           ...prevState.noteReferrerCommentsDTO,
           {
             ...commentsData,
-            approverEmailName: this.state.currentApprover[0].Title,
+            approverEmailName: prevState.currentApprover[0].Title,
           },
         ],
       }));
@@ -3242,11 +3222,12 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
         return result;
       };
 
-      this.setState({
-        commentsData: returnValue(this.state.commentsData),
-        commentsLog: returnValue(this.state.commentsLog),
-        generalComments: returnValueGen(this.state.generalComments),
-      });
+      this.setState((prevState) => ({
+        commentsData: returnValue(prevState.commentsData),
+        commentsLog: returnValue(prevState.commentsLog),
+        generalComments: returnValueGen(prevState.generalComments),
+      }));
+      
     }
   };
 
@@ -3281,7 +3262,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
   private handleGistDocuments = (files: File[], typeOfDoc: string) => {
     if (files) {
       const filesArray = Array.from(files);
-  
+
       this.setState({
         secretaryGistDocs: filesArray,
         secretaryGistDocsList: filesArray,
@@ -3459,24 +3440,23 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
 
     let doctype;
 
-switch (fileExtession.toLocaleLowerCase()) {
-  case "docx":
-  case "doc":
-    doctype = "docx";
-    break;
+    switch (fileExtession.toLocaleLowerCase()) {
+      case "docx":
+      case "doc":
+        doctype = "docx";
+        break;
 
-  case "pdf":
-    doctype = "pdf";
-    break;
+      case "pdf":
+        doctype = "pdf";
+        break;
 
-  case "xlsx":
-    doctype = "xlsx";
-    break;
+      case "xlsx":
+        doctype = "xlsx";
+        break;
 
-  default:
-    doctype = "txt";
-}
-
+      default:
+        doctype = "txt";
+    }
 
     const url = `https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/${doctype}.svg`;
     return url;
@@ -3496,7 +3476,12 @@ switch (fileExtession.toLocaleLowerCase()) {
     const newObj = this.state.errorFilesList;
     newObj[data[1]] = data[0];
 
-    this.setState({ errorFilesList: newObj });
+    this.setState((prevState) => {
+      const newObj = { ...prevState.errorFilesList }; 
+      newObj[data[1]] = data[0]; 
+    
+      return { errorFilesList: newObj }; 
+    });
 
     if (
       newObj.wordDocument.length > 0 ||
@@ -3515,13 +3500,15 @@ switch (fileExtession.toLocaleLowerCase()) {
   };
 
   private _getAtrCommentsGrid = (data: any): any => {
+    console.log(data)
     if (
       this.state.currentApprover !== null &&
-      this.state.currentApprover[0]?.approverEmail === this._currentUserEmail
+      this.state.currentApprover[0]?.approverEmail ||this.state.currentApprover[0]?.EMail === this._currentUserEmail
     ) {
-      const joinedCommentsData = this.state.generalComments
-        .filter((each: any) => !!each)
-        .map((each: any) => `${each?.pageNum} ${each?.page} ${each?.comment}`);
+      const joinedCommentsData = this.state.generalComments .filter((each: any) => !!each)
+        .map((each: any) => `${each?.pageNumber} ${each?.docReference} ${each?.comments}`);
+
+      console.log(joinedCommentsData)
 
       return data.map((each: any) => {
         return { ...each, comments: joinedCommentsData.join(", ") };
@@ -3689,7 +3676,7 @@ switch (fileExtession.toLocaleLowerCase()) {
           }
           if (this.state.generalComments.length === 0) {
             this.setState({ isReferBackAlterDialog: true });
-          }  else if (!this.state.isPasscodeValidated) {
+          } else if (!this.state.isPasscodeValidated) {
             this.setState({
               isPasscodeModalOpen: true,
               passCodeValidationFrom: "4900",
@@ -3718,391 +3705,545 @@ switch (fileExtession.toLocaleLowerCase()) {
     return approver ? approver.mainStatus : undefined;
   };
 
-  private _DialogBlockingExample = ():any =>{
+  private _DialogBlockingExample = (): any => {
+    return (
+      <DialogBlockingExample
+        changeApproverDataMandatory={this._changeApproverDataMandatory}
+        referCommentsAndDataMandatory={this._referCommentsAndDataMandatory}
+        statusNumberForChangeApprover={this.state.statusNumber}
+        referDto={
+          this.state.noteReferrerDTO[this.state.noteReferrerDTO.length - 1]
+        }
+        requesterEmail={this.state.createdByEmail}
+        isUserExistingDialog={() =>
+          this.setState({ isUserExistsModalVisible: true })
+        }
+        dialogUserCheck={{
+          peoplePickerApproverData: this.state.peoplePickerApproverData,
+          peoplePickerData: this.state.peoplePickerData,
+        }}
+        hiddenProp={this.state.dialogFluent}
+        dialogDetails={this.state.dialogDetails}
+        sp={this.props.sp}
+        context={this.props.context}
+        fetchReferData={(data: any) => {
+          // console.log(data, "Comments Data");
+          this.setState((prevState) => ({
+            commentsData: [...prevState.commentsData, data],
+            generalComments: [...prevState.commentsData, data],
+            commentsLog: [...prevState.commentsLog, data],
+            referComment: data,
+          }));
+        }}
+        fetchAnydata={(
+          data: any,
+          typeOfBtnTriggered: any,
+          status: any,
+          commentData: any
+        ) => {
+          this.setState({
+            peoplePickerSelectedDataWhileReferOrChangeApprover: data,
+          });
+          if (typeOfBtnTriggered === "Refer") {
+            this.setState((prevState) => ({
+              refferredToDetails: [{ ...data[0], status: status }],
+              referredFromDetails: [...prevState.currentApprover],
+            }));
+          }
+        }}
+      />
+    );
+  };
 
-    return <DialogBlockingExample
-    changeApproverDataMandatory={this._changeApproverDataMandatory}
-    referCommentsAndDataMandatory={this._referCommentsAndDataMandatory}
-    statusNumberForChangeApprover={this.state.statusNumber}
-    referDto={
-      this.state.noteReferrerDTO[this.state.noteReferrerDTO.length - 1]
-    }
-    requesterEmail={this.state.createdByEmail}
-    isUserExistingDialog={() =>
-      this.setState({ isUserExistsModalVisible: true })
-    }
-    dialogUserCheck={{
-      peoplePickerApproverData: this.state.peoplePickerApproverData,
-      peoplePickerData: this.state.peoplePickerData,
-    }}
-    hiddenProp={this.state.dialogFluent}
-    dialogDetails={this.state.dialogDetails}
-    sp={this.props.sp}
-    context={this.props.context}
-    fetchReferData={(data: any) => {
-      // console.log(data, "Comments Data");
-      this.setState((prevState) => ({
-        commentsData: [...prevState.commentsData, data],
-        generalComments:[...prevState.commentsData, data],
-        commentsLog: [...prevState.commentsLog, data],
-        referComment: data,
-      }));
-    }}
-    fetchAnydata={(
-      data: any,
-      typeOfBtnTriggered: any,
-      status: any,
-      commentData: any
-    ) => {
-      this.setState({
-        peoplePickerSelectedDataWhileReferOrChangeApprover: data,
-      });
-      if (typeOfBtnTriggered === "Refer") {
-        this.setState({
-          refferredToDetails: [{ ...data[0], status: status }],
-          referredFromDetails: [...this.state.currentApprover],
-        });
-      } 
-    }}
-  />
-
-  }
-
-  private _RenderMainViewForm = ():any=>{
-
+  private _RenderMainViewForm = (): any => {
     const { expandSections } = this.state;
 
-    const formTitle = this.props.formType === "BoardNoteView"
-    ? `Board Note - ${ this.state.title}`
-    :`eCommittee Note - ${ this.state.title}`;
-    return <div className={styles.viewFormMainContainer}>
-    <form>
-      <PasscodeModal
-        createPasscodeUrl={this.props.passCodeUrl}
-        isOpen={this.state.isPasscodeModalOpen}
-        onClose={() =>
-          this.setState({
-            isPasscodeModalOpen: false,
-            isPasscodeValidated: false,
-          })
-        }
-        onSuccess={this.handlePasscodeSuccess}
-        sp={this.props.sp}
-        user={this.props.context.pageContext.user}
-      />
-    </form>
+    const formTitle =
+      this.props.formType === "BoardNoteView"
+        ? `Board Note - ${this.state.title}`
+        : `eCommittee Note - ${this.state.title}`;
+    return (
+      <div className={styles.viewFormMainContainer}>
+        <form>
+          <PasscodeModal
+            createPasscodeUrl={this.props.passCodeUrl}
+            isOpen={this.state.isPasscodeModalOpen}
+            onClose={() =>
+              this.setState({
+                isPasscodeModalOpen: false,
+                isPasscodeValidated: false,
+              })
+            }
+            onSuccess={this.handlePasscodeSuccess}
+            sp={this.props.sp}
+            user={this.props.context.pageContext.user}
+          />
+        </form>
 
-    {this.getUserExistsModalJSX()}
+        {this.getUserExistsModalJSX()}
 
-    <SuccessDialog
-      existUrl={this.props.existPageUrl}
-      statusOfReq={this.state.successStatus}
-      isVisibleAlter={this.state.isVisibleAlter}
-      onCloseAlter={() => {
-        this._closeDialogAlter("success");
-      }}
-      typeOfNote={this._committeeType}
-    />
-    <Modal
-      isOpen={this.state.hideParellelActionAlertDialog}
-      onDismiss={() => {
-        // console.log("close triggered");
-        this.setState({
-          hideParellelActionAlertDialog:
-            !this.state.hideParellelActionAlertDialog,
-        });
-      }}
-      isBlocking={true}
-      containerClassName={Cutsomstyles.modal}
-    >
-      <div className={Cutsomstyles.header}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <IconButton iconProps={{ iconName: "Info" }} />
-          <h4 className={Cutsomstyles.headerTitle}>Alert</h4>
-        </div>
-        <IconButton
-          iconProps={{ iconName: "Cancel" }}
-          onClick={() => {
-            // console.log("close triggered");
-            window.location.reload();
-            this.setState({ hideParellelActionAlertDialog: false });
+        <SuccessDialog
+          existUrl={this.props.existPageUrl}
+          statusOfReq={this.state.successStatus}
+          isVisibleAlter={this.state.isVisibleAlter}
+          onCloseAlter={() => {
+            this._closeDialogAlter("success");
           }}
+          typeOfNote={this._committeeType}
         />
-      </div>
-      <div className={Cutsomstyles.body}>
-        <p>{this.state.parellelActionAlertMsg}</p>
-      </div>
-      <div className={Cutsomstyles.footer}>
-        <PrimaryButton
-          className={Cutsomstyles.button}
-          iconProps={{ iconName: "ReplyMirrored" }}
-          onClick={() =>{
-            this.setState({ hideParellelActionAlertDialog: false })
-            window.location.reload();
-
-          }
-            
-          }
-          text="OK"
-        />
-      </div>
-    </Modal>
-
-    <ChangeApproverMandatoryDialog
-      isVisibleAlter={this.state.isChangeApproverNeeded}
-      onCloseAlter={() => {
-        this.setState({ isChangeApproverNeeded: false });
-      }}
-    />
-
-{this.state.isLoading && (
-      <div>
         <Modal
-          isOpen={this.state.isLoading}
-          containerClassName={styles.spinnerModalTranparency}
-          styles={{
-            main: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "transparent", 
-              boxShadow: "none", 
-            },
+          isOpen={this.state.hideParellelActionAlertDialog}
+          onDismiss={() => {
+            // console.log("close triggered");
+            this.setState((prevState) => ({
+              hideParellelActionAlertDialog: !prevState.hideParellelActionAlertDialog,
+            }));
+            
           }}
+          isBlocking={true}
+          containerClassName={Cutsomstyles.modal}
         >
-          <div className="spinner">
-            <Spinner
-              label="still loading..."
-              ariaLive="assertive"
-              size={SpinnerSize.large}
+          <div className={Cutsomstyles.header}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <IconButton iconProps={{ iconName: "Info" }} />
+              <h4 className={Cutsomstyles.headerTitle}>Alert</h4>
+            </div>
+            <IconButton
+              iconProps={{ iconName: "Cancel" }}
+              onClick={() => {
+                // console.log("close triggered");
+                window.location.reload();
+                this.setState({ hideParellelActionAlertDialog: false });
+              }}
+            />
+          </div>
+          <div className={Cutsomstyles.body}>
+            <p>{this.state.parellelActionAlertMsg}</p>
+          </div>
+          <div className={Cutsomstyles.footer}>
+            <PrimaryButton
+              className={Cutsomstyles.button}
+              iconProps={{ iconName: "ReplyMirrored" }}
+              onClick={() => {
+                this.setState({ hideParellelActionAlertDialog: false });
+                window.location.reload();
+              }}
+              text="OK"
             />
           </div>
         </Modal>
-      </div>
-    )}
 
-    <ReferCommentsMandatoryDialog
-      isVisibleAlter={this.state.isReferDataAndCommentsNeeded}
-      onCloseAlter={() => {
-        this.setState({ isReferDataAndCommentsNeeded: false });
-      }}
-      statusOfReq={
-        this.state.peoplePickerSelectedDataWhileReferOrChangeApprover
-      }
-    />
-
-    <ReferBackCommentDialog
-      statusOfReq={this.state.status}
-      isVisibleAlter={this.state.isReferBackAlterDialog}
-      onCloseAlter={() => {
-        this._closeDialogAlter("commentsNeeded");
-      }}
-    />
-
-    <NotedCommentDialog
-      statusOfReq={this.state.status}
-      isVisibleAlter={this.state.isNotedCommentsManidatoryAlterDialog}
-      onCloseAlter={() => {
-        this._closeDialogAlter("commentsNeeded");
-      }}
-    />
-
-    <GistDocEmptyModal
-      isVisibleAlter={this.state.isGistDocEmpty}
-      onCloseAlter={() => {
-        this.setState({ isGistDocEmpty: false });
-      }}
-      statusOfReq={undefined}
-    />
-
-    <GistDocsConfirmation
-      isVisibleAlter={this.state.isGistDocCnrf}
-      onCloseAlter={() => {
-        this.setState({ isGistDocCnrf: false });
-      }}
-      handleConfirmatBtn={async () => {
-        this.setState({ isGistDocCnrf: false, isLoading: true });
-
-        try {
-          await this.updateGistDocumentFolderItems(
-            this.state.secretaryGistDocs,
-            `${this._folderName}/GistDocuments`,
-            "gistDocument"
-          ).then(async () => {
-            const updateAuditTrial = await this._getAuditTrail(
-              "gistDocuments"
-            );
-            await this.props.sp.web.lists
-              .getByTitle(this._listname)
-              .items.getById(this._itemId)
-              .update({
-                AuditTrail: updateAuditTrial,
-              });
-          });
-
-          this.setState({
-            isLoading: false,
-            isGistSuccessVisibleAlter: true,
-          });
-        } catch (e) {
-          return e;
-        }
-      }}
-      statusOfReq={undefined}
-    />
-
-    <GistDocSubmitted
-      existUrl={this.props.existPageUrl}
-      isVisibleAlter={this.state.isGistSuccessVisibleAlter}
-      onCloseAlter={() => {
-        this._closeDialogAlter("success");
-      }}
-      statusOfReq={undefined}
-    />
-
-    <RejectBtnCommentCheckDialog
-      statusOfReq={this.state.status}
-      isVisibleAlter={this.state.isRejectCommentsCheckAlterDialog}
-      onCloseAlter={() => {
-        this._closeDialogAlter("commentsNeeded");
-      }}
-    />
-
-    <ReturnBtnCommentCheckDialog
-      statusOfReq={this.state.status}
-      isVisibleAlter={this.state.isReturnCommentsCheckAlterDialog}
-      onCloseAlter={() => {
-        this._closeDialogAlter("commentsNeeded");
-      }}
-    />
-
-    <Dialog
-      hidden={!this.state.isDialogVisible}
-      onDismiss={() => this.setState({ isDialogVisible: false })}
-      dialogContentProps={{
-        title: this.state.dialogContent.title,
-      }}
-    >
-      <div>{this.state.dialogContent.message}</div>{" "}
-      <DialogFooter>
-        <PrimaryButton
-          onClick={() => this.setState({ isDialogVisible: false })}
-          text={this.state.dialogContent.buttonText}
+        <ChangeApproverMandatoryDialog
+          isVisibleAlter={this.state.isChangeApproverNeeded}
+          onCloseAlter={() => {
+            this.setState({ isChangeApproverNeeded: false });
+          }}
         />
-      </DialogFooter>
-    </Dialog>
 
-    <CummulativeErrorDialog
-      isVisibleAlter={this.state.dialogboxForCummulativeError}
-      onCloseAlter={() => {
-        this.setState({ dialogboxForCummulativeError: false });
-      }}
-      statusOfReq={undefined}
-    />
-
-    {this.state.isAutoSaveFailedDialog && (
-      <AutoSaveFailedDialog
-        statusOfReq={this.state.successStatus}
-        isVisibleAlter={this.state.isAutoSaveFailedDialog}
-        onCloseAlter={() => {
-          this.setState({ isAutoSaveFailedDialog: false });
-        }}
-      />
-    )}
-
-    <div
-      className={`${styles.generalSectionMainContainer} ${styles.viewFormHeaderSection}`}
-      style={{ paddingLeft: "10px", paddingRight: "10px" }}
-    >
-      <h1
-        className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
-      >
-        pending with:{" "}
-        {/* {this.state.status !== "Rejected" &&
-          this._getPendingStatus(this.state.ApproverDetails)} */}
-        {this.state.currentApprover[0]?.Title}
-      </h1>
-
-      <h1
-        className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer} `}
-      >
-        {formTitle}
-      </h1>
-
-      <h1
-        className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
-      >
-        Status:{" "}{this.state.statusNumber === "4900" 
-          ? this.getMainStatus()
-          : this.state.status}
-      </h1>
-    </div>
-
-    <div className={`${styles.viewFormContentContainer}`}>
-      <div className={styles.expansionAndPdfContainer}>
-        <div className={styles.expandingContainer}>
-          <GeneralSectionInViewForm _onToggleSection={this._onToggleSection} expandSections={expandSections} state={this.state} _renderTable={this._renderTable}/>
-         
-          <DraftResolutionInViewForm _onToggleSection={this._onToggleSection} expandSections={expandSections} state={this.state} formType={this.props.formType}/>
-        
-          <ReviewerOrApproverSectionInViewForm sectionName="Reviewers Section"  _onToggleSection={this._onToggleSection} toggleParameter="reviewersSection" expandSections={expandSections} state={this.state} reviewerORApproverData={this.state.peoplePickerData} reOrderData={this.reOrderData} removeDataFromGrid={this.removeDataFromGrid} type="Reviewer"/>
-          <ReviewerOrApproverSectionInViewForm sectionName="Approvers Section"  _onToggleSection={this._onToggleSection} toggleParameter="approversSection" expandSections={expandSections} state={this.state} reviewerORApproverData={this.state.peoplePickerApproverData} reOrderData={this.reOrderData} removeDataFromGrid={this.removeDataFromGrid} type="Approver"/>
-          
-
-          {(this._checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest() &&
-            this._currentUserEmail !== this.state.createdByEmail) ||
-          this._checkRefereeAvailable() ? (
-            <div className={styles.sectionContainer}>
-              <button
-                className={styles.header}
-                onClick={() => this._onToggleSection(`generalComments`)}
-              >
-                <Text className={styles.sectionText}>
-                  General Comments
-                </Text>
-                <IconButton
-                  iconProps={{
-                    iconName: expandSections.generalComments
-                      ? "ChevronUp"
-                      : "ChevronDown",
-                  }}
-                  title="Expand/Collapse"
-                  ariaLabel="Expand/Collapse"
-                  className={styles.chevronIcon}
+        {this.state.isLoading && (
+          <div>
+            <Modal
+              isOpen={this.state.isLoading}
+              containerClassName={styles.spinnerModalTranparency}
+              styles={{
+                main: {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "transparent",
+                  boxShadow: "none",
+                },
+              }}
+            >
+              <div className="spinner">
+                <Spinner
+                  label="still loading..."
+                  ariaLive="assertive"
+                  size={SpinnerSize.large}
                 />
-              </button>
+              </div>
+            </Modal>
+          </div>
+        )}
 
-              {expandSections.generalComments && (
-                <div className={`${styles.expansionPanelInside}`}>
-                  <div style={{ padding: "15px", paddingTop: "4px" }}>
-                    <GeneralCommentsFluentUIGrid
-                      handleCommentDataFuntion={this._getCommentData}
-                      data={this.state.generalComments}
-                      currentUserDetails={
-                        this.props.context.pageContext.user
-                      }
+        <ReferCommentsMandatoryDialog
+          isVisibleAlter={this.state.isReferDataAndCommentsNeeded}
+          onCloseAlter={() => {
+            this.setState({ isReferDataAndCommentsNeeded: false });
+          }}
+          statusOfReq={
+            this.state.peoplePickerSelectedDataWhileReferOrChangeApprover
+          }
+        />
+
+        <ReferBackCommentDialog
+          statusOfReq={this.state.status}
+          isVisibleAlter={this.state.isReferBackAlterDialog}
+          onCloseAlter={() => {
+            this._closeDialogAlter("commentsNeeded");
+          }}
+        />
+
+        <NotedCommentDialog
+          statusOfReq={this.state.status}
+          isVisibleAlter={this.state.isNotedCommentsManidatoryAlterDialog}
+          onCloseAlter={() => {
+            this._closeDialogAlter("commentsNeeded");
+          }}
+        />
+
+        <GistDocEmptyModal
+          isVisibleAlter={this.state.isGistDocEmpty}
+          onCloseAlter={() => {
+            this.setState({ isGistDocEmpty: false });
+          }}
+          statusOfReq={undefined}
+        />
+
+        <GistDocsConfirmation
+          isVisibleAlter={this.state.isGistDocCnrf}
+          onCloseAlter={() => {
+            this.setState({ isGistDocCnrf: false });
+          }}
+          handleConfirmatBtn={async () => {
+            this.setState({ isGistDocCnrf: false, isLoading: true });
+
+            try {
+              await this.updateGistDocumentFolderItems(
+                this.state.secretaryGistDocs,
+                `${this._folderName}/GistDocuments`,
+                "gistDocument"
+              ).then(async () => {
+                const updateAuditTrial = await this._getAuditTrail(
+                  "gistDocuments"
+                );
+                await this.props.sp.web.lists
+                  .getByTitle(this._listname)
+                  .items.getById(this._itemId)
+                  .update({
+                    AuditTrail: updateAuditTrial,
+                  });
+              });
+
+              this.setState({
+                isLoading: false,
+                isGistSuccessVisibleAlter: true,
+              });
+            } catch (e) {
+              return e;
+            }
+          }}
+          statusOfReq={undefined}
+        />
+
+        <GistDocSubmitted
+          existUrl={this.props.existPageUrl}
+          isVisibleAlter={this.state.isGistSuccessVisibleAlter}
+          onCloseAlter={() => {
+            this._closeDialogAlter("success");
+          }}
+          statusOfReq={undefined}
+        />
+
+        <RejectBtnCommentCheckDialog
+          statusOfReq={this.state.status}
+          isVisibleAlter={this.state.isRejectCommentsCheckAlterDialog}
+          onCloseAlter={() => {
+            this._closeDialogAlter("commentsNeeded");
+          }}
+        />
+
+        <ReturnBtnCommentCheckDialog
+          statusOfReq={this.state.status}
+          isVisibleAlter={this.state.isReturnCommentsCheckAlterDialog}
+          onCloseAlter={() => {
+            this._closeDialogAlter("commentsNeeded");
+          }}
+        />
+
+        <Dialog
+          hidden={!this.state.isDialogVisible}
+          onDismiss={() => this.setState({ isDialogVisible: false })}
+          dialogContentProps={{
+            title: this.state.dialogContent.title,
+          }}
+        >
+          <div>{this.state.dialogContent.message}</div>{" "}
+          <DialogFooter>
+            <PrimaryButton
+              onClick={() => this.setState({ isDialogVisible: false })}
+              text={this.state.dialogContent.buttonText}
+            />
+          </DialogFooter>
+        </Dialog>
+
+        <CummulativeErrorDialog
+          isVisibleAlter={this.state.dialogboxForCummulativeError}
+          onCloseAlter={() => {
+            this.setState({ dialogboxForCummulativeError: false });
+          }}
+          statusOfReq={undefined}
+        />
+
+        {this.state.isAutoSaveFailedDialog && (
+          <AutoSaveFailedDialog
+            statusOfReq={this.state.successStatus}
+            isVisibleAlter={this.state.isAutoSaveFailedDialog}
+            onCloseAlter={() => {
+              this.setState({ isAutoSaveFailedDialog: false });
+            }}
+          />
+        )}
+
+        <div
+          className={`${styles.generalSectionMainContainer} ${styles.viewFormHeaderSection}`}
+          style={{ paddingLeft: "10px", paddingRight: "10px" }}
+        >
+          <h1
+            className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
+          >
+            pending with:{" "}
+            {/* {this.state.status !== "Rejected" &&
+          this._getPendingStatus(this.state.ApproverDetails)} */}
+            {this.state.currentApprover[0]?.Title}
+          </h1>
+
+          <h1
+            className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer} `}
+          >
+            {formTitle}
+          </h1>
+
+          <h1
+            className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
+          >
+            Status:{" "}
+            {this.state.statusNumber === "4900"
+              ? this.getMainStatus()
+              : this.state.status}
+          </h1>
+        </div>
+
+        <div className={`${styles.viewFormContentContainer}`}>
+          <div className={styles.expansionAndPdfContainer}>
+            <div className={styles.expandingContainer}>
+              <GeneralSectionInViewForm
+                _onToggleSection={this._onToggleSection}
+                expandSections={expandSections}
+                state={this.state}
+                _renderTable={this._renderTable}
+              />
+
+              <DraftResolutionInViewForm
+                _onToggleSection={this._onToggleSection}
+                expandSections={expandSections}
+                state={this.state}
+                formType={this.props.formType}
+              />
+
+              <ReviewerOrApproverSectionInViewForm
+                sectionName="Reviewers Section"
+                _onToggleSection={this._onToggleSection}
+                toggleParameter="reviewersSection"
+                expandSections={expandSections}
+                state={this.state}
+                reviewerORApproverData={this.state.peoplePickerData}
+                reOrderData={this.reOrderData}
+              
+                type="Reviewer"
+              />
+              <ReviewerOrApproverSectionInViewForm
+                sectionName="Approvers Section"
+                _onToggleSection={this._onToggleSection}
+                toggleParameter="approversSection"
+                expandSections={expandSections}
+                state={this.state}
+                reviewerORApproverData={this.state.peoplePickerApproverData}
+                reOrderData={this.reOrderData}
+                
+                type="Approver"
+              />
+
+              {(this._checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest() &&
+                this._currentUserEmail !== this.state.createdByEmail) ||
+              this._checkRefereeAvailable() ? (
+                <div className={styles.sectionContainer}>
+                  <button
+                    className={styles.header}
+                    onClick={() => this._onToggleSection(`generalComments`)}
+                  >
+                    <Text className={styles.sectionText}>General Comments</Text>
+                    <IconButton
+                      iconProps={{
+                        iconName: expandSections.generalComments
+                          ? "ChevronUp"
+                          : "ChevronDown",
+                      }}
+                      title="Expand/Collapse"
+                      ariaLabel="Expand/Collapse"
+                      className={styles.chevronIcon}
                     />
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            ""
-          )}
+                  </button>
 
-          {this._checkCurrentUserIsAATRAssignee() &&
-            this._checkCurrentUserIsApproverType() && (
+                  {expandSections.generalComments && (
+                    <div className={`${styles.expansionPanelInside}`}>
+                      <div style={{ padding: "15px", paddingTop: "4px" }}>
+                        <GeneralCommentsFluentUIGrid
+                          handleCommentDataFuntion={this._getCommentData}
+                          data={this.state.generalComments}
+                          currentUserDetails={
+                            this.props.context.pageContext.user
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                ""
+              )}
+
+              {this._checkCurrentUserIsAATRAssignee() &&
+                this._checkCurrentUserIsApproverType() && (
+                  <div className={styles.sectionContainer}>
+                    <button
+                      className={styles.header}
+                      onClick={() => this._onToggleSection(`atrAssignees`)}
+                    >
+                      <Text className={styles.sectionText}>ATR Assignees</Text>
+                      <IconButton
+                        iconProps={{
+                          iconName: expandSections.atrAssignees
+                            ? "ChevronUp"
+                            : "ChevronDown",
+                        }}
+                        title="Expand/Collapse"
+                        ariaLabel="Expand/Collapse"
+                        className={styles.chevronIcon}
+                      />
+                    </button>
+                    {expandSections.atrAssignees && (
+                      <div
+                        className={`${styles.expansionPanelInside}`}
+                        style={{ overflowX: "scroll" }}
+                      >
+                        <div style={{ padding: "15px" }}>
+                          <ATRAssignee
+                            atrType={this.state.atrType}
+                            getATRTypeOnChange={(type: any) => {
+                              this.setState({ atrType: type });
+                            }}
+                            clearAtrGridDataOnSelectionOFATRType={() => {
+                              this.setState({
+                                atrGridData: [],
+                                noteATRAssigneeDetails: [],
+                              });
+                            }}
+                            checkingCurrentATRCreatorisCurrentApproverOrNot={this._checkingCurrentATRCreatorisCurrentApproverOrNot()}
+                            getATRJoinedComments={(data: any) => {
+                              this.setState({ atrJoinedComments: data });
+                            }}
+                            approverDetails={this.state.ApproverDetails}
+                            currentATRCreatorDetails={this._currentUserEmail}
+                            sp={this.props.sp}
+                            context={this.props.context}
+                            commentsData={this.state.generalComments}
+                            artCommnetsGridData={this._getAtrCommentsGrid(
+                              this.state.atrGridData
+                            )}
+                            deletedGridData={(data: any) => {
+                              this.setState({ atrGridData: data });
+                            }}
+                            updategirdData={(data: any): void => {
+                              this.setState({ atrType: data.atrType });
+
+                              const currentAtrCreator =
+                                this.state.atrCreatorsList.filter(
+                                  (each: any) =>
+                                    each.atrCreatorEmail ===
+                                    this.props.context.pageContext.user.email
+                                );
+
+                              const { assigneeDetails } = data;
+
+                              const currentApproverDetailsFromApproverDTO =
+                                this._getCurrentApproverDetailsFromApproverDTO();
+
+                              // console.log(
+                              //   currentApproverDetailsFromApproverDTO
+                              // );
+
+                              this.setState((prevState) => ({
+                                atrGridData: data.comments,
+
+                                noteATRAssigneeDetails: [
+                                  ...prevState.noteATRAssigneeDetails,
+                                  {
+                                    atrType: data.atrType,
+                                    atrAssigneeId: assigneeDetails.id,
+                                    atrCreatorId:
+                                      currentAtrCreator[0].atrCreatorId,
+                                    atrCreatorEmail:
+                                      currentAtrCreator[0].atrCreatorEmail,
+
+                                    atrAssigneeEmailName: assigneeDetails.text,
+                                    atrAssigneeEmail: assigneeDetails.email,
+                                    approverEmailName:
+                                      currentApproverDetailsFromApproverDTO[0]
+                                        .approverEmailName,
+
+                                    atrCreatorEmailName:
+                                      currentAtrCreator[0].atrCreatorEmailName,
+
+                                    createdDate: this._formatDateTime(
+                                      new Date()
+                                    ),
+                                    createdBy:
+                                      this.props.context.pageContext.user.email,
+                                    modifiedDate: this._formatDateTime(
+                                      new Date()
+                                    ),
+                                    modifiedBy:
+                                      this.props.context.pageContext.user.email,
+                                    statusMessage: null,
+                                    atrId: "",
+                                    noteApproverId:
+                                      currentApproverDetailsFromApproverDTO[0]
+                                        .userId,
+                                    approverType:
+                                      currentApproverDetailsFromApproverDTO[0]
+                                        .approverType,
+                                    approverOrder:
+                                      currentApproverDetailsFromApproverDTO[0]
+                                        .approverOrder,
+                                    approverStatus: 1,
+                                    approverEmail:
+                                      currentApproverDetailsFromApproverDTO[0]
+                                        .approverEmail,
+                                    noteApproverComments: "",
+                                    strATRStatus: "Pending",
+                                    atrStatus: 1,
+                                    noteId: this._itemId,
+                                  },
+                                ],
+                              }));
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
               <div className={styles.sectionContainer}>
                 <button
                   className={styles.header}
-                  onClick={() => this._onToggleSection(`atrAssignees`)}
+                  onClick={() => this._onToggleSection(`commentsLog`)}
                 >
-                  <Text className={styles.sectionText}>
-                    ATR Assignees
-                  </Text>
+                  <Text className={styles.sectionText}>Comments Log</Text>
                   <IconButton
                     iconProps={{
-                      iconName: expandSections.atrAssignees
+                      iconName: expandSections.commentsLog
                         ? "ChevronUp"
                         : "ChevronDown",
                     }}
@@ -4111,697 +4252,550 @@ switch (fileExtession.toLocaleLowerCase()) {
                     className={styles.chevronIcon}
                   />
                 </button>
-                {expandSections.atrAssignees && (
-                  <div
-                    className={`${styles.expansionPanelInside}`}
-                    style={{ overflowX: "scroll" }}
-                  >
-                    <div style={{ padding: "15px" }}>
-                      <ATRAssignee
-                        atrType={this.state.atrType}
-                        getATRTypeOnChange={(type: any) => {
-                          this.setState({ atrType: type });
-                        }}
-                        clearAtrGridDataOnSelectionOFATRType={() => {
-                          this.setState({
-                            atrGridData: [],
-                            noteATRAssigneeDetails: [],
-                          });
-                        }}
-                        checkingCurrentATRCreatorisCurrentApproverOrNot={this._checkingCurrentATRCreatorisCurrentApproverOrNot()}
-                        getATRJoinedComments={(data: any) => {
-                          this.setState({ atrJoinedComments: data });
-                        }}
-                        approverDetails={this.state.ApproverDetails}
-                        currentATRCreatorDetails={
-                          this._currentUserEmail
-                        }
-                        sp={this.props.sp}
-                        context={this.props.context}
-                        commentsData={this.state.generalComments}
-                        artCommnetsGridData={this._getAtrCommentsGrid(
-                          this.state.atrGridData
-                        )}
-                        deletedGridData={(data: any) => {
-                          this.setState({ atrGridData: data });
-                        }}
-                        updategirdData={(data: any): void => {
-                          this.setState({ atrType: data.atrType });
-
-                          const currentAtrCreator =
-                            this.state.atrCreatorsList.filter(
-                              (each: any) =>
-                                each.atrCreatorEmail ===
-                                this.props.context.pageContext.user
-                                  .email
-                            );
-
-                          const { assigneeDetails } = data;
-
-                          const currentApproverDetailsFromApproverDTO =
-                          this._getCurrentApproverDetailsFromApproverDTO()
-
-                          // console.log(
-                          //   currentApproverDetailsFromApproverDTO
-                          // );
-
-                          this.setState((prevState) => ({
-                            atrGridData: data.comments,
-
-                            noteATRAssigneeDetails: [
-                              ...prevState.noteATRAssigneeDetails,
-                              {
-                                atrType:data.atrType,
-                                atrAssigneeId: assigneeDetails.id,
-                                atrCreatorId:
-                                  currentAtrCreator[0].atrCreatorId,
-                                atrCreatorEmail:
-                                  currentAtrCreator[0].atrCreatorEmail,
-
-                                atrAssigneeEmailName:
-                                  assigneeDetails.text,
-                                atrAssigneeEmail: assigneeDetails.email,
-                                approverEmailName:
-                                  currentApproverDetailsFromApproverDTO[0].approverEmailName,
-                                    
-                                atrCreatorEmailName:
-                                  currentAtrCreator[0].atrCreatorEmailName,
-
-                                createdDate: this._formatDateTime(
-                                  new Date()
-                                ),
-                                createdBy:
-                                  this.props.context.pageContext.user
-                                    .email,
-                                modifiedDate: this._formatDateTime(
-                                  new Date()
-                                ),
-                                modifiedBy:
-                                  this.props.context.pageContext.user.email,
-                                statusMessage: null,
-                                atrId: "",
-                                noteApproverId:
-                                  currentApproverDetailsFromApproverDTO[0].userId,
-                                approverType:
-                                  currentApproverDetailsFromApproverDTO[0].approverType,
-                                approverOrder:
-                                  currentApproverDetailsFromApproverDTO[0].approverOrder,
-                                approverStatus: 1,
-                                approverEmail:
-                                  currentApproverDetailsFromApproverDTO[0].approverEmail,
-                                noteApproverComments: "",
-                                strATRStatus: "Pending",
-                                atrStatus: 1,
-                                noteId: this._itemId,
-                              },
-                            ],
-                          }));
-                        }}
+                {expandSections.commentsLog && (
+                  <div className={`${styles.expansionPanelInside}`}>
+                    <div style={{ padding: "15px", paddingTop: "4px" }}>
+                      <CommentsLogTable
+                        data={this.state.commentsLog}
+                        type="commentsLog"
+                        formType="view"
                       />
                     </div>
                   </div>
                 )}
               </div>
-            )}
 
-          <div className={styles.sectionContainer}>
-            <button
-              className={styles.header}
-              onClick={() => this._onToggleSection(`commentsLog`)}
-            >
-              <Text className={styles.sectionText}>Comments Log</Text>
-              <IconButton
-                iconProps={{
-                  iconName: expandSections.commentsLog
-                    ? "ChevronUp"
-                    : "ChevronDown",
-                }}
-                title="Expand/Collapse"
-                ariaLabel="Expand/Collapse"
-                className={styles.chevronIcon}
-              />
-            </button>
-            {expandSections.commentsLog && (
-              <div className={`${styles.expansionPanelInside}`}>
-                <div style={{ padding: "15px", paddingTop: "4px" }}>
-                  <CommentsLogTable
-                    data={this.state.commentsLog}
-                    type="commentsLog"
-                    formType="view"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {(this.state.currentApprover?.[0]?.approverEmail ||
-            this.state.currentApprover?.[0]?.EMail) ===
-          this._currentUserEmail ? (
-            <div className={styles.sectionContainer}>
-              <button
-                className={styles.header}
-                onClick={() =>
-                  this._onToggleSection(`attachSupportingDocuments`)
-                }
-              >
-                <Text className={styles.sectionText}>
-                  Attach Supporting Documents
-                </Text>
-                <IconButton
-                  iconProps={{
-                    iconName: expandSections.attachSupportingDocuments
-                      ? "ChevronUp"
-                      : "ChevronDown",
-                  }}
-                  title="Expand/Collapse"
-                  ariaLabel="Expand/Collapse"
-                  className={styles.chevronIcon}
-                />
-              </button>
-              {expandSections.attachSupportingDocuments && (
-                <div
-                  className={`${styles.expansionPanelInside}`}
-                  style={{ width: "100%", margin: "0px" }}
-                >
-                  <div style={{ padding: "15px", paddingTop: "4px" }}>
-                    <SupportingDocumentsUploadFileComponent
-                      errorData={this._getFileWithError}
-                      typeOfDoc="supportingDocument"
-                      onChange={
-                        this.handleSupportingFileChangeInViewForm
-                      }
-                      accept=".xlsx,.pdf,.doc,.docx"
-                      multiple={true}
-                      maxFileSizeMB={25}
-                      data={this.state.supportingFilesInViewForm}
-                      addtionalData={this.state.supportingDocumentfiles}
-                      cummulativeError={this._getCummulativeError}
-                    />
-                    <p
-                      className={styles.message}
-                      style={{ margin: "0px", textAlign: "right" }}
-                    >
-                      Allowed Formats (pdf,doc,docx,xlsx only) Upto 25MB
-                      max.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            ""
-          )}
-
-          {this._checkingCurrentUserInSecretaryDTO() &&
-          this.state.statusNumber !== "5000" &&
-          this.state.statusNumber !== "8000" &&
-          this.state.statusNumber !== "4000" ? (
-            <div className={styles.sectionContainer}>
-              <button
-                className={styles.header}
-                onClick={() => this._onToggleSection(`gistDocuments`)}
-              >
-                <Text className={styles.sectionText}>
-                  Gist Document
-                </Text>
-                <IconButton
-                  iconProps={{
-                    iconName: expandSections.gistDocuments
-                      ? "ChevronUp"
-                      : "ChevronDown",
-                  }}
-                  title="Expand/Collapse"
-                  ariaLabel="Expand/Collapse"
-                  className={styles.chevronIcon}
-                />
-              </button>
-              {expandSections.gistDocuments && (
-                <div
-                  className={`${styles.expansionPanelInside}`}
-                  style={{ width: "100%", margin: "0px" }}
-                >
-                  <div style={{ padding: "6px", paddingTop: "4px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        padding: "15px",
-                        paddingTop: "4px",
+              {(this.state.currentApprover?.[0]?.approverEmail ||
+                this.state.currentApprover?.[0]?.EMail) ===
+              this._currentUserEmail ? (
+                <div className={styles.sectionContainer}>
+                  <button
+                    className={styles.header}
+                    onClick={() =>
+                      this._onToggleSection(`attachSupportingDocuments`)
+                    }
+                  >
+                    <Text className={styles.sectionText}>
+                      Attach Supporting Documents
+                    </Text>
+                    <IconButton
+                      iconProps={{
+                        iconName: expandSections.attachSupportingDocuments
+                          ? "ChevronUp"
+                          : "ChevronDown",
                       }}
+                      title="Expand/Collapse"
+                      ariaLabel="Expand/Collapse"
+                      className={styles.chevronIcon}
+                    />
+                  </button>
+                  {expandSections.attachSupportingDocuments && (
+                    <div
+                      className={`${styles.expansionPanelInside}`}
+                      style={{ width: "100%", margin: "0px" }}
                     >
-                      {this._checkingCurrentUserIsSecretaryDTO() ? (
-                        <UploadFileComponent
+                      <div style={{ padding: "15px", paddingTop: "4px" }}>
+                        <SupportingDocumentsUploadFileComponent
                           errorData={this._getFileWithError}
-                          typeOfDoc="gistDocument"
-                          onChange={this.handleGistDocuments}
-                          accept=".pdf,.doc,.docx "
-                          multiple={false}
-                          maxFileSizeMB={5}
-                          data={this.state.secretaryGistDocs}
-                          addtionalData={
-                            this.state.secretaryGistDocsList
-                          }
+                          typeOfDoc="supportingDocument"
+                          onChange={this.handleSupportingFileChangeInViewForm}
+                          accept=".xlsx,.pdf,.doc,.docx"
+                          multiple={true}
+                          maxFileSizeMB={25}
+                          data={this.state.supportingFilesInViewForm}
+                          addtionalData={this.state.supportingDocumentfiles}
+                          cummulativeError={this._getCummulativeError}
                         />
-                      ) : (
-                        this._checkingCurrentUserInSecretaryDTOAfterApproved() && (
-                          <div
-                            style={{
-                              padding: "6px",
-                              border: "1px solid rgb(211, 211, 211)",
-                              width: "100%",
-                            }}
-                          >
-                            <p>Gist Document</p>
-                            {this._checkingCurrentUserInSecretaryDTO() &&
-                            this.state.secretaryGistDocsList.length >
-                              0 ? (
-                              this.state.secretaryGistDocsList.map(
-                                (file, index) => {
-                                  if (!file || !file.name) {
-                                    return null;
-                                  }
-
-                                  return (
-                                    <li
-                                      key={v4()}
-                                      style={{
-                                        width: "100%",
-                                        marginTop: "5px",
-                                      }}
-                                      className={`${styles.basicLi} ${styles.attachementli}`}
-                                    >
-                                      <div
-                                        className={`${styles.fileIconAndNameWithErrorContainer}`}
-                                      >
-                                        <img
-                                         alt="typeOfIconInGist1"
-                                          src={this._randomFileIcon(
-                                            file.name
-                                          )}
-                                          width={32}
-                                          height={32}
-                                        />
-
-                                        <a
-                                          data-interception="off"
-                                          className={
-                                            styles.notePdfCustom
-                                          }
-                                          href={
-                                            file.name
-                                              .toLowerCase()
-                                              .endsWith(".pdf")
-                                              ? file.fileUrl
-                                              : file.LinkingUri
-                                          }
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          style={{
-                                            marginTop: "9px",
-                                            paddingLeft: "4px",
-                                            textDecoration: "none",
-                                          }}
-                                        >
-                                          <span
-                                            style={{
-                                              paddingBottom: "0px",
-                                              marginBottom: "0px",
-                                              paddingLeft: "4px",
-                                            }}
-                                          >
-                                            {file.name.length > 30
-                                              ? `${file.name.slice(
-                                                  0,
-                                                  20
-                                                )}...`
-                                              : file.name}
-                                          </span>
-                                        </a>
-                                      </div>
-                                    </li>
-                                  );
-                                }
-                              )
-                            ) : (
-                              <h4>No File Found</h4>
-                            )}
-                          </div>
-                        )
-                      )}
-                      {this._checkingCurrentUserIsSecretaryDTO() && (
                         <p
                           className={styles.message}
                           style={{ margin: "0px", textAlign: "right" }}
                         >
-                          Allowed Formats (pdf,doc,docx,only) Upto 5MB
+                          Allowed Formats (pdf,doc,docx,xlsx only) Upto 25MB
                           max.
                         </p>
-                      )}
-                      {this._checkingCurrentUserAsApproverDTOInSecretaryDTO() && (
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                ""
+              )}
+
+              {this._checkingCurrentUserInSecretaryDTO() &&
+              this.state.statusNumber !== "5000" &&
+              this.state.statusNumber !== "8000" &&
+              this.state.statusNumber !== "4000" ? (
+                <div className={styles.sectionContainer}>
+                  <button
+                    className={styles.header}
+                    onClick={() => this._onToggleSection(`gistDocuments`)}
+                  >
+                    <Text className={styles.sectionText}>Gist Document</Text>
+                    <IconButton
+                      iconProps={{
+                        iconName: expandSections.gistDocuments
+                          ? "ChevronUp"
+                          : "ChevronDown",
+                      }}
+                      title="Expand/Collapse"
+                      ariaLabel="Expand/Collapse"
+                      className={styles.chevronIcon}
+                    />
+                  </button>
+                  {expandSections.gistDocuments && (
+                    <div
+                      className={`${styles.expansionPanelInside}`}
+                      style={{ width: "100%", margin: "0px" }}
+                    >
+                      <div style={{ padding: "6px", paddingTop: "4px" }}>
                         <div
                           style={{
-                            padding: "6px",
-                            border: "1px solid rgb(211, 211, 211)",
-                            width: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                            padding: "15px",
+                            paddingTop: "4px",
                           }}
                         >
-                          <p>Gist Document</p>
-                          {this.state.secretaryGistDocsList.length >
-                          0 ? (
-                            this.state.secretaryGistDocsList.map(
-                              (file, index) => {
-                                if (!file || !file.name) {
-                                  return null;
-                                }
-
-                                return (
-                                  <li
-                                    key={v4()}
-                                    style={{
-                                      width: "100%",
-                                      marginTop: "5px",
-                                    }}
-                                    className={`${styles.basicLi} ${styles.attachementli}`}
-                                  >
-                                    <div
-                                      className={`${styles.fileIconAndNameWithErrorContainer}`}
-                                    >
-                                      <img
-                                      alt="typeOfIconInGist2"
-                                        src={this._randomFileIcon(
-                                          file.name
-                                        )}
-                                        width={32}
-                                        height={32}
-                                      />
-
-                                      <a
-                                        data-interception="off"
-                                        className={styles.notePdfCustom}
-                                        href={
-                                          file.name
-                                            .toLowerCase()
-                                            .endsWith(".pdf")
-                                            ? file.fileUrl
-                                            : file.LinkingUri
-                                        }
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{
-                                          marginTop: "9px",
-                                          paddingLeft: "4px",
-                                          textDecoration: "none",
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            paddingBottom: "0px",
-                                            marginBottom: "0px",
-                                            paddingLeft: "4px",
-                                          }}
-                                        >
-                                          {file.name.length > 30
-                                            ? `${file.name.slice(
-                                                0,
-                                                20
-                                              )}...`
-                                            : file.name}
-                                        </span>
-                                      </a>
-                                    </div>
-                                  </li>
-                                );
-                              }
-                            )
+                          {this._checkingCurrentUserIsSecretaryDTO() ? (
+                            <UploadFileComponent
+                              errorData={this._getFileWithError}
+                              typeOfDoc="gistDocument"
+                              onChange={this.handleGistDocuments}
+                              accept=".pdf,.doc,.docx "
+                              multiple={false}
+                              maxFileSizeMB={5}
+                              data={this.state.secretaryGistDocs}
+                              addtionalData={this.state.secretaryGistDocsList}
+                            />
                           ) : (
-                            <h4>No File Found</h4>
+                            this._checkingCurrentUserInSecretaryDTOAfterApproved() && (
+                              <div
+                                style={{
+                                  padding: "6px",
+                                  border: "1px solid rgb(211, 211, 211)",
+                                  width: "100%",
+                                }}
+                              >
+                                <p>Gist Document</p>
+                                {this._checkingCurrentUserInSecretaryDTO() &&
+                                this.state.secretaryGistDocsList.length > 0 ? (
+                                  this.state.secretaryGistDocsList.map(
+                                    (file, index) => {
+                                      if (!file || !file.name) {
+                                        return null;
+                                      }
+
+                                      return (
+                                        <li
+                                          key={v4()}
+                                          style={{
+                                            width: "100%",
+                                            marginTop: "5px",
+                                          }}
+                                          className={`${styles.basicLi} ${styles.attachementli}`}
+                                        >
+                                          <div
+                                            className={`${styles.fileIconAndNameWithErrorContainer}`}
+                                          >
+                                            <img
+                                              alt="typeOfIconInGist1"
+                                              src={this._randomFileIcon(
+                                                file.name
+                                              )}
+                                              width={32}
+                                              height={32}
+                                            />
+
+                                            <a
+                                              data-interception="off"
+                                              className={styles.notePdfCustom}
+                                              href={
+                                                file.name
+                                                  .toLowerCase()
+                                                  .endsWith(".pdf")
+                                                  ? file.fileUrl
+                                                  : file.LinkingUri
+                                              }
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              style={{
+                                                marginTop: "9px",
+                                                paddingLeft: "4px",
+                                                textDecoration: "none",
+                                              }}
+                                            >
+                                              <span
+                                                style={{
+                                                  paddingBottom: "0px",
+                                                  marginBottom: "0px",
+                                                  paddingLeft: "4px",
+                                                }}
+                                              >
+                                                {file.name.length > 30
+                                                  ? `${file.name.slice(
+                                                      0,
+                                                      20
+                                                    )}...`
+                                                  : file.name}
+                                              </span>
+                                            </a>
+                                          </div>
+                                        </li>
+                                      );
+                                    }
+                                  )
+                                ) : (
+                                  <h4>No File Found</h4>
+                                )}
+                              </div>
+                            )
+                          )}
+                          {this._checkingCurrentUserIsSecretaryDTO() && (
+                            <p
+                              className={styles.message}
+                              style={{ margin: "0px", textAlign: "right" }}
+                            >
+                              Allowed Formats (pdf,doc,docx,only) Upto 5MB max.
+                            </p>
+                          )}
+                          {this._checkingCurrentUserAsApproverDTOInSecretaryDTO() && (
+                            <div
+                              style={{
+                                padding: "6px",
+                                border: "1px solid rgb(211, 211, 211)",
+                                width: "100%",
+                              }}
+                            >
+                              <p>Gist Document</p>
+                              {this.state.secretaryGistDocsList.length > 0 ? (
+                                this.state.secretaryGistDocsList.map(
+                                  (file, index) => {
+                                    if (!file || !file.name) {
+                                      return null;
+                                    }
+
+                                    return (
+                                      <li
+                                        key={v4()}
+                                        style={{
+                                          width: "100%",
+                                          marginTop: "5px",
+                                        }}
+                                        className={`${styles.basicLi} ${styles.attachementli}`}
+                                      >
+                                        <div
+                                          className={`${styles.fileIconAndNameWithErrorContainer}`}
+                                        >
+                                          <img
+                                            alt="typeOfIconInGist2"
+                                            src={this._randomFileIcon(
+                                              file.name
+                                            )}
+                                            width={32}
+                                            height={32}
+                                          />
+
+                                          <a
+                                            data-interception="off"
+                                            className={styles.notePdfCustom}
+                                            href={
+                                              file.name
+                                                .toLowerCase()
+                                                .endsWith(".pdf")
+                                                ? file.fileUrl
+                                                : file.LinkingUri
+                                            }
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                              marginTop: "9px",
+                                              paddingLeft: "4px",
+                                              textDecoration: "none",
+                                            }}
+                                          >
+                                            <span
+                                              style={{
+                                                paddingBottom: "0px",
+                                                marginBottom: "0px",
+                                                paddingLeft: "4px",
+                                              }}
+                                            >
+                                              {file.name.length > 30
+                                                ? `${file.name.slice(0, 20)}...`
+                                                : file.name}
+                                            </span>
+                                          </a>
+                                        </div>
+                                      </li>
+                                    );
+                                  }
+                                )
+                              ) : (
+                                <h4>No File Found</h4>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
+                      </div>
+                      {""}
+                      <div />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                ""
+              )}
+
+              <div className={styles.sectionContainer}>
+                <button
+                  className={styles.header}
+                  onClick={() => this._onToggleSection(`workflowLog`)}
+                >
+                  <Text className={styles.sectionText}>Workflow Log</Text>
+                  <IconButton
+                    iconProps={{
+                      iconName: expandSections.workflowLog
+                        ? "ChevronUp"
+                        : "ChevronDown",
+                    }}
+                    title="Expand/Collapse"
+                    ariaLabel="Expand/Collapse"
+                    className={styles.chevronIcon}
+                  />
+                </button>
+                {expandSections.workflowLog && (
+                  <div className={`${styles.expansionPanelInside}`}>
+                    <div style={{ padding: "15px", paddingTop: "4px" }}>
+                      <WorkFlowLogsTable
+                        data={this.state.auditTrail}
+                        type="Approver"
+                      />
                     </div>
                   </div>
-                  {""}
-                  <div />
-                </div>
-              )}
-            </div>
-          ) : (
-            ""
-          )}
-
-          <div className={styles.sectionContainer}>
-            <button
-              className={styles.header}
-              onClick={() => this._onToggleSection(`workflowLog`)}
-            >
-              <Text className={styles.sectionText}>Workflow Log</Text>
-              <IconButton
-                iconProps={{
-                  iconName: expandSections.workflowLog
-                    ? "ChevronUp"
-                    : "ChevronDown",
-                }}
-                title="Expand/Collapse"
-                ariaLabel="Expand/Collapse"
-                className={styles.chevronIcon}
-              />
-            </button>
-            {expandSections.workflowLog && (
-              <div className={`${styles.expansionPanelInside}`}>
-                <div style={{ padding: "15px", paddingTop: "4px" }}>
-                  <WorkFlowLogsTable
-                    data={this.state.auditTrail}
-                    type="Approver"
-                  />
-                </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className={styles.sectionContainer}>
-            <button
-              className={styles.header}
-              onClick={() => this._onToggleSection(`fileAttachments`)}
-            >
-              <Text className={styles.sectionText}>
-                File Attachments
-              </Text>
-              <IconButton
-                iconProps={{
-                  iconName: expandSections.fileAttachments
-                    ? "ChevronUp"
-                    : "ChevronDown",
-                }}
-                title="Expand/Collapse"
-                ariaLabel="Expand/Collapse"
-                className={styles.chevronIcon}
-              />
-            </button>
-            {expandSections.fileAttachments && (
-              <div
-                className={`${styles.expansionPanelInside} ${styles.responsiveContainerheaderForFileAttachment}`}
-              >
-                <div
-                  style={{
-                    padding: "15px",
-                    paddingTop: "4px",
-                    width: "100%",
-                  }}
+              <div className={styles.sectionContainer}>
+                <button
+                  className={styles.header}
+                  onClick={() => this._onToggleSection(`fileAttachments`)}
                 >
-                  <p className={styles.responsiveHeading}>
-                    Main Note Link :<a
-                      href={this.state.noteTofiles[0]?.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-interception="off"
-                      className={styles.notePdfCustom}
+                  <Text className={styles.sectionText}>File Attachments</Text>
+                  <IconButton
+                    iconProps={{
+                      iconName: expandSections.fileAttachments
+                        ? "ChevronUp"
+                        : "ChevronDown",
+                    }}
+                    title="Expand/Collapse"
+                    ariaLabel="Expand/Collapse"
+                    className={styles.chevronIcon}
+                  />
+                </button>
+                {expandSections.fileAttachments && (
+                  <div
+                    className={`${styles.expansionPanelInside} ${styles.responsiveContainerheaderForFileAttachment}`}
+                  >
+                    <div
+                      style={{
+                        padding: "15px",
+                        paddingTop: "4px",
+                        width: "100%",
+                      }}
                     >
-                     
-                      {this.state.noteTofiles[0]?.name}
-                    </a>
-                  </p>
-                  {this._checkingCurrentUserInSecretaryDTO() &&
-                    this.state.wordDocumentfiles.length > 0 && (
-                      <p
-                        className={styles.responsiveHeading}
-                        style={{ minWidth: "150px" }}
-                      >
-                        Word Documents :
-                        <a
-                          href={
-                            this.state.wordDocumentfiles[0]?.LinkingUri
-                          }
+                      <p className={styles.responsiveHeading}>
+                        Main Note Link :<a
+                          href={this.state.noteTofiles[0]?.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           data-interception="off"
                           className={styles.notePdfCustom}
                         >
-                          {" "}
-                          {this.state.wordDocumentfiles[0]?.name}
+                          {this.state.noteTofiles[0]?.name}
                         </a>
                       </p>
-                    )}
+                      {this._checkingCurrentUserInSecretaryDTO() &&
+                        this.state.wordDocumentfiles.length > 0 && (
+                          <p
+                            className={styles.responsiveHeading}
+                            style={{ minWidth: "150px" }}
+                          >
+                            Word Documents :<a
+                              href={this.state.wordDocumentfiles[0]?.LinkingUri}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              data-interception="off"
+                              className={styles.notePdfCustom}
+                            >
+                              {" "}
+                              {this.state.wordDocumentfiles[0]?.name}
+                            </a>
+                          </p>
+                        )}
 
-                  <div style={{ width: "100%", overflow: "auto" }}>
-                    <p
-                      className={styles.responsiveHeading}
-                      style={{ marginTop: "5px", marginBottom: "5px" }}
-                    >
-                      Support Documents:
-                    </p>
-                    <FileAttatchmentTable
-                      data={this.state.supportingDocumentfiles}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {this.state.statusNumber === "9000" &&
-            this.state.createdByEmail ===
-              this.props.context.pageContext.user.email && (
-              <div className={styles.sectionContainer}>
-                <button
-                  className={styles.header}
-                  onClick={() => this._onToggleSection(`markInfo`)}
-                >
-                  <Text className={styles.sectionText}>
-                    Mark for Information Section
-                  </Text>
-                  <IconButton
-                    iconProps={{
-                      iconName: expandSections.markInfo
-                        ? "ChevronUp"
-                        : "ChevronDown",
-                    }}
-                    title="Expand/Collapse"
-                    ariaLabel="Expand/Collapse"
-                    className={styles.chevronIcon}
-                  />
-                </button>
-                {expandSections.markInfo && (
-                  <div
-                    className={`${styles.expansionPanelInside}`}
-                    style={{ overflowX: "scroll" }}
-                  >
-                    <div style={{ padding: "15px" }}>
-                      <MarkInfo
-                        homePageUrl={this.props.homePageUrl}
-                        sp={this.props.sp}
-                        context={this.props.context}
-                        submitFunctionForMarkInfo={
-                          this._handleMarkInfoSubmit
-                        }
-                        artCommnetsGridData={
-                          this.state.noteMarkedInfoDTOState
-                        }
-                        deletedGridData={(data: any) => {
-                          this.setState({
-                            noteMarkedInfoDTOState: data,
-                          });
-                        }}
-                        updategirdData={(data: any): void => {
-                          const { markInfoassigneeDetails } = data;
-                          this.setState((prevState) => ({
-                            noteMarkedInfoDTOState: [
-                              ...prevState.noteMarkedInfoDTOState,
-                              markInfoassigneeDetails,
-                            ],
-                          }));
-                        }}
-                      />
+                      <div style={{ width: "100%", overflow: "auto" }}>
+                        <p
+                          className={styles.responsiveHeading}
+                          style={{ marginTop: "5px", marginBottom: "5px" }}
+                        >
+                          Support Documents:
+                        </p>
+                        <FileAttatchmentTable
+                          data={this.state.supportingDocumentfiles}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
-            )}
-        </div>
 
-        <div className={styles.pdfContainer}>
-          {this.state.pdfLink && this._renderPDFView()}
-        </div>
-      </div>
+              {this.state.statusNumber === "9000" &&
+                this.state.createdByEmail ===
+                  this.props.context.pageContext.user.email && (
+                  <div className={styles.sectionContainer}>
+                    <button
+                      className={styles.header}
+                      onClick={() => this._onToggleSection(`markInfo`)}
+                    >
+                      <Text className={styles.sectionText}>
+                        Mark for Information Section
+                      </Text>
+                      <IconButton
+                        iconProps={{
+                          iconName: expandSections.markInfo
+                            ? "ChevronUp"
+                            : "ChevronDown",
+                        }}
+                        title="Expand/Collapse"
+                        ariaLabel="Expand/Collapse"
+                        className={styles.chevronIcon}
+                      />
+                    </button>
+                    {expandSections.markInfo && (
+                      <div
+                        className={`${styles.expansionPanelInside}`}
+                        style={{ overflowX: "scroll" }}
+                      >
+                        <div style={{ padding: "15px" }}>
+                          <MarkInfo
+                            homePageUrl={this.props.homePageUrl}
+                            sp={this.props.sp}
+                            context={this.props.context}
+                            submitFunctionForMarkInfo={
+                              this._handleMarkInfoSubmit
+                            }
+                            artCommnetsGridData={
+                              this.state.noteMarkedInfoDTOState
+                            }
+                            deletedGridData={(data: any) => {
+                              this.setState({
+                                noteMarkedInfoDTOState: data,
+                              });
+                            }}
+                            updategirdData={(data: any): void => {
+                              const { markInfoassigneeDetails } = data;
+                              this.setState((prevState) => ({
+                                noteMarkedInfoDTOState: [
+                                  ...prevState.noteMarkedInfoDTOState,
+                                  markInfoassigneeDetails,
+                                ],
+                              }));
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+            </div>
 
-      <div className={styles.btnsContainer}>
-        {this._checkCurrentRequestIsReturnedOrRejected() &&
-          (this._currentUserEmail === this.state.createdByEmail
-            ? this._getCallBackAndChangeApproverBtn()
-            : this._getReferBackAndApproverStageButtons())}
+            <div className={styles.pdfContainer}>
+              {this.state.pdfLink && this._renderPDFView()}
+            </div>
+          </div>
 
-        {this._checkingCurrentUserIsSecretaryDTO() &&
-          this.state.statusNumber !== "5000" &&
-          this.state.statusNumber !== "8000" &&
-          this.state.statusNumber !== "9000" &&
-          this.state.statusNumber !== "4000" && (
-            <PrimaryButton
-              iconProps={{ iconName: "Send" }}
-              style={{
-                alignSelf: "flex-end",
-                marginRight: "8px",
-                marginLeft: "8px",
+          <div className={styles.btnsContainer}>
+            {this._checkCurrentRequestIsReturnedOrRejected() &&
+              (this._currentUserEmail === this.state.createdByEmail
+                ? this._getCallBackAndChangeApproverBtn()
+                : this._getReferBackAndApproverStageButtons())}
+
+            {this._checkingCurrentUserIsSecretaryDTO() &&
+              this.state.statusNumber !== "5000" &&
+              this.state.statusNumber !== "8000" &&
+              this.state.statusNumber !== "9000" &&
+              this.state.statusNumber !== "4000" && (
+                <PrimaryButton
+                  iconProps={{ iconName: "Send" }}
+                  style={{
+                    alignSelf: "flex-end",
+                    marginRight: "8px",
+                    marginLeft: "8px",
+                  }}
+                  onClick={async () => {
+                    const item = await this._getItemDataSpList(this._itemId);
+                    const checkCurrentApproverIsCurrentUser =
+                      item?.CurrentApproverId;
+
+                    const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
+
+                    const secWithApprover = _ApproverDTO.filter(
+                      (each: any) =>
+                        each.userId === checkCurrentApproverIsCurrentUser &&
+                        each.secretaryEmail !== ""
+                    );
+
+                    console.log(secWithApprover);
+
+                    if (
+                      secWithApprover.length === 0 ||
+                      (secWithApprover[0]?.userId !==
+                        checkCurrentApproverIsCurrentUser &&
+                        secWithApprover[0]?.status !== "Pending")
+                    ) {
+                      this.setState({
+                        hideParellelActionAlertDialog: true,
+                        parellelActionAlertMsg:
+                          "This request has been taken action by approver.",
+                      });
+
+                      return;
+                    }
+
+                    if (this.state.errorOfDocuments) {
+                      this.setState({ isAutoSaveFailedDialog: true });
+                    } else {
+                      this.state.secretaryGistDocs.length === 0
+                        ? this.setState({ isGistDocEmpty: true })
+                        : this.setState({ isGistDocCnrf: true });
+                    }
+                  }}
+                >
+                  Submit
+                </PrimaryButton>
+              )}
+
+            <DefaultButton
+              onClick={() => {
+                const pageURL: string = this.props.existPageUrl;
+                window.location.href = `${pageURL}`;
               }}
-              onClick={async () => {
-
-                const item = await this._getItemDataSpList(this._itemId);
-                const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-
-                const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
-
-                const secWithApprover = _ApproverDTO.filter(
-                  (each:any)=>each.userId === checkCurrentApproverIsCurrentUser && each.secretaryEmail!==""
-                )
-
-                console.log(secWithApprover)
-
-
-
-                if (secWithApprover.length === 0 || (secWithApprover[0]?.userId !==checkCurrentApproverIsCurrentUser && secWithApprover[0]?.status !== "Pending")){
-
-                  this.setState({
-                   
-                    hideParellelActionAlertDialog: true,
-                    parellelActionAlertMsg: "This request has been taken action by approver.",
-                  });
-
-                  return
-
-                }
-
-                
-                if (this.state.errorOfDocuments) {
-                  this.setState({ isAutoSaveFailedDialog: true });
-                } else {
-                  this.state.secretaryGistDocs.length === 0
-                    ? this.setState({ isGistDocEmpty: true })
-                    : this.setState({ isGistDocCnrf: true });
-                }
-              }}
+              className={`${styles.responsiveButton} `}
+              style={{ marginLeft: "10px" }}
+              iconProps={{ iconName: "Cancel" }}
             >
-              Submit
-            </PrimaryButton>
-          )}
-
-        <DefaultButton
-          onClick={() => {
-            const pageURL: string = this.props.existPageUrl;
-            window.location.href = `${pageURL}`;
-          }}
-          className={`${styles.responsiveButton} `}
-          style={{ marginLeft: "10px" }}
-          iconProps={{ iconName: "Cancel" }}
-        >
-          Exit
-        </DefaultButton>
+              Exit
+            </DefaultButton>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  }
+    );
+  };
 
   public render(): React.ReactElement<IViewFormProps> {
     console.log(this.state);
-   
+
     // console.log(formTitle)
 
     return (
@@ -4833,9 +4827,7 @@ switch (fileExtession.toLocaleLowerCase()) {
         ) : (
           this._RenderMainViewForm()
         )}
-        {!this.state.dialogFluent && (
-          this._DialogBlockingExample()
-        )}
+        {!this.state.dialogFluent && this._DialogBlockingExample()}
       </div>
     );
   }

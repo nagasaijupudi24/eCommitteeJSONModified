@@ -110,12 +110,22 @@ export class MarkInfo extends React.Component<
 
 
   private handleDeleteRow = (rowKey: number): void => {
-    const updatedTableData = this.state.tableData.filter(
-      (item: { id: number }) => item.id !== rowKey
-    );
-    this.setState({ tableData: updatedTableData,selectedValue:[], submitBtnVisable:true});
-    this.props.deletedGridData(updatedTableData);
+    this.setState((prevState) => {
+      const updatedTableData = prevState.tableData.filter(
+        (item: { id: number }) => item.id !== rowKey
+      );
+  
+      return {
+        tableData: updatedTableData,
+        selectedValue: [],
+        submitBtnVisable: true,
+      };
+    }, () => {
+      
+      this.props.deletedGridData(this.state.tableData);
+    });
   };
+  
 
   public _handleAdd = (): any => {
     const { tableData, selectedValue } = this.state;

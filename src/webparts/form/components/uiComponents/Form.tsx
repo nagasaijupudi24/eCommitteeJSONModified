@@ -1159,17 +1159,23 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       this.setState({ wordDocumentfiles: [] });
     }
 
+
     if (typeOfTable === "Reviewer") {
-      const filterData = this.state.peoplePickerData.filter(
-        (item: any) => item.userId !== dataItem.userId
-      );
-      this.setState({ peoplePickerData: filterData });
+      this.setState((prevState) => {
+        const filterData = prevState.peoplePickerData.filter(
+          (item: any) => item.userId !== dataItem.userId
+        );
+        return { peoplePickerData: filterData };
+      });
     } else {
-      const filterData = this.state.peoplePickerApproverData.filter(
-        (item: any) => item.userId !== dataItem.userId
-      );
-      this.setState({ peoplePickerApproverData: filterData });
+      this.setState((prevState) => {
+        const filterData = prevState.peoplePickerApproverData.filter(
+          (item: any) => item.userId !== dataItem.userId
+        );
+        return { peoplePickerApproverData: filterData };
+      });
     }
+    
   };
 
   private checkReviewer = (): boolean => {
@@ -1214,18 +1220,19 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
   };
 
   private _clearReviewerPeoplePicker = () => {
-    this.setState({
+    this.setState((prevState) => ({
       reviewerInfo: [],
-      reviewerKey: this.state.reviewerKey + 1,
-    });
+      reviewerKey: prevState.reviewerKey + 1,
+    }));
   };
-
+  
   private _clearApproverPeoplePicker = () => {
-    this.setState({
+    this.setState((prevState) => ({
       approverInfo: [],
-      approverKey: this.state.approverKey + 1,
-    }); 
+      approverKey: prevState.approverKey + 1,
+    }));
   };
+  
 
   private handleOnAdd = async (event: any, type: string): Promise<void> => {
   
@@ -1293,16 +1300,18 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     });
   };
 
+  
+
+
   private handleSubjectChange = (event: any) => {
     const { value } = event.target;
-    const isWarning = !value && this.state.isWarningSubject;
-    
-
-    this.setState({
+  
+    this.setState((prevState) => ({
       subjectFeildValue: value,
-      isWarningSubject: isWarning,
-    });
+      isWarningSubject: !value && prevState.isWarningSubject,
+    }));
   };
+  
 
   private handleNatureOfNoteChange = (
     event: React.FormEvent<HTMLDivElement>,
@@ -1369,17 +1378,18 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     });
   };
 
+
+
+
   private handleSearchTextChange = (event: any) => {
     const { value } = event.target;
-
-    
-    const isWarning = !value && this.state.isWarningSearchText;
-
-    this.setState({
-      searchTextFeildValue: value.substring(0, 250), 
-      isWarningSearchText: isWarning,
-    });
+  
+    this.setState((prevState) => ({
+      searchTextFeildValue: value.substring(0, 250),
+      isWarningSearchText: !value && prevState.isWarningSearchText,
+    }));
   };
+  
 
   private handleAmountChange = (event: any) => {
     const { value } = event.target;
@@ -1390,11 +1400,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     if (isValid) {
     
       if (value === "" || parseFloat(value) > 0) {
-        const isWarning = !value && this.state.isWarningAmountField;
-        this.setState({
+        
+        this.setState((prevState)=>({
           amountFeildValue: value,
-          isWarningAmountField: isWarning,
-        });
+          isWarningAmountField: !value && prevState.isWarningAmountField,
+        }));
       }
     }
   };
@@ -1416,24 +1426,23 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
   private handlePurposeChange = (event: any) => {
     const { value } = event.target;
-    const isWarning = !value && this.state.isWarningPurposeField;
+    const isWarning = !value;
 
-    this.setState({
+    this.setState((prevState) => ({
       puroposeFeildValue: value,
-      isWarningPurposeField: isWarning,
-    });
+      isWarningPurposeField: isWarning && prevState.isWarningPurposeField,
+    }));
   };
 
   private handleOthersChange = (event: any) => {
     const { value } = event.target;
-    const isWarning = !value && this.state.isWarningPurposeField;
-
-    this.setState({
+  
+    this.setState((prevState) => ({
       othersFieldValue: value,
-      isWarningPurposeField: isWarning,
-    });
+      isWarningPurposeField: !value && prevState.isWarningPurposeField,
+    }));
   };
-
+  
 
 
   private getFileArrayBuffer =async  (file: any): Promise<ArrayBuffer> => {
@@ -3874,7 +3883,13 @@ try {
     const newObj = this.state.errorFilesList;
     newObj[data[1]] = data[0];
 
-    this.setState({ errorFilesList: newObj });
+    this.setState((prevState) => {
+      const newObj = { ...prevState.errorFilesList }; 
+      newObj[data[1]] = data[0]; 
+    
+      return { errorFilesList: newObj }; 
+    });
+    
     
 
     if (
@@ -4446,10 +4461,10 @@ try {
                           isOpen={this.state.hideParellelActionAlertDialog}
                           onDismiss={() => {
                             console.log("close triggered");
-                            this.setState({
-                              hideParellelActionAlertDialog:
-                                !this.state.hideParellelActionAlertDialog,
-                            });
+                            this.setState((prevState) => ({
+                              hideParellelActionAlertDialog: !prevState.hideParellelActionAlertDialog,
+                            }));
+                            
                           }}
                           isBlocking={true}
                           containerClassName={Cutsomstyles.modal}

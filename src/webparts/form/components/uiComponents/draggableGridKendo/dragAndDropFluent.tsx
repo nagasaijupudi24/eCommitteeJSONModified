@@ -233,12 +233,17 @@ private _insertBeforeItem(item: IExampleItem): void {
     : [this._draggedItem!];
 
   const insertIndex = this.state.items.indexOf(item);
-  const items = this.state.items.filter((itm: any) => draggedItems.indexOf(itm) === -1);
+  this.setState((prevState) => {
+    const items = prevState.items.filter((itm: any) => draggedItems.indexOf(itm) === -1);
 
-  items.splice(insertIndex, 0, ...draggedItems);
+   
+    items.splice(insertIndex, 0, ...draggedItems);
 
-  this.setState({ items:items });
- 
-  this.props.reOrderData(items,this.props.type);
+   
+    return { items: items };
+  }, () => {
+    
+    this.props.reOrderData(this.state.items, this.props.type);
+  });
 }
 }
