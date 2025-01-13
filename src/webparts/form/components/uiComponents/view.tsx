@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-constant-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -130,7 +131,7 @@ const Cutsomstyles = mergeStyleSets({
 
 const GeneralSectionInViewForm = (props:any):any =>{
   return  <div className={styles.sectionContainer}>
-  <div
+  <button
     className={styles.header}
     onClick={() => props._onToggleSection(`generalSection`)}
   >
@@ -147,7 +148,7 @@ const GeneralSectionInViewForm = (props:any):any =>{
       ariaLabel="Expand/Collapse"
       className={styles.chevronIcon}
     />
-  </div>
+  </button>
   {props.expandSections.generalSection && (
     <div className={`${styles.expansionPanelInside}`}>
       <div style={{ padding: "15px", paddingTop: "4px" }}>
@@ -159,6 +160,84 @@ const GeneralSectionInViewForm = (props:any):any =>{
   )}
 </div>
 }
+
+const DraftResolutionInViewForm = (props:any):any =>{
+
+
+  return props.formType === "BoardNoteView" && (
+    <div className={styles.sectionContainer}>
+      <button
+        className={styles.header}
+        onClick={() => props._onToggleSection(`draftResolution`)}
+      >
+        <Text className={styles.sectionText}>
+          Draft Resolution Section
+        </Text>
+        <IconButton
+          iconProps={{
+            iconName: props.expandSections.draftResolution
+              ? "ChevronUp"
+              : "ChevronDown",
+          }}
+          title="Expand/Collapse"
+          ariaLabel="Expand/Collapse"
+          className={styles.chevronIcon}
+        />
+      </button>
+      {props.expandSections.draftResolution && (
+        <div className={`${styles.expansionPanelInside}`}>
+          <div style={{ padding: "15px", paddingTop: "4px" }}>
+            <RichText
+              value={props.state.draftResolutionFieldValue}
+              isEditMode={false}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+}
+
+const ReviewerOrApproverSectionInViewForm = (props:any):any=>{
+
+  return <div className={styles.sectionContainer}>
+  <button
+    className={styles.header}
+    onClick={() => props._onToggleSection(props.toggleParameter)}
+  >
+    <Text className={styles.sectionText}>
+      {props.sectionName}
+    </Text>
+    <IconButton
+      iconProps={{
+        iconName: props.expandSections[props.toggleParameter]
+          ? "ChevronUp"
+          : "ChevronDown",
+      }}
+      title="Expand/Collapse"
+      ariaLabel="Expand/Collapse"
+      className={styles.chevronIcon}
+    />
+  </button>
+  {props.expandSections[props.toggleParameter] && (
+    <div className={`${styles.expansionPanelInside}`}>
+      <div style={{ padding: "15px", paddingTop: "4px" }}>
+        <ApproverAndReviewerTableInViewForm
+          data={props.reviewerORApproverData}
+          reOrderData={props.reOrderData}
+          removeDataFromGrid={props.removeDataFromGrid}
+          type={props.type}
+        />
+      </div>
+    </div>
+  )}
+</div>
+
+}
+
+type FieldValueType = string | number | readonly string[];
+
 
 export interface IViewFormState {
   title: string;
@@ -190,9 +269,9 @@ export interface IViewFormState {
   noteTypeFeildValue: string;
   natureOfApprovalOrSanctionFeildValue: string;
   typeOfFinancialNoteFeildValue: string;
-  searchTextFeildValue: string | number | readonly string[];
-  amountFeildValue: string | number | readonly string[];
-  puroposeFeildValue: string | number | readonly string[];
+  searchTextFeildValue: FieldValueType;
+  amountFeildValue: FieldValueType;
+  puroposeFeildValue: FieldValueType;
   othersFieldValue: any;
   // eslint-disable-next-line @rushstack/no-new-null
   notePdfFile: File | null;
@@ -518,9 +597,24 @@ export default class ViewForm extends React.Component<
     });
   }
 
+  private getMessageBasedOnStatusNumber(statusNumber: string): string {
+    const statusMessages: { [key: string]: string } = {
+      "2000": "This request has already been submitted",
+      "3000": "This request has already been submitted",
+      "300": "This request has already been canceled.",
+      "4000": "This request has already been referred",
+      "9000": "This request has already been approved",
+      "8000": "This request has already been rejected",
+      "4900": "This request has already been refereed back",
+      "5000": "This request has been already returned.",
+    };
+  
+    return statusMessages[statusNumber] || "Unknown status.";
+  }
+
   private _getUserProperties = async (loginName: any): Promise<any> => {
-    let designation = "NA";
-    let email = "NA";
+    let designation ;
+    let email ;
 
     const profile = await this.props.sp.profiles.getPropertiesFor(loginName);
 
@@ -883,7 +977,7 @@ export default class ViewForm extends React.Component<
         column1: "Purpose",
         column2: `${purposeData[0]}`,
       },
-      purposeData[1] !== "" && {
+      purposeData[1] !== undefined && {
         column1: "Others",
         column2: `${purposeData[1]}`,
       },
@@ -914,9 +1008,9 @@ export default class ViewForm extends React.Component<
         : "",
     amountFeildValue: item.Amount !== null ? item.Amount : null,
     puroposeFeildValue:
-      item.Purpose !== null ? JSON.parse(item.Purpose)[0] : "",
+      item.Purpose !== null ?  item.Purpose.split(",")[0] : "",
     othersFieldValue:
-      item.Purpose !== null ? JSON.parse(item.Purpose)[1] : "",
+      item.Purpose !== null ? item.Purpose.split(",")[1] : "",
 
     peoplePickerData: this._getJsonifyReviewer(
       item.NoteApproversDTO,
@@ -940,10 +1034,12 @@ export default class ViewForm extends React.Component<
   private _getItemData = async (id: any, folderPath?: any) => {
     const item: any = await this._getItemDataSpList(id);
 
-    // console.log(item, `Item .........${id}`);
+    console.log(item, `Item .........${id}`);
 
     const purposeData =
-      item.Purpose !== null ? JSON.parse(item.Purpose) : ["", ""];
+      item.Purpose !== null ? item.Purpose.split(",") : "";
+
+    console.log(purposeData,"Purpose data")
 
       const tableData = this._generateTableData(item, purposeData);
 
@@ -1206,22 +1302,54 @@ export default class ViewForm extends React.Component<
           }
             
           );
+          if (filteredFolderItemsPdf.length > 0){
+
+            const tempFilesPdf: IFileDetails[] = [];
+            filteredFolderItemsPdf.forEach((values) => {
+              const fileObj = this._getFileObj(values);
+              tempFilesPdf.push(fileObj);
+          
+              // Update state for the first file's link
+              if (!this.state.pdfLink) {
+                this.setState({ pdfLink: fileObj.fileUrl });
+              }
+            });
+          
+            // Update state with filtered files
+            this.setState({ noteTofiles: tempFilesPdf });
+
+          }else{
+
+            const filteredFolderItemsPdf = folderItemsPdf.filter((file) =>{
+              // console.log(file)
+              // console.log(file.Name)
+              return !file.Name.toLowerCase().includes(this._folderNameAfterApproved.toLowerCase())
+  
+  
+            }
+              
+            );
+          
+            // console.log("Filtered files:", filteredFolderItemsPdf);
+            const tempFilesPdf: IFileDetails[] = [];
+            filteredFolderItemsPdf.forEach((values) => {
+              const fileObj = this._getFileObj(values);
+              tempFilesPdf.push(fileObj);
+          
+              // Update state for the first file's link
+              if (!this.state.pdfLink) {
+                this.setState({ pdfLink: fileObj.fileUrl });
+              }
+            });
+          
+            // Update state with all files
+            this.setState({ noteTofiles: tempFilesPdf });
+
+          }
         
           // console.log("Filtered files:", filteredFolderItemsPdf);
         
-          const tempFilesPdf: IFileDetails[] = [];
-          filteredFolderItemsPdf.forEach((values) => {
-            const fileObj = this._getFileObj(values);
-            tempFilesPdf.push(fileObj);
-        
-            // Update state for the first file's link
-            if (!this.state.pdfLink) {
-              this.setState({ pdfLink: fileObj.fileUrl });
-            }
-          });
-        
-          // Update state with filtered files
-          this.setState({ noteTofiles: tempFilesPdf });
+         
         } else {
           // Original processing for all files
 
@@ -1732,16 +1860,36 @@ export default class ViewForm extends React.Component<
         isLoading:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
-          "This request approver/referee has been changed by requester or the request already action taken.",
+          "This request has been taken action by approver.",
       });
 
-      return;
+      return null;
     }
 
   }
 
 
   private _updateItemInHandleApproverBtn =async (modifyApproveDetails:any,currentApproverDetail:any,previousApprover:any,updateNoteATRAssigneeDTO:any,updateAuditTrial:any,_CommentsLog:any):Promise<any>=>{
+
+    let noteATRAssigneeDTO;
+
+    // Determine the value of NoteATRAssigneeDTO
+    if (this._checkCurrentUserIsAATRAssignee()) {
+      if (this.state.atrGridData.length > 0) {
+        noteATRAssigneeDTO = JSON.stringify([
+          ...this.state.noteATRAssigneeDetailsAllUser,
+          ...updateNoteATRAssigneeDTO,
+        ]);
+      } else {
+        const defaultDetails = await this._updateDefaultNoteATRAssigneeDetails();
+        noteATRAssigneeDTO = JSON.stringify(defaultDetails);
+      }
+    } else {
+      noteATRAssigneeDTO = JSON.stringify([
+        ...this.state.noteATRAssigneeDetailsAllUser,
+        ...updateNoteATRAssigneeDTO,
+      ]);
+    }
 
     return {
       NoteApproversDTO: JSON.stringify(modifyApproveDetails),
@@ -1755,19 +1903,7 @@ export default class ViewForm extends React.Component<
           : currentApproverDetail.userId,
       PreviousApproverId: previousApprover[0].userId,
 
-      NoteATRAssigneeDTO: this._checkCurrentUserIsAATRAssignee()
-        ? this.state.atrGridData.length > 0
-          ? JSON.stringify([
-              ...this.state.noteATRAssigneeDetailsAllUser,
-              ...updateNoteATRAssigneeDTO,
-            ])
-          : JSON.stringify(
-              await this._updateDefaultNoteATRAssigneeDetails()
-            )
-        : JSON.stringify([
-            ...this.state.noteATRAssigneeDetailsAllUser,
-            ...updateNoteATRAssigneeDTO,
-          ]),
+      NoteATRAssigneeDTO: noteATRAssigneeDTO,
       PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
       startProcessing: true,
     };
@@ -1982,6 +2118,17 @@ export default class ViewForm extends React.Component<
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map((each:any)=>each.userId);
 
     // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+
+    if (StatusNumber === "8000" ) {
+      this.setState({
+        isLoading:false,
+        hideParellelActionAlertDialog: true,
+        parellelActionAlertMsg:
+          "This request has been taken action by approver.",
+      });
+
+      return;
+    }
    
 
     if (StatusNumber !== "200" && currentUserId === checkCurrentApproverIsCurrentUser) {
@@ -1991,7 +2138,7 @@ export default class ViewForm extends React.Component<
           isLoading:false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
-            "This request approver/referee has been changed by requester or the request already action taken.",
+            "This request has been taken action by approver.",
         });
   
         return;
@@ -2068,7 +2215,7 @@ export default class ViewForm extends React.Component<
         passCodeValidationFrom: "4000",
         dialogFluent: true,
       });
-      return;
+      return null;
     }
   };
 
@@ -2079,18 +2226,13 @@ export default class ViewForm extends React.Component<
         passCodeValidationFrom: "7500",
         dialogFluent: true,
       });
-      return;
+      return null;
     }
   };
 
   private _referCommentsAndDataMandatory = (): any => {
-    if (
-      this.state.peoplePickerSelectedDataWhileReferOrChangeApprover.length === 0
-    ) {
-      this.setState({ dialogFluent: true, isReferDataAndCommentsNeeded: true });
-    } else {
-      this.setState({ dialogFluent: true, isReferDataAndCommentsNeeded: true });
-    }
+    this.setState({ dialogFluent: true, isReferDataAndCommentsNeeded: true });
+   
   };
 
   private handleRefer = async (
@@ -2098,6 +2240,8 @@ export default class ViewForm extends React.Component<
     statusNumber: string,
     commentsObj: any
   ) => {
+    console.log(commentsObj)
+    console.log(this.state)
     this._closeDialog();
     this.setState({ isLoading: true });
     const item = await this._getItemDataSpList(this._itemId);
@@ -2126,7 +2270,7 @@ export default class ViewForm extends React.Component<
           isLoading:false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
-            "This request approver/referee has been changed by requester or the request already action taken.",
+            "This request has been taken action by approver.",
         });
   
         return;
@@ -2160,7 +2304,7 @@ export default class ViewForm extends React.Component<
         AuditTrail: updateAuditTrial,
         NoteApproverCommentsDTO: JSON.stringify([
           ..._CommentsLog,
-          commentsObj,
+         ...this.state.generalComments
         ]),
 
         CurrentApproverId: this.state.refferredToDetails[0].id,
@@ -2242,6 +2386,7 @@ export default class ViewForm extends React.Component<
     commentsObj: any
   ) => {
     this._closeDialog();
+    this.setState({ isLoading: true });
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
 
@@ -2358,6 +2503,7 @@ export default class ViewForm extends React.Component<
       this.setState({ isVisibleAlter: true, isLoading: false });
     } else {
       this.setState({
+        isLoading:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg: "This request has been call back",
       });
@@ -2402,7 +2548,7 @@ export default class ViewForm extends React.Component<
           isLoading:false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
-            "This request approver/referee has been changed by requester or the request already action taken.",
+            "This request has been taken action by approver.",
         });
   
         return;
@@ -2476,6 +2622,7 @@ export default class ViewForm extends React.Component<
     statusNumber: string
   ) => {
     this._closeDialog();
+    this.setState({ isLoading: true });
 
     const item = await this._getItemDataSpList(this._itemId);
     const StatusNumber = item?.StatusNumber;
@@ -2505,7 +2652,7 @@ export default class ViewForm extends React.Component<
           isLoading:false,
           hideParellelActionAlertDialog: true,
           parellelActionAlertMsg:
-            "This request has already action taken please reload the page to take further action.",
+            "This request has been taken action by approver.",
         });
   
         return;
@@ -2603,19 +2750,9 @@ export default class ViewForm extends React.Component<
     // console.log(item);
     const _ReferDTO = item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : []
 
-    const getStatusText = (code: any) => {
-      switch (code) {
-          case '200':
-              return 'Call backed';
-          case '5000':
-              return 'Returned';
-          case '8000':
-              return 'Rejected';
-          case '9000':
-              return 'Approved';
-          
-      }
-  };
+    const StatusNumber = item?.StatusNumber
+
+    
   
   
   
@@ -2807,7 +2944,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
     isLoading:false,
     hideParellelActionAlertDialog: true,
     parellelActionAlertMsg:
-      `This request has been ${getStatusText(item?.StatusNumber)}`,
+    this.getMessageBasedOnStatusNumber(StatusNumber),
   });
 
 }
@@ -3021,6 +3158,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
     type: string = "",
     id: string = ""
   ) => {
+    console.log(commentsData)
     if (this.state.statusNumber === "4000") {
       this.setState((prevState) => ({
         noteReferrerCommentsDTO: [
@@ -3143,18 +3281,11 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
   private handleGistDocuments = (files: File[], typeOfDoc: string) => {
     if (files) {
       const filesArray = Array.from(files);
-
-      if (files.length > 0) {
-        this.setState({
-          secretaryGistDocs: filesArray,
-          secretaryGistDocsList: filesArray,
-        });
-      } else {
-        this.setState({
-          secretaryGistDocs: filesArray,
-          secretaryGistDocsList: filesArray,
-        });
-      }
+  
+      this.setState({
+        secretaryGistDocs: filesArray,
+        secretaryGistDocsList: filesArray,
+      });
     }
   };
 
@@ -3326,31 +3457,26 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
     const docExtension = docType.split(".");
     const fileExtession = docExtension[docExtension.length - 1];
 
-    let doctype = "txt";
+    let doctype;
 
-    switch (fileExtession.toLocaleLowerCase()) {
- 
-      case "docx":
-        doctype = "docx";
-        break;
-      case "doc":
-        doctype = "docx";
-        break;
-     
-       
-      case "pdf":
-        doctype = "pdf";
-        break;
-     
-       
-      case "xlsx":
-        doctype = "xlsx";
-        break;
-    
-      default:
-        doctype = "txt";
-      
-    }
+switch (fileExtession.toLocaleLowerCase()) {
+  case "docx":
+  case "doc":
+    doctype = "docx";
+    break;
+
+  case "pdf":
+    doctype = "pdf";
+    break;
+
+  case "xlsx":
+    doctype = "xlsx";
+    break;
+
+  default:
+    doctype = "txt";
+}
+
 
     const url = `https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/assets/item-types/16/${doctype}.svg`;
     return url;
@@ -3519,7 +3645,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                 isPasscodeModalOpen: true,
                 passCodeValidationFrom: "200",
               });
-              return;
+              return null;
             }
           }}
         >
@@ -3617,6 +3743,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
       // console.log(data, "Comments Data");
       this.setState((prevState) => ({
         commentsData: [...prevState.commentsData, data],
+        generalComments:[...prevState.commentsData, data],
         commentsLog: [...prevState.commentsLog, data],
         referComment: data,
       }));
@@ -3697,6 +3824,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
           iconProps={{ iconName: "Cancel" }}
           onClick={() => {
             // console.log("close triggered");
+            window.location.reload();
             this.setState({ hideParellelActionAlertDialog: false });
           }}
         />
@@ -3914,140 +4042,18 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
       <div className={styles.expansionAndPdfContainer}>
         <div className={styles.expandingContainer}>
           <GeneralSectionInViewForm _onToggleSection={this._onToggleSection} expandSections={expandSections} state={this.state} _renderTable={this._renderTable}/>
-          <div className={styles.sectionContainer}>
-            <div
-              className={styles.header}
-              onClick={() => this._onToggleSection(`generalSection`)}
-            >
-              <Text className={styles.sectionText}>
-                General Section
-              </Text>
-              <IconButton
-                iconProps={{
-                  iconName: expandSections.generalSection
-                    ? "ChevronUp"
-                    : "ChevronDown",
-                }}
-                title="Expand/Collapse"
-                ariaLabel="Expand/Collapse"
-                className={styles.chevronIcon}
-              />
-            </div>
-            {expandSections.generalSection && (
-              <div className={`${styles.expansionPanelInside}`}>
-                <div style={{ padding: "15px", paddingTop: "4px" }}>
-                  {this._renderTable(
-                    this.state.eCommitteData[0].tableData
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {this.props.formType === "BoardNoteView" && (
-            <div className={styles.sectionContainer}>
-              <div
-                className={styles.header}
-                onClick={() => this._onToggleSection(`draftResolution`)}
-              >
-                <Text className={styles.sectionText}>
-                  Draft Resolution Section
-                </Text>
-                <IconButton
-                  iconProps={{
-                    iconName: expandSections.draftResolution
-                      ? "ChevronUp"
-                      : "ChevronDown",
-                  }}
-                  title="Expand/Collapse"
-                  ariaLabel="Expand/Collapse"
-                  className={styles.chevronIcon}
-                />
-              </div>
-              {expandSections.draftResolution && (
-                <div className={`${styles.expansionPanelInside}`}>
-                  <div style={{ padding: "15px", paddingTop: "4px" }}>
-                    <RichText
-                      value={this.state.draftResolutionFieldValue}
-                      isEditMode={false}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className={styles.sectionContainer}>
-            <div
-              className={styles.header}
-              onClick={() => this._onToggleSection(`reviewersSection`)}
-            >
-              <Text className={styles.sectionText}>
-                Reviewers Section
-              </Text>
-              <IconButton
-                iconProps={{
-                  iconName: expandSections.reviewersSection
-                    ? "ChevronUp"
-                    : "ChevronDown",
-                }}
-                title="Expand/Collapse"
-                ariaLabel="Expand/Collapse"
-                className={styles.chevronIcon}
-              />
-            </div>
-            {expandSections.reviewersSection && (
-              <div className={`${styles.expansionPanelInside}`}>
-                <div style={{ padding: "15px", paddingTop: "4px" }}>
-                  <ApproverAndReviewerTableInViewForm
-                    data={this.state.peoplePickerData}
-                    reOrderData={this.reOrderData}
-                    removeDataFromGrid={this.removeDataFromGrid}
-                    type="Reviewer"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className={styles.sectionContainer}>
-            <div
-              className={styles.header}
-              onClick={() => this._onToggleSection(`approversSection`)}
-            >
-              <Text className={styles.sectionText}>
-                Approvers Section
-              </Text>
-              <IconButton
-                iconProps={{
-                  iconName: expandSections.approversSection
-                    ? "ChevronUp"
-                    : "ChevronDown",
-                }}
-                title="Expand/Collapse"
-                ariaLabel="Expand/Collapse"
-                className={styles.chevronIcon}
-              />
-            </div>
-            {expandSections.approversSection && (
-              <div className={`${styles.expansionPanelInside}`}>
-                <div style={{ padding: "15px", paddingTop: "4px" }}>
-                  <ApproverAndReviewerTableInViewForm
-                    data={this.state.peoplePickerApproverData}
-                    reOrderData={this.reOrderData}
-                    removeDataFromGrid={this.removeDataFromGrid}
-                    type="Approver"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+         
+          <DraftResolutionInViewForm _onToggleSection={this._onToggleSection} expandSections={expandSections} state={this.state} formType={this.props.formType}/>
+        
+          <ReviewerOrApproverSectionInViewForm sectionName="Reviewers Section"  _onToggleSection={this._onToggleSection} toggleParameter="reviewersSection" expandSections={expandSections} state={this.state} reviewerORApproverData={this.state.peoplePickerData} reOrderData={this.reOrderData} removeDataFromGrid={this.removeDataFromGrid} type="Reviewer"/>
+          <ReviewerOrApproverSectionInViewForm sectionName="Approvers Section"  _onToggleSection={this._onToggleSection} toggleParameter="approversSection" expandSections={expandSections} state={this.state} reviewerORApproverData={this.state.peoplePickerApproverData} reOrderData={this.reOrderData} removeDataFromGrid={this.removeDataFromGrid} type="Approver"/>
+          
 
           {(this._checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest() &&
             this._currentUserEmail !== this.state.createdByEmail) ||
           this._checkRefereeAvailable() ? (
             <div className={styles.sectionContainer}>
-              <div
+              <button
                 className={styles.header}
                 onClick={() => this._onToggleSection(`generalComments`)}
               >
@@ -4064,7 +4070,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                   ariaLabel="Expand/Collapse"
                   className={styles.chevronIcon}
                 />
-              </div>
+              </button>
 
               {expandSections.generalComments && (
                 <div className={`${styles.expansionPanelInside}`}>
@@ -4087,7 +4093,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
           {this._checkCurrentUserIsAATRAssignee() &&
             this._checkCurrentUserIsApproverType() && (
               <div className={styles.sectionContainer}>
-                <div
+                <button
                   className={styles.header}
                   onClick={() => this._onToggleSection(`atrAssignees`)}
                 >
@@ -4104,7 +4110,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                     ariaLabel="Expand/Collapse"
                     className={styles.chevronIcon}
                   />
-                </div>
+                </button>
                 {expandSections.atrAssignees && (
                   <div
                     className={`${styles.expansionPanelInside}`}
@@ -4219,7 +4225,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
             )}
 
           <div className={styles.sectionContainer}>
-            <div
+            <button
               className={styles.header}
               onClick={() => this._onToggleSection(`commentsLog`)}
             >
@@ -4234,7 +4240,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                 ariaLabel="Expand/Collapse"
                 className={styles.chevronIcon}
               />
-            </div>
+            </button>
             {expandSections.commentsLog && (
               <div className={`${styles.expansionPanelInside}`}>
                 <div style={{ padding: "15px", paddingTop: "4px" }}>
@@ -4252,7 +4258,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
             this.state.currentApprover?.[0]?.EMail) ===
           this._currentUserEmail ? (
             <div className={styles.sectionContainer}>
-              <div
+              <button
                 className={styles.header}
                 onClick={() =>
                   this._onToggleSection(`attachSupportingDocuments`)
@@ -4271,7 +4277,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                   ariaLabel="Expand/Collapse"
                   className={styles.chevronIcon}
                 />
-              </div>
+              </button>
               {expandSections.attachSupportingDocuments && (
                 <div
                   className={`${styles.expansionPanelInside}`}
@@ -4311,7 +4317,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
           this.state.statusNumber !== "8000" &&
           this.state.statusNumber !== "4000" ? (
             <div className={styles.sectionContainer}>
-              <div
+              <button
                 className={styles.header}
                 onClick={() => this._onToggleSection(`gistDocuments`)}
               >
@@ -4328,7 +4334,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                   ariaLabel="Expand/Collapse"
                   className={styles.chevronIcon}
                 />
-              </div>
+              </button>
               {expandSections.gistDocuments && (
                 <div
                   className={`${styles.expansionPanelInside}`}
@@ -4389,6 +4395,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                                         className={`${styles.fileIconAndNameWithErrorContainer}`}
                                       >
                                         <img
+                                         alt="typeOfIconInGist1"
                                           src={this._randomFileIcon(
                                             file.name
                                           )}
@@ -4481,6 +4488,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                                       className={`${styles.fileIconAndNameWithErrorContainer}`}
                                     >
                                       <img
+                                      alt="typeOfIconInGist2"
                                         src={this._randomFileIcon(
                                           file.name
                                         )}
@@ -4543,7 +4551,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
           )}
 
           <div className={styles.sectionContainer}>
-            <div
+            <button
               className={styles.header}
               onClick={() => this._onToggleSection(`workflowLog`)}
             >
@@ -4558,7 +4566,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                 ariaLabel="Expand/Collapse"
                 className={styles.chevronIcon}
               />
-            </div>
+            </button>
             {expandSections.workflowLog && (
               <div className={`${styles.expansionPanelInside}`}>
                 <div style={{ padding: "15px", paddingTop: "4px" }}>
@@ -4572,7 +4580,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
           </div>
 
           <div className={styles.sectionContainer}>
-            <div
+            <button
               className={styles.header}
               onClick={() => this._onToggleSection(`fileAttachments`)}
             >
@@ -4589,7 +4597,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                 ariaLabel="Expand/Collapse"
                 className={styles.chevronIcon}
               />
-            </div>
+            </button>
             {expandSections.fileAttachments && (
               <div
                 className={`${styles.expansionPanelInside} ${styles.responsiveContainerheaderForFileAttachment}`}
@@ -4602,15 +4610,14 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                   }}
                 >
                   <p className={styles.responsiveHeading}>
-                    Main Note Link:
-                    <a
+                    Main Note Link :<a
                       href={this.state.noteTofiles[0]?.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       data-interception="off"
                       className={styles.notePdfCustom}
                     >
-                      {" "}
+                     
                       {this.state.noteTofiles[0]?.name}
                     </a>
                   </p>
@@ -4620,7 +4627,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                         className={styles.responsiveHeading}
                         style={{ minWidth: "150px" }}
                       >
-                        Word Documents:
+                        Word Documents :
                         <a
                           href={
                             this.state.wordDocumentfiles[0]?.LinkingUri
@@ -4656,7 +4663,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
             this.state.createdByEmail ===
               this.props.context.pageContext.user.email && (
               <div className={styles.sectionContainer}>
-                <div
+                <button
                   className={styles.header}
                   onClick={() => this._onToggleSection(`markInfo`)}
                 >
@@ -4673,7 +4680,7 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                     ariaLabel="Expand/Collapse"
                     className={styles.chevronIcon}
                   />
-                </div>
+                </button>
                 {expandSections.markInfo && (
                   <div
                     className={`${styles.expansionPanelInside}`}
@@ -4736,6 +4743,33 @@ if (item?.StatusNumber !=='9000' && item?.StatusNumber!=='5000' && item?.StatusN
                 marginLeft: "8px",
               }}
               onClick={async () => {
+
+                const item = await this._getItemDataSpList(this._itemId);
+                const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
+
+                const _ApproverDTO = JSON.parse(item?.NoteApproversDTO)
+
+                const secWithApprover = _ApproverDTO.filter(
+                  (each:any)=>each.userId === checkCurrentApproverIsCurrentUser && each.secretaryEmail!==""
+                )
+
+                console.log(secWithApprover)
+
+
+
+                if (secWithApprover.length === 0 || (secWithApprover[0]?.userId !==checkCurrentApproverIsCurrentUser && secWithApprover[0]?.status !== "Pending")){
+
+                  this.setState({
+                   
+                    hideParellelActionAlertDialog: true,
+                    parellelActionAlertMsg: "This request has been taken action by approver.",
+                  });
+
+                  return
+
+                }
+
+                
                 if (this.state.errorOfDocuments) {
                   this.setState({ isAutoSaveFailedDialog: true });
                 } else {

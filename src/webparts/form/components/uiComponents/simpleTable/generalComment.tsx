@@ -21,20 +21,16 @@ import { v4 } from "uuid";
 import CommentsMandatoryDialog from "../dialogFluentUi/generalCommentsMandiatoryDialog";
 import SpanComponent from "../spanComponent/spanComponent";
 
+
+
+
 interface IGridRow {
   id: string;
-  pageNum: string;
-  page: string;
-  comment: string;
-  commentedBy: string;
-  commentedByEmail: any;
-  commentsFrom: any;
-
-  pageNumber: any;
+  pageNumber:any;
   docReference: any;
   comments: any;
-  commentBy: any;
-  actionDate: any;
+  approverEmailName: string;
+
 }
 
 interface IGridProps {
@@ -208,20 +204,19 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
   private handleAddNewComment = () => {
     const { pageNumValue, pageValue, commentValue } = this.state;
 
+    
+
+    
+
     const commentsObj: IGridRow = {
       id: v4(),
-      pageNum: pageNumValue?pageNumValue:'N/A',
-      page: pageValue?pageValue:'N/A',
-      comment: commentValue,
-      commentsFrom: "generalComments",
-      commentedBy: this.props.currentUserDetails.displayName,
-      commentedByEmail: this.props.currentUserDetails.email,
-
-      pageNumber: pageNumValue,
-      docReference: pageValue,
+      pageNumber: pageNumValue || 'N/A',
+      docReference: pageValue || 'N/A',
       comments: commentValue,
-      commentBy: this.props.currentUserDetails.displayName,
-      actionDate: new Date()
+      approverEmailName: this.props.currentUserDetails.displayName,
+      
+     
+     
       
 
     };
@@ -242,10 +237,12 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
   private handleEdit = (id: string) => {
     const row = this.state.rowsData.find((each) => each.id === id);
     if (row) {
+
+     
       this.setState({
-        pageNumValue: row.pageNum,
-        pageValue: row.page,
-        commentValue: row.comment,
+        pageNumValue: row.pageNumber,
+        pageValue: row.docReference,
+        commentValue: row.comments,
         editRowId: id,
         isDialogOpen: true,
         isEditMode: true, // Setting to Edit Mode
@@ -322,27 +319,28 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
   };
 
   public render(): React.ReactElement<any> {
+    console.log(this.props)
     const columns: IColumn[] = [
       {
-        key: "pageNum",
+        key: "pageNumber",
         name: "Page#",
-        fieldName: "pageNum",
+        fieldName: "pageNumber",
         minWidth: 100,
         maxWidth: 150,
         isResizable: true,
       },
       {
-        key: "page",
+        key: "docReference",
         name: "Doc Reference",
-        fieldName: "page",
+        fieldName: "docReference",
         minWidth: 100,
         maxWidth: 150,
         isResizable: true,
       },
       {
-        key: "comment",
+        key: "comments",
         name: "Comment",
-        fieldName: "comment",
+        fieldName: "comments",
         minWidth: 200,
         maxWidth: 300,
         isResizable: true,

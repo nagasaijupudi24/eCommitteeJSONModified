@@ -18,8 +18,8 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
     "group": { "default": "Advanced" },
-    "title": { "default": "form" },
-    "description": { "default": "form description" },
+    "title": { "default": "XenWPeCommitteeForms" },
+    "description": { "default": "XenWPeCommitteeForms description" },
     "officeFabricIconFontName": "Page",
     "properties": {
       "description": "form"

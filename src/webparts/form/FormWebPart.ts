@@ -104,22 +104,16 @@ export default class FormWebPart extends BaseClientSideWebPart<IFormWebPartProps
       viewFormProps
     );
 
-    if (this.properties.FormType === "New") {
+    if (this.properties.FormType === "New" ||this.properties.FormType === "BoardNoteNew") {
       element = createForm
      
     }
-    else if (this.properties.FormType === "View") {
+    else if (this.properties.FormType === "View" ||this.properties.FormType === "BoardNoteView") {
       element = viewForm
      
     }
-    else if (this.properties.FormType === "BoardNoteView") {
-      element = viewForm
-     
-    }
-    else if (this.properties.FormType === "BoardNoteNew") {
-      element = createForm
-     
-    }
+    
+
  
       
 

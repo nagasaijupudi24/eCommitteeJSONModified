@@ -38,31 +38,25 @@ const _randomFileIcon = (docType: string): any => {
   const docExtension = docType.split(".");
   const fileExtession = docExtension[docExtension.length - 1];
 
-  let doctype = "txt";
+  let doctype;
 
-  switch (fileExtession.toLocaleLowerCase()) {
- 
-    case "docx":
-      doctype = "docx";
-      break;
-    case "doc":
-      doctype = "docx";
-      break;
-   
-     
-    case "pdf":
-      doctype = "pdf";
-      break;
-   
-     
-    case "xlsx":
-      doctype = "xlsx";
-      break;
-  
-    default:
-      doctype = "txt";
-    
-  }
+switch (fileExtession.toLocaleLowerCase()) {
+  case "docx":
+  case "doc":
+    doctype = "docx";
+    break;
+
+  case "pdf":
+    doctype = "pdf";
+    break;
+
+  case "xlsx":
+    doctype = "xlsx";
+    break;
+
+  default:
+    doctype = "txt";
+}
 
 
 
@@ -254,10 +248,10 @@ export default class SupportingDocumentsUploadFileComponent extends React.Compon
 
     let cumulativeError = null;
     let currentTotalSize = 0;
-    
 
-    for (let i = 0; i < updatedFiles.length; i++) {
-      const file = updatedFiles[i];
+
+    for (let file  of updatedFiles){
+      
       
 
       if (
@@ -270,7 +264,10 @@ export default class SupportingDocumentsUploadFileComponent extends React.Compon
       } else {
         cumulativeError = null;
       }
+
     }
+    
+
 
     
     this.props.errorData([updatedFiles, this.props.typeOfDoc]);
@@ -346,6 +343,7 @@ export default class SupportingDocumentsUploadFileComponent extends React.Compon
               >
                 <div className={`${styles.fileIconAndNameWithErrorContainer}`}>
                   <img
+                  alt="typeOfIcon"
                   
                     src={_randomFileIcon(file.name)}
                     width={32}

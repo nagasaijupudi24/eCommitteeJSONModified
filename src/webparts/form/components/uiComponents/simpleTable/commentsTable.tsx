@@ -10,19 +10,19 @@ const CommentsLogTable = (props: any) => {
 
     // Define the columns for the DetailsList
     const columnsNew: IColumn[] = [
-        { key: 'pageNum', name: 'Page#', fieldName: 'pageNum', minWidth:80, maxWidth: 265, isResizable: true },
-        { key: 'page', name: 'Doc Reference', fieldName: 'page', minWidth: 80, maxWidth: 265, isResizable: true },
-        { key: 'comment', name: 'Comments', fieldName: 'comment', minWidth: 80, maxWidth:265, isResizable: true, isMultiline: true },
-        { key: 'commentedBy', name: 'Comment By', fieldName: 'commentedBy', minWidth: 80, maxWidth: 265
+        { key: 'pageNumber', name: 'Page#', fieldName: 'pageNumber', minWidth:80, maxWidth: 265, isResizable: true },
+        { key: 'docReference', name: 'Doc Reference', fieldName: 'docReference', minWidth: 80, maxWidth: 265, isResizable: true },
+        { key: 'comments', name: 'Comments', fieldName: 'comments', minWidth: 80, maxWidth:265, isResizable: true, isMultiline: true },
+        { key: 'approverEmailName', name: 'Comment By', fieldName: 'approverEmailName', minWidth: 80, maxWidth: 265
             , isResizable: true }
     ];
 
 
     const columnsView: IColumn[] = [
-        { key: 'pageNum', name: 'Page#', fieldName: 'pageNum', minWidth:80, maxWidth: 150, isResizable: true },
-        { key: 'page', name: 'Doc Reference', fieldName: 'page', minWidth: 80, maxWidth: 150, isResizable: true },
-        { key: 'comment', name: 'Comments', fieldName: 'comment', minWidth: 80, maxWidth: 250, isResizable: true, isMultiline: true },
-        { key: 'commentedBy', name: 'Comment By', fieldName: 'commentedBy', minWidth: 80, maxWidth: 150, isResizable: true }
+        { key: 'pageNumber', name: 'Page#', fieldName: 'pageNumber', minWidth:80, maxWidth: 150, isResizable: true },
+        { key: 'docReference', name: 'Doc Reference', fieldName: 'docReference', minWidth: 80, maxWidth: 150, isResizable: true },
+        { key: 'comments', name: 'Comments', fieldName: 'comments', minWidth: 80, maxWidth: 250, isResizable: true, isMultiline: true },
+        { key: 'approverEmailName', name: 'Comment By', fieldName: 'approverEmailName', minWidth: 80, maxWidth: 150, isResizable: true }
     ];
 
     switch (props.type) {

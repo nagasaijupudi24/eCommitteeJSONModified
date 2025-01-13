@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
@@ -51,8 +52,8 @@ export default class PnPPeoplePicker extends React.Component<
 
   private _getUserProperties = async (loginName: any): Promise<any> => {
    
-    let designation = "NA";
-    let email = "NA";
+    let designation ;
+    let email ;
    
     const profile = await this.props.spProp.profiles.getPropertiesFor(
       loginName

@@ -38,31 +38,26 @@ const _randomFileIcon = (docType: string): any => {
   const docExtension = docType.split(".");
   const fileExtession = docExtension[docExtension.length - 1];
 
-  let doctype = "txt"; 
+  let doctype;
 
   switch (fileExtession.toLocaleLowerCase()) {
- 
     case "docx":
-      doctype = "docx";
-      break;
     case "doc":
       doctype = "docx";
       break;
-   
-     
+  
     case "pdf":
       doctype = "pdf";
       break;
-   
-     
+  
     case "xlsx":
       doctype = "xlsx";
       break;
   
     default:
       doctype = "txt";
-    
   }
+  
 
 
 
@@ -324,7 +319,7 @@ export default class UploadFileComponent extends React.Component<
               >
                 <div className={`${styles.fileIconAndNameWithErrorContainer}`}>
                   <img
-                    
+                      alt="typeOfIconInUploadfile"
                     src={_randomFileIcon(file.name)}
                     width={32}
                     height={32}

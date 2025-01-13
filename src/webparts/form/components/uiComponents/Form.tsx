@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-constant-condition */
 /* eslint-disable @typescript-eslint/no-floating-promises */
@@ -540,8 +541,8 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
   };
 
   private _getUserProperties = async (loginName: any): Promise<any> => {
-    let designation = "NA";
-    let email = "NA";
+    let designation ;
+    let email ;
 
     const profile = await this.props.sp.profiles.getPropertiesFor(loginName);
 
@@ -739,10 +740,10 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         item.SearchKeyword !== null ? item.SearchKeyword : "",
       amountFeildValue: item.Amount !== null ? item.Amount : null,
       puroposeFeildValue:
-        item.Purpose !== null ? JSON.parse(item.Purpose)[0] : "",
+        item.Purpose !== null ? item.Purpose.split(",")[0] : "",
       othersFieldValue:
-        item.Purpose !== null ? JSON.parse(item.Purpose)[1] : "",
-      isPuroposeVisable: (item.NatureOfNote !== null ) ? true : false,
+        item.Purpose !== null ? item.Purpose.split(",")[1] : "",
+      isPuroposeVisable: (item.NatureOfNote !== null ),
 
       peoplePickerData: this._getJsonifyReviewer(
         item.NoteApproversDTO,
@@ -1384,7 +1385,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const { value } = event.target;
 
     
-    const isValid = /^[0-9]*\.?[0-9]{0,2}$/.test(value);
+    const isValid = /^\d*\.?\d{0,2}$/.test(value);
 
     if (isValid) {
     
@@ -1496,45 +1497,38 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
       const gistFolderPath = `${parentFolderPath}/GistDocuments`;
 
-      let gistFolderExists = false;
-
-      if (!gistFolderExists) {
-        await sp.web.rootFolder.folders.addUsingPath(gistFolderPath);
-      } else {
-        try {
+      try {
+        
+        await sp.web.getFolderByServerRelativePath(gistFolderPath)();
+      } catch (error) {
+        if (error.status === 404) {
           
-          await sp.web.getFolderByServerRelativePath(gistFolderPath)();
-          gistFolderExists = true;
-        } catch (error) {
-          if (error.status === 404) {
-            gistFolderExists = false;
-          } else {
-            throw error;
-          }
+          await sp.web.rootFolder.folders.addUsingPath(gistFolderPath);
+        } else {
+         
+          return error;
         }
       }
+      
 
       for (const { folderName, files, errorCondition } of filesDataArray) {
         const siteUrl = `${parentFolderPath}/${folderName}`;
-        let folderExists = false;
+        
 
        
-        if (!folderExists) {
-          await sp.web.rootFolder.folders.addUsingPath(siteUrl);
+        try {
          
-        } else {
-          try {
+          await sp.web.getFolderByServerRelativePath(siteUrl)();
+         
+        } catch (error) {
+          if (error.status === 404) {
            
-            await sp.web.getFolderByServerRelativePath(siteUrl)();
-            folderExists = true;
-          } catch (error) {
-            if (error.status === 404) {
-              folderExists = false;
-            } else {
-              throw error;
-            }
+            await sp.web.rootFolder.folders.addUsingPath(siteUrl);
+          } else {
+            return error.message
           }
         }
+        
 
       
         if (errorCondition) {
@@ -1607,21 +1601,17 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
       
       const gistFolderPath = `${parentFolderPath}/GistDocuments`;
-      let gistFolderExists = false;
 
-      if (!gistFolderExists) {
-        await sp.web.rootFolder.folders.addUsingPath(gistFolderPath);
-      } else {
-        try {
+      try {
+        
+        await sp.web.getFolderByServerRelativePath(gistFolderPath)();
+      } catch (error) {
+        if (error.status === 404) {
+          
+          await sp.web.rootFolder.folders.addUsingPath(gistFolderPath);
+        } else {
          
-          await sp.web.getFolderByServerRelativePath(gistFolderPath)();
-          gistFolderExists = true;
-        } catch (error) {
-          if (error.status === 404) {
-            gistFolderExists = false;
-          } else {
-            throw error;
-          }
+          return error;
         }
       }
      
@@ -1630,23 +1620,20 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
        
         const siteUrl = `${parentFolderPath}/${folderName}`;
        
-        let folderExists = false;
-        if (!folderExists) {
+       
+
+      try {
+        
+        await sp.web.getFolderByServerRelativePath(siteUrl)();
+      } catch (error) {
+        if (error.status === 404) {
+          
           await sp.web.rootFolder.folders.addUsingPath(siteUrl);
-         
         } else {
-          try {
-           
-            await sp.web.getFolderByServerRelativePath(siteUrl)();
-            folderExists = true;
-          } catch (error) {
-            if (error.status === 404) {
-              folderExists = false;
-            } else {
-              throw error;
-            }
-          }
+         
+          return error;
         }
+      }
 
         for (const file of files) {
          
@@ -1680,25 +1667,20 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       this._folderName = `${absUrl}/${this._libraryName}/${folderName}`;
 
       const siteUrl = `${absUrl}/${this._libraryName}/${folderName}`;
-     
-      let folderExists = false;
 
-      if (!folderExists) { 
-        await this.props.sp.web.folders.addUsingPath(siteUrl);
-       
-      } else {
-       
-        try {
-          await this.props.sp.web.getFolderByServerRelativePath(siteUrl)();
-          folderExists = true;
-        } catch (error) {
-          if (error.status === 404) {
-            folderExists = false;
-          } else {
-            throw error;
-          }
-        }
-      }
+try {
+  
+  await this.props.sp.web.getFolderByServerRelativePath(siteUrl)();
+ 
+} catch (error) {
+  if (error.status === 404) {
+  
+    await this.props.sp.web.folders.addUsingPath(siteUrl);
+  } else {
+    return error.message
+  }
+}
+
 
       // eslint-disable-next-line no-void
       await this.createSubFolder(siteUrl);
@@ -1847,24 +1829,22 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     }
   };
 
-  private handleAuditTrail(status: string): void {
-    switch (status) {
-     
-        
-        case "Draft":
-          return this._getAuditTrail("Drafted");
-          
-      default:
+  private handleAuditTrail = (status: string): void => {
+    if (status === "Draft") {
+        return this._getAuditTrail("Drafted");
+    } else {
         return this._getAuditTrail(status);
-        
     }
-  }
+};
+
   
 
   private createEcommitteeObject = async (
     status: string,
     statusNumber: any
   ): Promise<INoteObject> => {
+
+   
     
     const ecommitteObject: any = {
       Department: this._department,
@@ -1877,10 +1857,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       FinancialType: this.state.typeOfFinancialNoteFeildValue,
       Amount: parseInt(this.state.amountFeildValue),
       SearchKeyword: this.state.searchTextFeildValue,
-      Purpose: JSON.stringify([
-        this.state.puroposeFeildValue,
-        this.state.othersFieldValue,
-      ]),
+      Purpose:this.state.puroposeFeildValue === "Others"? `${this.state.puroposeFeildValue},${this.state.othersFieldValue}`:this.state.puroposeFeildValue,
 
       NoteApproversDTO: this._getApproverDetails(
         this.state.peoplePickerData,
@@ -2218,70 +2195,35 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       this.state.noteTypeFeildValue === "Non-Financial"
     ) {
       conditionNumber = 4;
-      if (this.state.natureOfNoteFeildValue === "Information") {
-       
-        fieldValues = {
-          committeeName: this.state.committeeNameFeildValue,
-          subject: this.state.subjectFeildValue,
-          natureOfNote: this.state.natureOfNoteFeildValue,
+      fieldValues = {
+        committeeName: this.state.committeeNameFeildValue,
+        subject: this.state.subjectFeildValue,
+        natureOfNote: this.state.natureOfNoteFeildValue,
 
-          noteType: this.state.noteTypeFeildValue,
+        noteType: this.state.noteTypeFeildValue,
 
-          searchText: this.state.searchTextFeildValue,
-          purpose: this.state.puroposeFeildValue,
+        searchText: this.state.searchTextFeildValue,
+        purpose: this.state.puroposeFeildValue,
 
-          
-          noteTofiles: this.state.noteTofiles,
+        
+        noteTofiles: this.state.noteTofiles,
 
-          wordDocumentfiles: this._checkSecertaryIsAvailable()
-            ? this.state.wordDocumentfiles
-            : false,
+        wordDocumentfiles: this._checkSecertaryIsAvailable()
+          ? this.state.wordDocumentfiles
+          : false,
 
-          
-          errorInPdfFiles: this.state.errorFilesList.notePdF.length > 0,
-          errorInWordDocFiles:
-            this.state.errorFilesList.wordDocument.length > 0,
-          errorInSupportingDocFiles:
-            this.state.errorFilesList.supportingDocument.length > 0,
+        
+        errorInPdfFiles: this.state.errorFilesList.notePdF.length > 0,
+        errorInWordDocFiles:
+          this.state.errorFilesList.wordDocument.length > 0,
+        errorInSupportingDocFiles:
+          this.state.errorFilesList.supportingDocument.length > 0,
 
-          AppoverData: this.state.peoplePickerApproverData,
-          cummulativeErrorDisplay: this.state.errorForCummulative,
-        };
-       
-        this.setState({ eCommitteDataForValidataion: fieldValues });
-      } else {
-      
-        fieldValues = {
-          committeeName: this.state.committeeNameFeildValue,
-          subject: this.state.subjectFeildValue,
-          natureOfNote: this.state.natureOfNoteFeildValue,
-
-          noteType: this.state.noteTypeFeildValue,
-
-          searchText: this.state.searchTextFeildValue,
-          purpose: this.state.puroposeFeildValue,
-
-         
-
-          noteTofiles: this.state.noteTofiles,
-
-          wordDocumentfiles: this._checkSecertaryIsAvailable()
-            ? this.state.wordDocumentfiles
-            : false,
-
-          
-          errorInPdfFiles: this.state.errorFilesList.notePdF.length > 0,
-          errorInWordDocFiles:
-            this.state.errorFilesList.wordDocument.length > 0,
-          errorInSupportingDocFiles:
-            this.state.errorFilesList.supportingDocument.length > 0,
-
-          AppoverData: this.state.peoplePickerApproverData,
-          cummulativeErrorDisplay: this.state.errorForCummulative,
-        };
-    
-        this.setState({ eCommitteDataForValidataion: fieldValues });
-      }
+        AppoverData: this.state.peoplePickerApproverData,
+        cummulativeErrorDisplay: this.state.errorForCummulative,
+      };
+     
+      this.setState({ eCommitteDataForValidataion: fieldValues });
     } else if (
       this.state.natureOfNoteFeildValue === "Approval" ||
       this.state.natureOfNoteFeildValue === "Sanction"
@@ -2928,106 +2870,54 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     ) {
       conditionNumArray = 3;
   
-      if (this.state.natureOfNoteFeildValue === "Information") {
-       
-        fieldValues = {
-          committeeName: [this.state.committeeNameFeildValue, "Committe Name"],
-          subject: [this.state.subjectFeildValue, "Subject"],
-          natureOfNote: [this.state.natureOfNoteFeildValue, "Nature of Note"],
+      fieldValues = {
+        committeeName: [this.state.committeeNameFeildValue, "Committe Name"],
+        subject: [this.state.subjectFeildValue, "Subject"],
+        natureOfNote: [this.state.natureOfNoteFeildValue, "Nature of Note"],
 
-          noteType: [this.state.noteTypeFeildValue, "Note Type"],
-          typeOfFinancialNote: [
-            this.state.typeOfFinancialNoteFeildValue,
-            "Type of Financial Note",
-          ],
-          amount: [this.state.amountFeildValue, "Amount"],
-          searchText: [this.state.searchTextFeildValue, "Search Text"],
-          purpose: [this.state.puroposeFeildValue, "Purpose"],
-          AppoverData: [
-            this.state.peoplePickerApproverData,
-            "Please select atleast one Approver to submit request",
-          ],
+        noteType: [this.state.noteTypeFeildValue, "Note Type"],
+        typeOfFinancialNote: [
+          this.state.typeOfFinancialNoteFeildValue,
+          "Type of Financial Note",
+        ],
+        amount: [this.state.amountFeildValue, "Amount"],
+        searchText: [this.state.searchTextFeildValue, "Search Text"],
+        purpose: [this.state.puroposeFeildValue, "Purpose"],
 
-          noteTofiles: [this.state.noteTofiles, "Please select Valid Pdf File"],
-          wordDocumentfiles:
+        AppoverData: [
+          this.state.peoplePickerApproverData,
+          "Please select atleast one Approver to submit request",
+        ],
+
+        noteTofiles: [this.state.noteTofiles, "Please select Valid Pdf File"],
+        wordDocumentfiles:
         (this._checkSecertaryIsAvailable() && this.state.wordDocumentfiles.length ===0)
             ? [
                 this.state.wordDocumentfiles,
                 "Please select Valid Word Doc File",
               ]
             : [false, "Please select Valid Word Doc File"],
-         
-          errorInPdfFiles: [
-            this.state.errorFilesList.notePdF.length > 0,
-            "Please select Valid Pdf File...",
-          ],
-          errorInWordDocFiles: [
-            this.state.errorFilesList.wordDocument.length > 0,
-            "Please select Valid Word File...",
-          ],
-          errorInSupportingDocFiles: [
-            this.state.errorFilesList.supportingDocument.length > 0,
-            "Please select Valid Supporting Files...",
-          ],
-
-          cummulativeErrorDisplay: [
-            this.state.errorForCummulative,
-            "Cumulative size of all the supporting documents should not exceed 25 MB.",
-          ],
-        };
        
-        this.setState({ eCommitteDataForValidataionDialog: fieldValues });
-      } else {
-      
-        fieldValues = {
-          committeeName: [this.state.committeeNameFeildValue, "Committe Name"],
-          subject: [this.state.subjectFeildValue, "Subject"],
-          natureOfNote: [this.state.natureOfNoteFeildValue, "Nature of Note"],
+        errorInPdfFiles: [
+          this.state.errorFilesList.notePdF.length > 0,
+          "Please select Valid Pdf File...",
+        ],
+        errorInWordDocFiles: [
+          this.state.errorFilesList.wordDocument.length > 0,
+          "Please select Valid Word File...",
+        ],
+        errorInSupportingDocFiles: [
+          this.state.errorFilesList.supportingDocument.length > 0,
+          "Please select Valid Supporting Files...",
+        ],
 
-          noteType: [this.state.noteTypeFeildValue, "Note Type"],
-          typeOfFinancialNote: [
-            this.state.typeOfFinancialNoteFeildValue,
-            "Type of Financial Note",
-          ],
-          amount: [this.state.amountFeildValue, "Amount"],
-          searchText: [this.state.searchTextFeildValue, "Search Text"],
-          purpose: [this.state.puroposeFeildValue, "Purpose"],
-
-          AppoverData: [
-            this.state.peoplePickerApproverData,
-            "Please select atleast one Approver to submit request",
-          ],
-
-          noteTofiles: [this.state.noteTofiles, "Please select Valid Pdf File"],
-          wordDocumentfiles:
-          (this._checkSecertaryIsAvailable() && this.state.wordDocumentfiles.length ===0)
-              ? [
-                  this.state.wordDocumentfiles,
-                  "Please select Valid Word Doc File",
-                ]
-              : [false, "Please select Valid Word Doc File"],
-         
-          errorInPdfFiles: [
-            this.state.errorFilesList.notePdF.length > 0,
-            "Please select Valid Pdf File...",
-          ],
-          errorInWordDocFiles: [
-            this.state.errorFilesList.wordDocument.length > 0,
-            "Please select Valid Word File...",
-          ],
-          errorInSupportingDocFiles: [
-            this.state.errorFilesList.supportingDocument.length > 0,
-            "Please select Valid Supporting Files...",
-          ],
-
-          cummulativeErrorDisplay: [
-            this.state.errorForCummulative,
-            "Cumulative size of all the supporting documents should not exceed 25 MB.",
-          ],
-        };
-       
-        this.setState({ eCommitteDataForValidataionDialog: fieldValues });
-      }
+        cummulativeErrorDisplay: [
+          this.state.errorForCummulative,
+          "Cumulative size of all the supporting documents should not exceed 25 MB.",
+        ],
+      };
+     
+      this.setState({ eCommitteDataForValidataionDialog: fieldValues });
     } else if (
       (this.state.natureOfNoteFeildValue === "Information" ||
         this.state.natureOfNoteFeildValue === "Ratification") &&
@@ -3035,97 +2925,49 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     ) {
       conditionNumArray = 4;
      
-      if (this.state.natureOfNoteFeildValue === "Information") {
-        
-        fieldValues = {
-          committeeName: [this.state.committeeNameFeildValue, "Committe Name"],
-          subject: [this.state.subjectFeildValue, "Subject"],
-          natureOfNote: [this.state.natureOfNoteFeildValue, "Nature of Note"],
+      fieldValues = {
+        committeeName: [this.state.committeeNameFeildValue, "Committe Name"],
+        subject: [this.state.subjectFeildValue, "Subject"],
+        natureOfNote: [this.state.natureOfNoteFeildValue, "Nature of Note"],
 
-          noteType: [this.state.noteTypeFeildValue, "Note Type"],
+        noteType: [this.state.noteTypeFeildValue, "Note Type"],
 
-          searchText: [this.state.searchTextFeildValue, "Search Text"],
-          purpose: [this.state.puroposeFeildValue, "Purpose"],
-          AppoverData: [
-            this.state.peoplePickerApproverData,
-            "Please select atleast one Approver to submit request",
-          ],
+        searchText: [this.state.searchTextFeildValue, "Search Text"],
+        purpose: [this.state.puroposeFeildValue, "Purpose"],
+        AppoverData: [
+          this.state.peoplePickerApproverData,
+          "Please select atleast one Approver to submit request",
+        ],
 
-          noteTofiles: [this.state.noteTofiles, "Please select Valid Pdf File"],
-          wordDocumentfiles:
-          (this._checkSecertaryIsAvailable() && this.state.wordDocumentfiles.length ===0)
-              ? [
-                  this.state.wordDocumentfiles,
-                  "Please select Valid Word Doc File",
-                ]
-              : [false, "Please select Valid Word Doc File"],
-        
-          errorInPdfFiles: [
-            this.state.errorFilesList.notePdF.length > 0,
-            "Please select Valid Pdf File...",
-          ],
-          errorInWordDocFiles: [
-            this.state.errorFilesList.wordDocument.length > 0,
-            "Please select Valid Word File...",
-          ],
-          errorInSupportingDocFiles: [
-            this.state.errorFilesList.supportingDocument.length > 0,
-            "Please select Valid Supporting Files...",
-          ],
+        noteTofiles: [this.state.noteTofiles, "Please select Valid Pdf File"],
+        wordDocumentfiles:
+        (this._checkSecertaryIsAvailable() && this.state.wordDocumentfiles.length ===0)
+            ? [
+                this.state.wordDocumentfiles,
+                "Please select Valid Word Doc File",
+              ]
+            : [false, "Please select Valid Word Doc File"],
+      
+        errorInPdfFiles: [
+          this.state.errorFilesList.notePdF.length > 0,
+          "Please select Valid Pdf File...",
+        ],
+        errorInWordDocFiles: [
+          this.state.errorFilesList.wordDocument.length > 0,
+          "Please select Valid Word File...",
+        ],
+        errorInSupportingDocFiles: [
+          this.state.errorFilesList.supportingDocument.length > 0,
+          "Please select Valid Supporting Files...",
+        ],
 
-          cummulativeErrorDisplay: [
-            this.state.errorForCummulative,
-            "Cumulative size of all the supporting documents should not exceed 25 MB.",
-          ],
-        };
-       
-        this.setState({ eCommitteDataForValidataionDialog: fieldValues });
-      } else {
-       
-        fieldValues = {
-          committeeName: [this.state.committeeNameFeildValue, "Committe Name"],
-          subject: [this.state.subjectFeildValue, "Subject"],
-          natureOfNote: [this.state.natureOfNoteFeildValue, "Nature of Note"],
-
-          noteType: [this.state.noteTypeFeildValue, "Note Type"],
-
-          searchText: [this.state.searchTextFeildValue, "Search Text"],
-          purpose: [this.state.puroposeFeildValue, "Purpose"],
-          AppoverData: [
-            this.state.peoplePickerApproverData,
-            "Please select atleast one Approver to submit request",
-          ],
-
-          noteTofiles: [this.state.noteTofiles, "Please select Valid Pdf File"],
-          wordDocumentfiles:
-          (this._checkSecertaryIsAvailable() && this.state.wordDocumentfiles.length ===0)
-              ? [
-                  this.state.wordDocumentfiles,
-                  "Please select Valid Word Doc File",
-                ]
-              : [false, "Please select Valid Word Doc File"],
-          
-          errorInPdfFiles: [
-            this.state.errorFilesList.notePdF.length > 0,
-            "Please select Valid Pdf File...",
-          ],
-          errorInWordDocFiles: [
-            this.state.errorFilesList.wordDocument.length > 0,
-            "Please select Valid Word File...",
-          ],
-          errorInSupportingDocFiles: [
-            this.state.errorFilesList.supportingDocument.length > 0,
-            "Please select Valid Supporting Files...",
-          ],
-
-          cummulativeErrorDisplay: [
-            this.state.errorForCummulative,
-            "Cumulative size of all the supporting documents should not exceed 25 MB.",
-          ],
-        };
-       
-        this.setState({ eCommitteDataForValidataionDialog: fieldValues });
-      }
+        cummulativeErrorDisplay: [
+          this.state.errorForCummulative,
+          "Cumulative size of all the supporting documents should not exceed 25 MB.",
+        ],
+      };
+     
+      this.setState({ eCommitteDataForValidataionDialog: fieldValues });
     } else if (
       this.state.natureOfNoteFeildValue === "Approval" ||
       this.state.natureOfNoteFeildValue === "Sanction"
@@ -3596,9 +3438,8 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const auditTrailStatus =
     this.state.successStatus === "submitted" ? "Submitted" : "Drafted";
 
-  const auditTrail = this.state.itemId
-    ? this._getAuditTrail(auditTrailStatus)
-    : this._getAuditTrail(auditTrailStatus);
+  const auditTrail = this._getAuditTrail(auditTrailStatus)
+    
 
 
     return ({
@@ -3611,10 +3452,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     FinancialType: this.state.typeOfFinancialNoteFeildValue,
     Amount: this.state.amountFeildValue,
     SearchKeyword: this.state.searchTextFeildValue,
-    Purpose: JSON.stringify([
-      this.state.puroposeFeildValue,
-      this.state.othersFieldValue,
-    ]),
+    Purpose:this.state.puroposeFeildValue === "Others"? `${this.state.puroposeFeildValue},${this.state.othersFieldValue}`:this.state.puroposeFeildValue,
     NoteApproversDTO: this._getApproverDetails(
       this.state.peoplePickerData,
       this.state.peoplePickerApproverData,
@@ -3639,7 +3477,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     CommitteeType:
       this.props.formType === "BoardNoteNew" ? "Board" : "Committee",
     PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
-    startProcessing: this.state.itemId ? false : true,
+    startProcessing: !this.state.itemId,
   })};
 
   public async clearFolder(
@@ -3716,13 +3554,13 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const StatusNumber = itemList?.StatusNumber;
     this.setState({ showCancelDialog: false, isLoadingOnForm: true });
 
-    if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'|| StatusNumber==='9000') {
+    if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'|| StatusNumber==='8000'|| StatusNumber==='9000') {
       this.setState({
         isConfirmationDialogVisible: false,
         isLoadingOnForm:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
-          "This request has been already submitted or action taken by requestor.",
+        this.getMessageBasedOnStatusNumber(StatusNumber),
       });
 
       return;
@@ -3732,7 +3570,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         isLoadingOnForm:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
-          "This request has been already cancelled by requestor.",
+        this.getMessageBasedOnStatusNumber(StatusNumber),
       });
 
       return
@@ -4123,6 +3961,23 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     return item;
   };
 
+
+  private getMessageBasedOnStatusNumber(statusNumber: string): string {
+    const statusMessages: { [key: string]: string } = {
+      "2000": "This request has already been submitted",
+      "3000": "This request has already been submitted",
+      "300": "This request has already been canceled.",
+      "4000": "This request has already been referred",
+      "9000": "This request has already been approved",
+      "8000": "This request has already been rejected",
+      "4900": "This request has already been refereed back",
+      "5000": "This request has been already returned.",
+          
+    };
+  
+    return statusMessages[statusNumber] || "Unknown status.";
+  }
+
  
   private handleCancel = async (
     statusFromEvent: string,
@@ -4135,12 +3990,12 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const StatusNumber = item?.StatusNumber;
    
 
-    if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'|| StatusNumber==='9000') {
+    if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'||StatusNumber==='8000'|| StatusNumber==='9000') {
       this.setState({
         isLoadingOnForm:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
-          "This request has been already submitted.",
+        this.getMessageBasedOnStatusNumber(StatusNumber),
       });
 
       return;
@@ -4149,7 +4004,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         isLoadingOnForm:false,
         hideParellelActionAlertDialog: true,
         parellelActionAlertMsg:
-          "This request has been already cancelled by requestor.",
+        this.getMessageBasedOnStatusNumber(StatusNumber),
       });
 
     return
@@ -4497,7 +4352,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                 isLoadingOnForm:false,
                 hideParellelActionAlertDialog: true,
                 parellelActionAlertMsg:
-                  "This request has been already submitted.",
+                this.getMessageBasedOnStatusNumber(StatusNumber),
               });
         
               return;
@@ -4541,8 +4396,14 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
   }
 
   public render(): React.ReactElement<IFormProps> {
+
+    
    
     console.log(this.state)
+
+    const purposeValue = `${this.state.puroposeFeildValue},${this.state.othersFieldValue}`
+    console.log(purposeValue)
+
     return (
       
       <div>
@@ -4602,6 +4463,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                               iconProps={{ iconName: "Cancel" }}
                               onClick={() => {
                                 console.log("close triggered");
+                                window.location.reload();
                                 this.setState({ hideParellelActionAlertDialog: false });
                               }}
                             />
@@ -4799,7 +4661,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                 />
               </div>
 
-              {this._committeeType === "Board" ? "" : ""}
+            
             
 
               <div
@@ -5566,7 +5428,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
                                   isLoadingOnForm:false,
                                   hideParellelActionAlertDialog: true,
                                   parellelActionAlertMsg:
-                                    "This request has been already submitted.",
+                                  this.getMessageBasedOnStatusNumber(StatusNumber),
                                 });
                           
                                 return;

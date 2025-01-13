@@ -77,7 +77,7 @@ export default class PasscodeModal extends React.Component<
       return user.Id;
     } catch (error) {
     
-      throw error;
+      return error;
     }
   };
 
@@ -296,15 +296,15 @@ export default class PasscodeModal extends React.Component<
         </div>
         <div className={styles.body} style={{ textAlign: "center" }}>
           {isCreating ? (
-            <>
+          
               <p>
                 Passcode is not set. Please create a passcode to proceed
                 further.
               </p>
              
-            </>
+         
           ) : (
-            <>
+          
               <div className={styles.contentContainer}>
                 <label htmlFor="passcode">Enter your passcode for verification:</label>
               
@@ -351,7 +351,7 @@ export default class PasscodeModal extends React.Component<
                   <span className={styles.errorMessage}>{errorMessage}</span>
                 )}
               </div>
-            </>
+          
           )}
         </div>
         <div className={styles.footer}>
