@@ -586,7 +586,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     return approverfilterData;
   };
 
-  private _getFileObj = async (data: any): Promise<any> => {
+  private _getFileObj = async (data: any): Promise<File> => {
     const tenantUrl = `${window.location.protocol}//${window.location.host}`;
 
     const formatDateTime = (date: string | number | Date) => {
@@ -611,41 +611,20 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       lastModified: new Date(data.TimeLastModified).getTime(),
     });
 
-    const filesId = Math.floor(Math.random() * 1000000000 + 1);
-
-
-     const filesObj = {
-      name:(file as any).name,
-      content: fileContent,
+    
+    (file as any).metadata = {
       index: 0,
-      id:filesId,
-      LinkingUri: data.LinkingUri || data.LinkingUrl,
       fileUrl: tenantUrl + data.ServerRelativeUrl,
-      ServerRelativeUrl: "",
+      ServerRelativeUrl: data.ServerRelativeUrl,
       isExists: true,
-      Modified: "",
+      Modified: data.TimeLastModified,
       isSelected: false,
-      size: parseInt(data.Length),
-      type: `application/${data.Name.split(".")[1]}`,
+      size: parseInt(data.Length, 10),
       modifiedBy: data.Author.Title,
-      createData: result,
+      createDate: result,
     };
 
-
-    
-    // (file as any).metadata = {
-    //   index: 0,
-    //   fileUrl: tenantUrl + data.ServerRelativeUrl,
-    //   ServerRelativeUrl: data.ServerRelativeUrl,
-    //   isExists: true,
-    //   Modified: data.TimeLastModified,
-    //   isSelected: false,
-    //   size: parseInt(data.Length, 10),
-    //   modifiedBy: data.Author.Title,
-    //   createDate: result,
-    // };
-
-    return filesObj;
+    return file;
   };
 
   private _getItemDocumentsData = async () => {
@@ -1465,31 +1444,31 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
   
 
 
-  // private getFileArrayBuffer =async  (file: any): Promise<ArrayBuffer> => {
-  //   if (file.arrayBuffer) {
-  //     return await file.arrayBuffer();
-  //   } else {
-  //     let blob: Blob;
-  //     if (file instanceof Blob) {
-  //       blob = file;
-  //     } else {
-  //       blob = new Blob([file]);
-  //     }
+  private getFileArrayBuffer =async  (file: any): Promise<ArrayBuffer> => {
+    if (file.arrayBuffer) {
+      return await file.arrayBuffer();
+    } else {
+      let blob: Blob;
+      if (file instanceof Blob) {
+        blob = file;
+      } else {
+        blob = new Blob([file]);
+      }
 
-  //     return new Promise<ArrayBuffer>((resolve, reject) => {
-  //       const reader = new FileReader();
-  //       reader.onloadend = () => {
-  //         if (reader.result) {
-  //           resolve(reader.result as ArrayBuffer);
-  //         } else {
-  //           reject(new Error("Failed to read file as ArrayBuffer"));
-  //         }
-  //       };
-  //       reader.onerror = reject;
-  //       reader.readAsArrayBuffer(blob);
-  //     });
-  //   }
-  // }
+      return new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (reader.result) {
+            resolve(reader.result as ArrayBuffer);
+          } else {
+            reject(new Error("Failed to read file as ArrayBuffer"));
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(blob);
+      });
+    }
+  }
 
 
 
@@ -1575,11 +1554,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
        
         for (const file of files) {
          
-      
+          const arrayBuffer = await this.getFileArrayBuffer(file);
           try{
             await sp.web
             .getFolderByServerRelativePath(siteUrl)
-            .files.addUsingPath(file.name, file.content, {
+            .files.addUsingPath(file.name, arrayBuffer, {
               Overwrite: true,
             });
 
@@ -1666,11 +1645,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
         for (const file of files) {
          
-          // const arrayBuffer = await this.getFileArrayBuffer(file);
+          const arrayBuffer = await this.getFileArrayBuffer(file);
         
           await sp.web
             .getFolderByServerRelativePath(siteUrl)
-            .files.addUsingPath(file.name, file.content, {
+            .files.addUsingPath(file.name, arrayBuffer, {
               Overwrite: true,
             });
             
@@ -3541,11 +3520,11 @@ try {
     try {
       for (const file of libraryName) {
        
-        // const arrayBuffer = await this.getFileArrayBuffer(file);
+        const arrayBuffer = await this.getFileArrayBuffer(file);
        
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, file.content, {
+          .files.addUsingPath(file.name, arrayBuffer, {
             Overwrite: true,
           });
       }
@@ -3867,7 +3846,7 @@ try {
     }
   };
 
-  private handleSupportingFileChange = (files: any, typeOfDoc: string) => {
+  private handleSupportingFileChange = (files: File[], typeOfDoc: string) => {
  
     
 
