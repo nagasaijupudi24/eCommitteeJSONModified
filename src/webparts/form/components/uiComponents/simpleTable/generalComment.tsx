@@ -38,7 +38,7 @@ interface IGridProps {
   data: any;
   currentUserDetails: any;
   
-  handleCommentDataFuntion: (data: any, action: any, id?: any) => void; // Pass the function as a prop
+  handleCommentDataFuntion: (data: any, action: any, id?: any) => void; 
 }
 
 interface IGridState {
@@ -58,20 +58,16 @@ const styles = mergeStyleSets({
     maxWidth: "80vw",
     width: '100%',
     "@media (min-width: 768px)": {
-      maxWidth: "580px", // Adjust width for medium screens
+      maxWidth: "580px",
     },
     "@media (max-width: 767px)": {
-      maxWidth: "290px", // Adjust width for smaller screens
+      maxWidth: "290px", 
     },
     margin: "auto",
     padding: "10px",
     backgroundColor: "white",
     borderRadius: "4px",
-    // height:'260px',
-    // display:'flex',
-    // flexDirection:'column',
-    // alignItem:'center',
-    // justifyContent:'center',
+   
 
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.26)",
   },
@@ -90,7 +86,7 @@ const styles = mergeStyleSets({
     fontWeight: "400",
   },
   headerIcon: {
-    paddingRight: "0px", // Reduced space between the icon and the title
+    paddingRight: "0px", 
   },
   body: {
     display: "flex",
@@ -101,17 +97,17 @@ const styles = mergeStyleSets({
     padding: "20px 0",
     height: "100%",
     "@media (min-width: 768px)": {
-      marginLeft: "20px", // Adjust width for smaller screens
-      marginRight: "20px", // Adjust width for medium screens
+      marginLeft: "20px", 
+      marginRight: "20px", 
     },
     "@media (max-width: 767px)": {
-      marginLeft: "20px", // Adjust width for smaller screens
+      marginLeft: "20px",
       marginRight: "20px",
     },
   },
   footer: {
     display: "flex",
-    justifyContent: "space-between", // Adjusted to space between
+    justifyContent: "space-between", 
 
     borderTop: "1px solid #ddd",
     paddingTop: "10px",
@@ -119,8 +115,8 @@ const styles = mergeStyleSets({
   },
   button: {
     maxHeight: "32px",
-    flex: "1 1 50%", // Ensures each button takes up 50% of the footer width
-    margin: "0 5px", // Adds some space between the buttons
+    flex: "1 1 50%", 
+    margin: "0 5px", 
   },
   buttonContent: {
     display: "flex",
@@ -128,7 +124,7 @@ const styles = mergeStyleSets({
     justifyContent: "center",
   },
   buttonIcon: {
-    marginRight: "4px", // Adjust the space between the icon and text
+    marginRight: "4px", 
   },
 
   removeTopMargin: {
@@ -157,8 +153,7 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
   }
 
   private _getCurentUserComment = (): IGridRow[] => {
-    // console.log(this.props.currentUserDetails);
-    // console.log(this.props.data);
+  
     if (this.props.data.length > 0) {
       return this.props.data?.filter(
         (each: any) =>
@@ -176,19 +171,19 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
     >);
   };
 
-  // Trigger Add Dialog
+
   private handleAddBtn = () => {
-    // this.props._atrJoinedCommentsToDTO()
+  
     this.setState({
       pageNumValue: "",
       pageValue: "",
       commentValue: "",
       isDialogOpen: true,
-      isEditMode: false, // Setting to Add Mode
+      isEditMode: false, 
     });
   };
 
-  // Save Add or Edit
+
   private handleSave = () => {
     if (this.state.isEditMode) {
       this.handleSaveBtn();
@@ -199,7 +194,7 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
     }
   };
 
-  // Add a new comment
+
   private handleAddNewComment = () => {
     const { pageNumValue, pageValue, commentValue } = this.state;
 
@@ -228,11 +223,11 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
       isDialogOpen: false,
     }));
 
-    // Call the function passed from the parent component
+  
     this.props.handleCommentDataFuntion(commentsObj, "add");
   };
 
-  // Open Edit Dialog with data populated
+  
   private handleEdit = (id: string) => {
     const row = this.state.rowsData.find((each) => each.id === id);
     if (row) {
@@ -244,12 +239,12 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
         commentValue: row.comments,
         editRowId: id,
         isDialogOpen: true,
-        isEditMode: true, // Setting to Edit Mode
+        isEditMode: true, 
       });
     }
   };
 
-  // Save the Edited row
+ 
   private handleSaveBtn = () => {
     const { editRowId, pageNumValue, pageValue, commentValue } = this.state;
 

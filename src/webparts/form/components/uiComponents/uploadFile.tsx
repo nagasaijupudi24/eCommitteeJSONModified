@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @rushstack/no-new-null */
@@ -10,7 +11,7 @@ import styles from "../Form.module.scss";
 export interface IUploadFileProps {
   
   typeOfDoc: string;
-  onChange: (files: File[] | null, typeOfDoc: string) => void;
+  onChange: (files: any[] | null, typeOfDoc: string) => void;
   accept?: string;
   maxFileSizeMB: number;
   multiple: boolean;
@@ -28,7 +29,7 @@ interface IFileWithError {
 }
 
 interface IUploadFileState {
-  selectedFiles: IFileWithError[];
+  selectedFiles: any[];
   cummError: string | null;
   errorOfFile: any;
 }
@@ -177,13 +178,16 @@ export default class UploadFileComponent extends React.Component<
 
       Promise.all(filePromises)
         .then((fileBuffers) => {
-          const filesWithBuffers = fileBuffers.map((buffer, index) => ({
+          const filesWithBuffers = fileBuffers.map((result, index) => ({
+           
             id: `${files[index].name}-${index}`,
-            file: files[index],
-            buffer: buffer,
+            file: {...result.fileInfo},
+            buffer: result.fileInfo.content, // Use the content from fileInfo
             error: null,
             cumulativeError: null,
+            ...result.fileInfo,
           }));
+          console.log(filesWithBuffers)
 
           const updatedFiles = this.props.multiple
             ? [...this.state.selectedFiles, ...filesWithBuffers]
@@ -232,17 +236,94 @@ export default class UploadFileComponent extends React.Component<
   };
 
 
-  private convertToFileArrayBuffer(file: File): Promise<ArrayBuffer> {
+  private convertToFileArrayBuffer(file: File): Promise<{
+    fileInfo: {
+      name: string;
+      content: ArrayBuffer | null;
+      index: number;
+      fileUrl: string;
+      ServerRelativeUrl: string;
+      isExists: boolean;
+      Modified: string;
+      isSelected: boolean;
+      fileSize: number;
+      fileValidation: boolean;
+      errormsg: string;
+    };
+  }> {
     return new Promise((resolve, reject) => {
+      const maxFileSizeBytes = 25 * 1024 * 1024; // 25 MB
+      const arrayExtension = [
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".xlsx",
+        ".PDF",
+        ".DOC",
+        ".DOCX",
+        ".XLSX",
+      ];
+      const validname = /^[a-zA-Z0-9._ -]+$/;
+  
+      const filesId = Math.floor(Math.random() * 1000000000 + 1);
+      const fileExt = file.name.split(".").pop();
+  
+      // Initial Validation
+      let fileValidation = true;
+      let errormsg = "";
+  
+      if (!arrayExtension.includes(`.${fileExt}`)) {
+        fileValidation = false;
+        errormsg = "File type is not allowed";
+      }
+      else if (file.size > maxFileSizeBytes) {
+        fileValidation = false;
+        errormsg = `File size should not exceed more ${this.props.maxFileSizeMB}MB`;
+      }
+       else if (validname.test(file.name)) {
+        fileValidation = false;
+        errormsg = "File name should not contain special characters";
+      } 
+  
+      // Read file content if valid
       const reader = new FileReader();
       reader.onload = () => {
-        if (reader.result instanceof ArrayBuffer) {
-          resolve(reader.result);
-        } else {
-          reject("FileReader result is not an ArrayBuffer");
-        }
+        const content = reader.result instanceof ArrayBuffer ? reader.result : null;
+  
+        const fileInfo:any = {
+          name: file.name,
+          content: content,
+          id: filesId,
+          fileUrl: "",
+          ServerRelativeUrl: "",
+          isExists: false,
+          Modified: new Date().toISOString(),
+          isSelected: false,
+          fileSize: file.size,
+          fileValidation: fileValidation,
+          errormsg: fileValidation ? "" : errormsg,
+        };
+  
+        resolve({ fileInfo });
       };
-      reader.onerror = (error) => reject(error);
+  
+      reader.onerror = (error) => {
+        const fileInfo = {
+          name: file.name,
+          content: null,
+          id: filesId,
+          fileUrl: "",
+          ServerRelativeUrl: "",
+          isExists: false,
+          Modified: new Date().toISOString(),
+          isSelected: false,
+          fileSize: file.size,
+          fileValidation: false,
+          errormsg: "Error reading file content",
+        };
+        reject({ fileInfo, error });
+      };
+  
       reader.readAsArrayBuffer(file);
     });
   }

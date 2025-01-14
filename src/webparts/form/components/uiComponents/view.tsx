@@ -23,7 +23,6 @@ import {
   mergeStyleSets,
 } from "@fluentui/react";
 import styles from "../Form.module.scss";
-// import  { TimeCheckerTab } from "./timeChecker";
 import ApproverAndReviewerTableInViewForm from "./simpleTable/reviewerAndApproverTableInViewForm";
 import CommentsLogTable from "./simpleTable/commentsTable";
 import WorkFlowLogsTable from "./simpleTable/workFlowLogsTable";
@@ -572,9 +571,6 @@ export default class ViewForm extends React.Component<
 
     const libraryTilte = this.props.libraryId;
     this._libraryName = libraryTilte?.title;
-    // TimeCheckerTab.initPageLoadTimeCheck();
-    // const timerChecker = new TimeChecker()
-    // timerChecker.startTimeCheck()
     this._fetchApproverDetails();
     this._fetchATRCreatorDetails();
     this._getItemData(this._itemId, this._folderName).then(async () => {
@@ -766,7 +762,6 @@ export default class ViewForm extends React.Component<
         : `${this.state.title.split("/")[0]}/${currentyear}-${nextYear}/C${id}`;
 
     this._folderNameAfterApproved = requesterNo.replace(/\//g, "-");
-    // console.log(this._folderNameAfterApproved)
 
     const folderName = requesterNo.replace(/\//g, "-");
     return folderName;
@@ -850,9 +845,8 @@ export default class ViewForm extends React.Component<
     const newATRGridData = JSON.parse(data)
 
       .map((each: any) => {
-        // console.log(each)
+      
         if (each.atrCreatorEmail === this._currentUserEmail) {
-          // console.log(each)
           this.setState({ atrType: each.atrType });
           return {
             comments: each.noteApproverComments,
@@ -1114,7 +1108,6 @@ export default class ViewForm extends React.Component<
     typeOfReferee: any
   ): any => {
     commentsData = JSON.parse(commentsData);
-    // console.log(commentsData);
 
     const lenOfCommentData = commentsData.length;
     if (typeOfReferee === "to") {
@@ -1148,7 +1141,7 @@ export default class ViewForm extends React.Component<
         }
       });
 
-      // console.log(filterApproverData);
+  
       return filterApproverData;
     }
 
@@ -1179,7 +1172,7 @@ export default class ViewForm extends React.Component<
     | boolean
     | null => {
     let result: boolean | null = null;
-    // console.log(result);
+   
 
     this.state.ApproverDetails.forEach((each: any) => {
       if (
@@ -1187,7 +1180,7 @@ export default class ViewForm extends React.Component<
           this._currentUserEmail &&
         each.approverOrder === this.state.ApproverOrder
       ) {
-        // console.log(each);
+        
         switch (this.state.statusNumber) {
           case "9000":
             result = false;
@@ -1210,7 +1203,7 @@ export default class ViewForm extends React.Component<
         }
       }
     });
-    // console.log(result);
+    
     return result;
   };
 
@@ -1252,15 +1245,12 @@ export default class ViewForm extends React.Component<
         .expand("Author", "Editor")()
         .then((res) => res);
 
-      // console.log(folderItemsPdf)
-
-      // console.log(this._folderNameAfterApproved)
+      
 
       if (this.state.statusNumber === "9000") {
-        // Filter files based on `_folderNameAfterApproved` value in the file name
+      
         const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
-          // console.log(file)
-          // console.log(file.Name)
+         
           return file.Name.toLowerCase().includes(
             this._folderNameAfterApproved.toLowerCase()
           );
@@ -1271,64 +1261,62 @@ export default class ViewForm extends React.Component<
             const fileObj = this._getFileObj(values);
             tempFilesPdf.push(fileObj);
 
-            // Update state for the first file's link
+        
             if (!this.state.pdfLink) {
               this.setState({ pdfLink: fileObj.fileUrl });
             }
           });
 
-          // Update state with filtered files
+          
           this.setState({ noteTofiles: tempFilesPdf });
         } else {
           const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
-            // console.log(file)
-            // console.log(file.Name)
+           
             return !file.Name.toLowerCase().includes(
               this._folderNameAfterApproved.toLowerCase()
             );
           });
 
-          // console.log("Filtered files:", filteredFolderItemsPdf);
+          
           const tempFilesPdf: IFileDetails[] = [];
           filteredFolderItemsPdf.forEach((values) => {
             const fileObj = this._getFileObj(values);
             tempFilesPdf.push(fileObj);
 
-            // Update state for the first file's link
+           
             if (!this.state.pdfLink) {
               this.setState({ pdfLink: fileObj.fileUrl });
             }
           });
 
-          // Update state with all files
+         
           this.setState({ noteTofiles: tempFilesPdf });
         }
 
-        // console.log("Filtered files:", filteredFolderItemsPdf);
+       
       } else {
-        // Original processing for all files
+       
 
         const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
-          // console.log(file)
-          // console.log(file.Name)
+         
           return !file.Name.toLowerCase().includes(
             this._folderNameAfterApproved.toLowerCase()
           );
         });
 
-        // console.log("Filtered files:", filteredFolderItemsPdf);
+       
         const tempFilesPdf: IFileDetails[] = [];
         filteredFolderItemsPdf.forEach((values) => {
           const fileObj = this._getFileObj(values);
           tempFilesPdf.push(fileObj);
 
-          // Update state for the first file's link
+          
           if (!this.state.pdfLink) {
             this.setState({ pdfLink: fileObj.fileUrl });
           }
         });
 
-        // Update state with all files
+       
         this.setState({ noteTofiles: tempFilesPdf });
       }
 
@@ -1442,7 +1430,7 @@ export default class ViewForm extends React.Component<
 
   private _getAuditTrail = async (status: any) => {
     const item = await this._getItemDataSpList(this._itemId);
-    // console.log(item);
+    
     const auditTrail = JSON.parse(item.AuditTrail);
     if (status === "gistDocuments") {
       const auditLog = [
@@ -1570,7 +1558,7 @@ export default class ViewForm extends React.Component<
       (each: any) => each.userId === this.state.currentApprover[0].id
     );
 
-    // console.log(currentApproverDetails)
+   
     return currentApproverDetails;
   };
 
@@ -1634,7 +1622,7 @@ export default class ViewForm extends React.Component<
 
   private _updateATRRequest = async (currentApproverId: any): Promise<void> => {
     this.state.noteATRAssigneeDetails.map(async (each: any) => {
-      // console.log(each);
+      
       try {
         const auditLog = [
           {
@@ -1673,7 +1661,7 @@ export default class ViewForm extends React.Component<
           ATRType: this.state.atrType,
         };
 
-        // console.log(atrObj);
+       
         await this.props.sp.web.lists
           .getByTitle("ATRRequests")
           .items.add(atrObj);
@@ -1723,7 +1711,7 @@ export default class ViewForm extends React.Component<
         ATRType: "Default",
       };
 
-      // console.log(defaultAtrObj);
+    
 
       await this.props.sp.web.lists
         .getByTitle("ATRRequests")
@@ -1743,7 +1731,7 @@ export default class ViewForm extends React.Component<
         return each;
       }
     });
-    // console.log(currentApproverdata);
+
 
     return currentApproverdata[0];
   };
@@ -1822,7 +1810,7 @@ export default class ViewForm extends React.Component<
   ): Promise<any> => {
     let noteATRAssigneeDTO;
 
-    // Determine the value of NoteATRAssigneeDTO
+    
     if (this._checkCurrentUserIsAATRAssignee()) {
       if (this.state.atrGridData.length > 0) {
         noteATRAssigneeDTO = JSON.stringify([
@@ -1883,7 +1871,7 @@ export default class ViewForm extends React.Component<
     statusNumber: string
   ) => {
     const item = await this._getItemDataSpList(this._itemId);
-    // console.log(item);
+ 
     const StatusNumber = item?.StatusNumber;
     this._closeDialog();
 
@@ -2071,11 +2059,11 @@ export default class ViewForm extends React.Component<
     const StatusNumber = item?.StatusNumber;
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-    // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
+   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    // console.log(currentUserId, "Current User Id");
+   
     const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
     const _CommentsLog =
       item.NoteApproverCommentsDTO !== null
@@ -2085,7 +2073,7 @@ export default class ViewForm extends React.Component<
       (each: any) => each.userId
     );
 
-    // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+  
 
     if (StatusNumber === "8000") {
       this.setState({
@@ -2230,14 +2218,14 @@ export default class ViewForm extends React.Component<
         : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-    // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
+   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
 
-    // console.log(currentUserId, "Current User Id");
+   
 
     if (
       StatusNumber !== "200" &&
@@ -2325,7 +2313,7 @@ export default class ViewForm extends React.Component<
           },
         ]),
       };
-      // console.log(obj);
+     
 
       await this.props.sp.web.lists
         .getByTitle(this._listname)
@@ -2378,11 +2366,11 @@ export default class ViewForm extends React.Component<
         : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-    // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
+   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    // console.log(currentUserId, "Current User Id");
+   
     if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
@@ -2397,7 +2385,7 @@ export default class ViewForm extends React.Component<
       (each: any) => each.userId
     );
 
-    // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+   
 
     if (_ApproverInfoDTOId.includes(currentUserId)) {
       this.setState({
@@ -2500,17 +2488,17 @@ export default class ViewForm extends React.Component<
         : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-    // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
+   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-    // console.log(currentUserId, "Current User Id");
+    
 
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
 
-    // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+    
 
     if (
       StatusNumber !== "200" &&
@@ -2607,13 +2595,13 @@ export default class ViewForm extends React.Component<
     const StatusNumber = item?.StatusNumber;
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-    // console.log(checkCurrentApproverIsCurrentUser, "In List Current Actioner");
+ 
 
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
 
-    // console.log(_ApproverInfoDTOId, "_ApproverInfoDTO's User Id");
+    
 
     const _NoteReferrerDTO =
       item?.NoteReferrerDTO !== null ? JSON.parse(item?.NoteReferrerDTO) : [];
@@ -2621,11 +2609,9 @@ export default class ViewForm extends React.Component<
       _NoteReferrerDTO.length > 0
         ? _NoteReferrerDTO[_NoteReferrerDTO.length - 1].referrerId
         : null;
-    // console.log(_refereeId)
-
+   
     const _actionersIDs = [..._ApproverInfoDTOId, _refereeId];
-    // console.log(_actionersIDs)
-
+   
     const actionTakenOcurredOrNot = JSON.parse(item?.NoteApproversDTO)[0]
       .actionDate;
 
@@ -2722,7 +2708,7 @@ export default class ViewForm extends React.Component<
     this.setState({ isLoading: true });
     const item = await this._getItemDataSpList(this._itemId);
     const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
-    // console.log(item);
+   
     const _ReferDTO =
       item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : [];
 
@@ -2767,7 +2753,7 @@ export default class ViewForm extends React.Component<
           return each;
         });
 
-        // console.log(updateNoteReferDTO)
+      
 
         await this.props.sp.web.lists
           .getByTitle(this._listname)
@@ -2812,7 +2798,7 @@ export default class ViewForm extends React.Component<
 
       const updateCurrentApprover = (): any => {
         const upatedCurrentApprover = _ApproverDTO.filter((each: any) => {
-          // console.log(this.state.peoplePickerSelectedDataWhileReferOrChangeApprover);
+         
 
           if (each.status === "Pending") {
             return {
@@ -2879,7 +2865,7 @@ export default class ViewForm extends React.Component<
           return each;
         }
       });
-      // console.log(modifyApproverDetails);
+     
 
       const reviewerIds = modifyApproverDetails
         .filter((each: any) => each.approverType === "Reviewer")
@@ -2938,7 +2924,7 @@ export default class ViewForm extends React.Component<
       (each: any) => each.actionDate !== ""
     );
 
-    // console.log(checkActionDateIsUpdated)
+   
 
     return checkActionDateIsUpdated;
   };
@@ -3643,7 +3629,7 @@ export default class ViewForm extends React.Component<
   };
 
   private _getReferBackAndApproverStageButtons = () => {
-    // console.log("btn visablity");
+   
     return this.state.noteReferrerDTO.length > 0 &&
       this.state.noteReferrerDTO[this.state.noteReferrerDTO.length - 1]
         ?.referrerEmail === this._currentUserEmail &&
@@ -3727,7 +3713,7 @@ export default class ViewForm extends React.Component<
         sp={this.props.sp}
         context={this.props.context}
         fetchReferData={(data: any) => {
-          // console.log(data, "Comments Data");
+         
           this.setState((prevState) => ({
             commentsData: [...prevState.commentsData, data],
             generalComments: [...prevState.commentsData, data],
@@ -3794,7 +3780,7 @@ export default class ViewForm extends React.Component<
         <Modal
           isOpen={this.state.hideParellelActionAlertDialog}
           onDismiss={() => {
-            // console.log("close triggered");
+          
             this.setState((prevState) => ({
               hideParellelActionAlertDialog: !prevState.hideParellelActionAlertDialog,
             }));
@@ -3811,7 +3797,7 @@ export default class ViewForm extends React.Component<
             <IconButton
               iconProps={{ iconName: "Cancel" }}
               onClick={() => {
-                // console.log("close triggered");
+               
                 window.location.reload();
                 this.setState({ hideParellelActionAlertDialog: false });
               }}
@@ -4003,8 +3989,7 @@ export default class ViewForm extends React.Component<
             className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
           >
             pending with:{" "}
-            {/* {this.state.status !== "Rejected" &&
-          this._getPendingStatus(this.state.ApproverDetails)} */}
+           
             {this.state.currentApprover[0]?.Title}
           </h1>
 
@@ -4169,9 +4154,7 @@ export default class ViewForm extends React.Component<
                               const currentApproverDetailsFromApproverDTO =
                                 this._getCurrentApproverDetailsFromApproverDTO();
 
-                              // console.log(
-                              //   currentApproverDetailsFromApproverDTO
-                              // );
+                            
 
                               this.setState((prevState) => ({
                                 atrGridData: data.comments,
@@ -4796,7 +4779,7 @@ export default class ViewForm extends React.Component<
   public render(): React.ReactElement<IViewFormProps> {
     console.log(this.state);
 
-    // console.log(formTitle)
+ 
 
     return (
       <div className={styles.viewForm}>

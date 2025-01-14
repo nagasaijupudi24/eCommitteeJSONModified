@@ -54,7 +54,6 @@ import {
   PrincipalType,
   IPeoplePickerContext,
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-// import { TimeCheckerTab } from "./timeChecker";
 import DraftSuccessDialog from "./dialogFluentUi/draftDialog";
 import CancelConfirmationDialog from "./dialogFluentUi/cancelDialog";
 import SuccessDialog from "./dialogFluentUi/endDialog";
@@ -126,7 +125,7 @@ interface IMainFormState {
   isAmountVisable: boolean;
   isTypeOfFinacialNote: boolean;
   isNatureOfApprovalOrSanction: boolean;
-  //generalSection
+
   committeeNameFeildValue: string;
   subjectFeildValue: string;
 
@@ -587,7 +586,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     return approverfilterData;
   };
 
-  private _getFileObj = async (data: any): Promise<File> => {
+  private _getFileObj = async (data: any): Promise<any> => {
     const tenantUrl = `${window.location.protocol}//${window.location.host}`;
 
     const formatDateTime = (date: string | number | Date) => {
@@ -612,20 +611,41 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       lastModified: new Date(data.TimeLastModified).getTime(),
     });
 
-    
-    (file as any).metadata = {
+    const filesId = Math.floor(Math.random() * 1000000000 + 1);
+
+
+     const filesObj = {
+      name:(file as any).name,
+      content: fileContent,
       index: 0,
+      id:filesId,
+      LinkingUri: data.LinkingUri || data.LinkingUrl,
       fileUrl: tenantUrl + data.ServerRelativeUrl,
-      ServerRelativeUrl: data.ServerRelativeUrl,
+      ServerRelativeUrl: "",
       isExists: true,
-      Modified: data.TimeLastModified,
+      Modified: "",
       isSelected: false,
-      size: parseInt(data.Length, 10),
+      size: parseInt(data.Length),
+      type: `application/${data.Name.split(".")[1]}`,
       modifiedBy: data.Author.Title,
-      createDate: result,
+      createData: result,
     };
 
-    return file;
+
+    
+    // (file as any).metadata = {
+    //   index: 0,
+    //   fileUrl: tenantUrl + data.ServerRelativeUrl,
+    //   ServerRelativeUrl: data.ServerRelativeUrl,
+    //   isExists: true,
+    //   Modified: data.TimeLastModified,
+    //   isSelected: false,
+    //   size: parseInt(data.Length, 10),
+    //   modifiedBy: data.Author.Title,
+    //   createDate: result,
+    // };
+
+    return filesObj;
   };
 
   private _getItemDocumentsData = async () => {
@@ -1445,31 +1465,31 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
   
 
 
-  private getFileArrayBuffer =async  (file: any): Promise<ArrayBuffer> => {
-    if (file.arrayBuffer) {
-      return await file.arrayBuffer();
-    } else {
-      let blob: Blob;
-      if (file instanceof Blob) {
-        blob = file;
-      } else {
-        blob = new Blob([file]);
-      }
+  // private getFileArrayBuffer =async  (file: any): Promise<ArrayBuffer> => {
+  //   if (file.arrayBuffer) {
+  //     return await file.arrayBuffer();
+  //   } else {
+  //     let blob: Blob;
+  //     if (file instanceof Blob) {
+  //       blob = file;
+  //     } else {
+  //       blob = new Blob([file]);
+  //     }
 
-      return new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (reader.result) {
-            resolve(reader.result as ArrayBuffer);
-          } else {
-            reject(new Error("Failed to read file as ArrayBuffer"));
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(blob);
-      });
-    }
-  }
+  //     return new Promise<ArrayBuffer>((resolve, reject) => {
+  //       const reader = new FileReader();
+  //       reader.onloadend = () => {
+  //         if (reader.result) {
+  //           resolve(reader.result as ArrayBuffer);
+  //         } else {
+  //           reject(new Error("Failed to read file as ArrayBuffer"));
+  //         }
+  //       };
+  //       reader.onerror = reject;
+  //       reader.readAsArrayBuffer(blob);
+  //     });
+  //   }
+  // }
 
 
 
@@ -1555,11 +1575,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
        
         for (const file of files) {
          
-          const arrayBuffer = await this.getFileArrayBuffer(file);
+      
           try{
             await sp.web
             .getFolderByServerRelativePath(siteUrl)
-            .files.addUsingPath(file.name, arrayBuffer, {
+            .files.addUsingPath(file.name, file.content, {
               Overwrite: true,
             });
 
@@ -1646,11 +1666,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
         for (const file of files) {
          
-          const arrayBuffer = await this.getFileArrayBuffer(file);
+          // const arrayBuffer = await this.getFileArrayBuffer(file);
         
           await sp.web
             .getFolderByServerRelativePath(siteUrl)
-            .files.addUsingPath(file.name, arrayBuffer, {
+            .files.addUsingPath(file.name, file.content, {
               Overwrite: true,
             });
             
@@ -3511,7 +3531,7 @@ try {
 
     
     } catch (error) {
-      // console.error("Error clearing folder:", error);
+      return error
     }
   }
 
@@ -3521,11 +3541,11 @@ try {
     try {
       for (const file of libraryName) {
        
-        const arrayBuffer = await this.getFileArrayBuffer(file);
+        // const arrayBuffer = await this.getFileArrayBuffer(file);
        
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, arrayBuffer, {
+          .files.addUsingPath(file.name, file.content, {
             Overwrite: true,
           });
       }
@@ -3694,7 +3714,7 @@ try {
      
       
     } catch (error) {
-      // console.error("Error fetching department alias: ", error);
+      return error
     }
   };
 
@@ -3847,7 +3867,7 @@ try {
     }
   };
 
-  private handleSupportingFileChange = (files: File[], typeOfDoc: string) => {
+  private handleSupportingFileChange = (files: any, typeOfDoc: string) => {
  
     
 
