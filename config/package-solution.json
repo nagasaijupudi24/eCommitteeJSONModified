@@ -3,7 +3,7 @@
   "solution": {
     "name": "e-committee-form-client-side-solution",
     "id": "eec28e9c-5983-4f55-a1b7-310691c42b8f",
-    "version": "1.0.0.3",
+    "version": "1.0.0.4",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "e-committee-form Feature",
         "description": "The feature that activates elements of the e-committee-form solution.",
         "id": "3395f8ea-07f9-4110-8df2-a9405398511c",
-        "version": "1.0.0.3"
+        "version": "1.0.0.4"
       }
     ]
   },

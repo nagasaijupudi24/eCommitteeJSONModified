@@ -73,6 +73,7 @@ interface IATRAssigneeState {
 
   isDisabled: boolean;
   statusOptions: IDropdownOption[];
+  completedRecords:any;
 }
 
 
@@ -93,6 +94,12 @@ export class ATRAssignee extends React.Component<
 
     
     this.state = {
+      completedRecords:this.props.artCommnetsGridData.map((each:any)=>{
+        if(each.status==='Completed'){
+          console.log(each)
+          return each
+        }
+      }),
       tableData: this.props.artCommnetsGridData,
       selectedUsers: {},
       currentRowKey: null,
@@ -179,7 +186,7 @@ export class ATRAssignee extends React.Component<
       onRender: (item: ITableItem) => (
         <IconButton
           iconProps={{ iconName: "Delete" }}
-          disabled={this.state.isDisabled}
+          disabled={this.state.isDisabled || item.status ==="Completed"}
           title="Delete"
           ariaLabel="Delete"
           styles={{ root: { paddingBottom: '16px',background:'transparent' } }}
@@ -325,7 +332,7 @@ export class ATRAssignee extends React.Component<
   ): void => {
     if (option) {
       this.setState({ selectedChoice: option.key,selectedValue:{},tableData:[],selectedDropDownValue:'' ,selectedUsers:{}});
-      // console.log("Selected choice:", option.key);
+    
       this.props.getATRTypeOnChange(option.key)
       this.props.clearAtrGridDataOnSelectionOFATRType()
 

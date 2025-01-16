@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @rushstack/no-new-null */
@@ -6,11 +7,12 @@ import { IconButton } from "@fluentui/react";
 
 
 import styles from "../Form.module.scss";
+import { v4 } from "uuid";
 
 export interface IUploadFileProps {
   
   typeOfDoc: string;
-  onChange: (files: File[] | null, typeOfDoc: string) => void;
+  onChange: (files: any[] | null, typeOfDoc: string) => void;
   accept?: string;
   maxFileSizeMB: number;
   multiple: boolean;
@@ -28,7 +30,7 @@ interface IFileWithError {
 }
 
 interface IUploadFileState {
-  selectedFiles: IFileWithError[];
+  selectedFiles: any[];
   cummError: string | null;
   errorOfFile: any;
 }
@@ -98,7 +100,7 @@ export default class UploadFileComponent extends React.Component<
     return regex.test(name);
   }
 
-  private validateFiles(files: File[]): void {
+  private validateFiles(files: any[]): void {
     const { maxFileSizeMB } = this.props;
     const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
 
@@ -117,20 +119,20 @@ export default class UploadFileComponent extends React.Component<
         )
       ) {
         error = "File type is not allowed";
-      } else if (file.size > maxFileSizeBytes) {
+      } else if ((file.size ||file.fileSize) > maxFileSizeBytes) {
         error = `File size should not exceed more ${maxFileSizeMB}MB`;
       } else if (!this.isFileNameValid(file.name)) {
         error = "File name should not contain special characters";
       } else if (
        
-        currentTotalSize + file.size >
+        currentTotalSize + (file.size ||file.fileSize) >
         maxFileSizeBytes
       ) {
         cumulativeError =
           "Cumulative size of all the supporting documents should not exceed 25 MB.";
       }
 
-      currentTotalSize += file.size;
+      currentTotalSize += (file.size ||file.fileSize);
       validFiles.push({
         id: `${file.name}-${i}`,
         file,
@@ -177,13 +179,16 @@ export default class UploadFileComponent extends React.Component<
 
       Promise.all(filePromises)
         .then((fileBuffers) => {
-          const filesWithBuffers = fileBuffers.map((buffer, index) => ({
-            id: `${files[index].name}-${index}`,
-            file: files[index],
-            buffer: buffer,
+          const filesWithBuffers = fileBuffers.map((result, index) => ({
+           
+          
+            file: {...result.fileInfo},
+            buffer: result.fileInfo.content, // Use the content from fileInfo
             error: null,
             cumulativeError: null,
+            ...result.fileInfo,
           }));
+          console.log(filesWithBuffers)
 
           const updatedFiles = this.props.multiple
             ? [...this.state.selectedFiles, ...filesWithBuffers]
@@ -232,17 +237,93 @@ export default class UploadFileComponent extends React.Component<
   };
 
 
-  private convertToFileArrayBuffer(file: File): Promise<ArrayBuffer> {
+  private validateFile(file: File): { isValid: boolean; errorMsg: string } {
+    const maxFileSizeBytes = 25 * 1024 * 1024; // 25 MB
+    const allowedExtensions = [".pdf", ".doc", ".docx", ".xlsx"];
+    const validNamePattern = /^[a-zA-Z0-9._ -]+$/;
+  
+    const fileExt = `.${file.name.split(".").pop()?.toLowerCase()}`;
+  
+    if (!allowedExtensions.includes(fileExt)) {
+      return { isValid: false, errorMsg: "File type is not allowed" };
+    }
+  
+    if (file.size > maxFileSizeBytes) {
+      return { isValid: false, errorMsg: `File size should not exceed more than ${this.props.maxFileSizeMB}MB` };
+    }
+  
+    if (!validNamePattern.test(file.name)) {
+      return { isValid: false, errorMsg: "File name should not contain special characters" };
+    }
+  
+    return { isValid: true, errorMsg: "" };
+  }
+
+  private convertToFileArrayBuffer(file: File): Promise<{
+    fileInfo: {
+      name: string;
+      content: ArrayBuffer | null;
+      id: any;
+      fileUrl: string;
+      ServerRelativeUrl: string;
+      isExists: boolean;
+      Modified: string;
+      isSelected: boolean;
+      fileSize: number;
+      fileValidation: boolean;
+      errormsg: string;
+    };
+  }> {
     return new Promise((resolve, reject) => {
+    
+  
+      const filesId =v4();
+     
+
+      const { isValid, errorMsg } = this.validateFile(file);
+  
+      // Initial Validation
+      let fileValidation = true;
+    
+      // Read file content if valid
       const reader = new FileReader();
       reader.onload = () => {
-        if (reader.result instanceof ArrayBuffer) {
-          resolve(reader.result);
-        } else {
-          reject("FileReader result is not an ArrayBuffer");
-        }
+        const content = reader.result instanceof ArrayBuffer ? reader.result : null;
+  
+        const fileInfo = {
+          name: file.name,
+          content: content,
+          id: filesId,
+          fileUrl: "",
+          ServerRelativeUrl: "",
+          isExists: false,
+          Modified: new Date().toISOString(),
+          isSelected: false,
+          fileSize: file.size,
+          fileValidation: fileValidation,
+          errormsg: isValid ? "" : errorMsg,
+        };
+  
+        resolve({ fileInfo });
       };
-      reader.onerror = (error) => reject(error);
+  
+      reader.onerror = (error) => {
+        const fileInfo = {
+          name: file.name,
+          content: null,
+          id: filesId,
+          fileUrl: "",
+          ServerRelativeUrl: "",
+          isExists: false,
+          Modified: new Date().toISOString(),
+          isSelected: false,
+          fileSize: file.size,
+          fileValidation: false,
+          errormsg: "Error reading file content",
+        };
+        reject({ fileInfo, error });
+      };
+  
       reader.readAsArrayBuffer(file);
     });
   }
@@ -259,7 +340,6 @@ export default class UploadFileComponent extends React.Component<
     }, () => {
     
       this.validateFiles(this.state.selectedFiles.map((f) => f.file));
-
       this.props.errorData([this.state.selectedFiles, this.props.typeOfDoc]);
   
    
@@ -270,7 +350,7 @@ export default class UploadFileComponent extends React.Component<
     });
   
     
-   
+  
   };
   
 

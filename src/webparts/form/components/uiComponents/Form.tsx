@@ -66,6 +66,7 @@ import CummulativeErrorDialog from "./dialogFluentUi/cummulativeDialog";
 import SupportingDocumentsUploadFileComponent from "./supportingDocuments";
 import CommentsLogTable from "./simpleTable/commentsTable";
 import React from "react";
+import { v4 } from "uuid";
 
 
 interface INoteObject {
@@ -586,7 +587,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     return approverfilterData;
   };
 
-  private _getFileObj = async (data: any): Promise<File> => {
+  private _getFileObj = async (data: any): Promise<any> => {
     const tenantUrl = `${window.location.protocol}//${window.location.host}`;
 
     const formatDateTime = (date: string | number | Date) => {
@@ -611,20 +612,32 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       lastModified: new Date(data.TimeLastModified).getTime(),
     });
 
-    
-    (file as any).metadata = {
+    const filesId = v4();
+
+
+     const filesObj = {
+      name:(file as any).name,
+      content: fileContent,
       index: 0,
+      id:filesId,
+      LinkingUri: data.LinkingUri || data.LinkingUrl,
       fileUrl: tenantUrl + data.ServerRelativeUrl,
-      ServerRelativeUrl: data.ServerRelativeUrl,
+      ServerRelativeUrl: "",
       isExists: true,
-      Modified: data.TimeLastModified,
+      Modified: "",
       isSelected: false,
-      size: parseInt(data.Length, 10),
+      size: parseInt(data.Length),
+      type: `application/${data.Name.split(".")[1]}`,
       modifiedBy: data.Author.Title,
-      createDate: result,
+      createData: result,
+      errormsg:''
     };
 
-    return file;
+
+    
+
+
+    return filesObj;
   };
 
   private _getItemDocumentsData = async () => {
@@ -1190,7 +1203,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
     const reviewerEmail = reviewerInfo.email || reviewerInfo.secondaryText|| reviewerInfo.approverEmail ;
     const reviewerName = reviewerInfo.text ||reviewerInfo.approverEmailName;
 
-    // Condition checks
+    
     const isReviewerOrApprover =
       reviewerTitles.includes(reviewerName) ||
       approverTitles.includes(reviewerName);
@@ -1444,32 +1457,6 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
   
 
 
-  private getFileArrayBuffer =async  (file: any): Promise<ArrayBuffer> => {
-    if (file.arrayBuffer) {
-      return await file.arrayBuffer();
-    } else {
-      let blob: Blob;
-      if (file instanceof Blob) {
-        blob = file;
-      } else {
-        blob = new Blob([file]);
-      }
-
-      return new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (reader.result) {
-            resolve(reader.result as ArrayBuffer);
-          } else {
-            reject(new Error("Failed to read file as ArrayBuffer"));
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(blob);
-      });
-    }
-  }
-
 
 
  
@@ -1519,7 +1506,7 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
       }
       
 
-      for (const { folderName, files, errorCondition } of filesDataArray) {
+      for (const { folderName, files } of filesDataArray) {
         const siteUrl = `${parentFolderPath}/${folderName}`;
         
 
@@ -1539,26 +1526,20 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
         
 
       
-        if (errorCondition) {
-         
-          if (this.state.errorForCummulative) {
-            
-            return;
-          } else {
-           
-
-            continue;
-          }
-        }
 
        
         for (const file of files) {
+          console.log(file)
+
+          if (file.errormsg !==""){
+            continue
+          }
          
-          const arrayBuffer = await this.getFileArrayBuffer(file);
+      
           try{
             await sp.web
             .getFolderByServerRelativePath(siteUrl)
-            .files.addUsingPath(file.name, arrayBuffer, {
+            .files.addUsingPath(file.name, file.content, {
               Overwrite: true,
             });
 
@@ -1645,11 +1626,11 @@ export default class Form extends React.Component<IFormProps, IMainFormState> {
 
         for (const file of files) {
          
-          const arrayBuffer = await this.getFileArrayBuffer(file);
+       
         
           await sp.web
             .getFolderByServerRelativePath(siteUrl)
-            .files.addUsingPath(file.name, arrayBuffer, {
+            .files.addUsingPath(file.name, file.content, {
               Overwrite: true,
             });
             
@@ -3519,12 +3500,17 @@ try {
  
     try {
       for (const file of libraryName) {
+        console.log(file)
+
+        if (file.errormsg !==""){
+          continue
+        }
        
-        const arrayBuffer = await this.getFileArrayBuffer(file);
+     
        
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, arrayBuffer, {
+          .files.addUsingPath(file.name, file.content, {
             Overwrite: true,
           });
       }
@@ -3556,11 +3542,22 @@ try {
   }
 
   private handleUpdate = async (showAlert: boolean = true): Promise<void> => {
+    let itemList
 
-    const itemList = await this._getItemDataSpList(this._itemId);
-    console.log(itemList);
-    const StatusNumber = itemList?.StatusNumber;
+    if (this.state.itemId){
+       itemList = await this._getItemDataSpList( this.state.itemId);
+
+    }else{
+     itemList = await this._getItemDataSpList(this._itemId );
+      console.log(itemList);
+   
     this.setState({ showCancelDialog: false, isLoadingOnForm: true });
+
+    }
+    const StatusNumber = itemList?.StatusNumber;
+
+    
+    
 
     if (StatusNumber === '2000' || StatusNumber ==='3000' ||StatusNumber==='4000' || StatusNumber==='4900'|| StatusNumber==='8000'|| StatusNumber==='9000') {
       this.setState({
@@ -3629,7 +3626,7 @@ try {
         ));
 
    
-      this.state.errorFilesList.supportingDocument.length === 0 &&
+      
         (await this.updateSupportingDocumentFolderItems(
           this.state.supportingDocumentfiles,
           `${this._folderName}/SupportingDocument`
@@ -3846,7 +3843,7 @@ try {
     }
   };
 
-  private handleSupportingFileChange = (files: File[], typeOfDoc: string) => {
+  private handleSupportingFileChange = (files: any, typeOfDoc: string) => {
  
     
 

@@ -851,7 +851,7 @@ export default class ViewForm extends React.Component<
           return {
             comments: each.noteApproverComments,
             assignedTo: each.atrAssigneeEmailName,
-            status: "Submitted",
+            status: "Completed",
           };
         }
       })
@@ -1494,11 +1494,11 @@ export default class ViewForm extends React.Component<
 
     try {
       for (const file of libraryName) {
-        const arrayBuffer = await this.getFileArrayBuffer(file);
+       
 
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, arrayBuffer, {
+          .files.addUsingPath(file.name, file.content, {
             Overwrite: true,
           });
       }
@@ -1507,31 +1507,31 @@ export default class ViewForm extends React.Component<
     }
   }
 
-  private getFileArrayBuffer = async (file: any): Promise<ArrayBuffer> => {
-    if (file.arrayBuffer) {
-      return await file.arrayBuffer();
-    } else {
-      let blob: Blob;
-      if (file instanceof Blob) {
-        blob = file;
-      } else {
-        blob = new Blob([file]);
-      }
+  // private getFileArrayBuffer = async (file: any): Promise<ArrayBuffer> => {
+  //   if (file.arrayBuffer) {
+  //     return await file.arrayBuffer();
+  //   } else {
+  //     let blob: Blob;
+  //     if (file instanceof Blob) {
+  //       blob = file;
+  //     } else {
+  //       blob = new Blob([file]);
+  //     }
 
-      return new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          if (reader.result) {
-            resolve(reader.result as ArrayBuffer);
-          } else {
-            reject(new Error("Failed to read file as ArrayBuffer"));
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(blob);
-      });
-    }
-  };
+  //     return new Promise<ArrayBuffer>((resolve, reject) => {
+  //       const reader = new FileReader();
+  //       reader.onloadend = () => {
+  //         if (reader.result) {
+  //           resolve(reader.result as ArrayBuffer);
+  //         } else {
+  //           reject(new Error("Failed to read file as ArrayBuffer"));
+  //         }
+  //       };
+  //       reader.onerror = reject;
+  //       reader.readAsArrayBuffer(blob);
+  //     });
+  //   }
+  // };
 
   private async updateSupportingDocumentFolderItems(
     libraryName: any[],
@@ -1540,11 +1540,11 @@ export default class ViewForm extends React.Component<
   ) {
     try {
       for (const file of libraryName) {
-        const arrayBuffer = await this.getFileArrayBuffer(file);
+       
 
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
-          .files.addUsingPath(file.name, arrayBuffer, {
+          .files.addUsingPath(file.name, file.content, {
             Overwrite: true,
           });
       }
@@ -1844,7 +1844,8 @@ export default class ViewForm extends React.Component<
           : currentApproverDetail.userId,
       PreviousApproverId: previousApprover[0].userId,
 
-      NoteATRAssigneeDTO: noteATRAssigneeDTO,
+      NoteATRAssigneeDTO:  this._checkCurrentUserIsAATRAssignee() &&
+      this._checkCurrentUserIsApproverType()? noteATRAssigneeDTO:JSON.stringify([]),
       PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
       startProcessing: true,
     };
@@ -1919,8 +1920,12 @@ export default class ViewForm extends React.Component<
       );
       try {
         const updateAuditTrial = await this._getAuditTrail(
-          this._checkCurrentUserIsAATRAssignee() ? "Noted" : "Approved"
+          this._checkCurrentUserIsAATRAssignee() &&
+          this._checkCurrentUserIsApproverType() ? "Noted" : "Approved"
         );
+
+        console.log(  this._checkCurrentUserIsAATRAssignee() &&
+        this._checkCurrentUserIsApproverType(),  "this._checkCurrentUserIsAATRAssignee() &&this._checkCurrentUserIsApproverType()")
 
         const updateItems = await this._updateItemInHandleApproverBtn(
           modifyApproveDetails,
@@ -1937,7 +1942,8 @@ export default class ViewForm extends React.Component<
           .items.getById(this._itemId)
           .update(updateItems);
 
-        this._checkCurrentUserIsAATRAssignee() &&
+          this._checkCurrentUserIsAATRAssignee() &&
+            this._checkCurrentUserIsApproverType() &&
           (this.state.atrGridData.length > 0
             ? await this._updateATRRequest(currentApproverId)
             : await this._defaultUserAsATR(currentApproverId));
@@ -2542,7 +2548,7 @@ export default class ViewForm extends React.Component<
           NoteApproversDTO: JSON.stringify(modifyApproveDetails),
           CurrentApproverId: this.state.createdByID,
 
-          NoteATRAssigneeDTO: JSON.stringify([]),
+          // NoteATRAssigneeDTO: JSON.stringify([]),
           Status: statusFromEvent,
           StatusNumber: statusNumber,
           AuditTrail: updateAuditTrial,
@@ -3220,7 +3226,7 @@ export default class ViewForm extends React.Component<
   public _atrJoinedCommentsToDTO = (): void => {
     const joinedCommentsData = this.state.generalComments
       .filter((each: any) => !!each)
-      .map((each: any) => `${each?.pageNum} ${each?.page} ${each?.comment}`)
+      .map((each: any) => `${each?.pageNumber} ${each?.docReference} ${each?.comments}`)
       .join(", ");
 
     return joinedCommentsData;
@@ -3497,7 +3503,13 @@ export default class ViewForm extends React.Component<
       console.log(joinedCommentsData)
 
       return data.map((each: any) => {
-        return { ...each, comments: joinedCommentsData.join(", ") };
+        if (each.status ==='Completed'){
+          return each;
+
+        }else{
+          return { ...each, comments: joinedCommentsData.join(", ") };
+        }
+        
       });
     } else {
       return this.state.atrGridData;
