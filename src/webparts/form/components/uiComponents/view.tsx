@@ -891,6 +891,18 @@ export default class ViewForm extends React.Component<
     return item;
   };
 
+
+  private _requestedDate = (auditTrail:any):any =>{
+    const AuditTrail = JSON.parse(auditTrail)
+    const requestSubmittedDate = AuditTrail.filter(
+      (each:any)=>each.action.includes("Submitted")
+    )[0]?.createdDate
+
+    console.log(requestSubmittedDate)
+    return requestSubmittedDate
+
+  }
+
   private _generateTableData = (item: any, purposeData: any[]) => {
     return [
       item.CommitteeName !== null && {
@@ -903,7 +915,7 @@ export default class ViewForm extends React.Component<
       },
       item.Created !== null && {
         column1: "Request Date",
-        column2: `${this._formatDateTime(item.Created)}`,
+        column2: `${this._requestedDate(item.AuditTrail)}`,
       },
       item.Status !== null && {
         column1: "Status",
