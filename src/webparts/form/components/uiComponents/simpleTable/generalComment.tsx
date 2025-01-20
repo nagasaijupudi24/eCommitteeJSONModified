@@ -251,10 +251,12 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
     const updatedRows = this.state.rowsData.map((row) =>
       row.id === editRowId
         ? {
-            ...row,
-            pageNum: pageNumValue,
-            page: pageValue,
-            comment: commentValue,
+          ...row,
+          
+          pageNumber: pageNumValue || 'N/A',
+          docReference: pageValue || 'N/A',
+          comments: commentValue,
+          
           }
         : row
     ); 
@@ -268,9 +270,9 @@ export default class GeneralCommentsFluentUIGrid extends React.Component<
       row.id === editRowId
         ? {
             ...row,
-            pageNum: prev.pageNumValue,
-            page: prev.pageValue,
-            comment: prev.commentValue,
+            pageNumber: pageNumValue || 'N/A',
+            docReference: pageValue || 'N/A',
+            comments: commentValue,
           }
         : row
     );

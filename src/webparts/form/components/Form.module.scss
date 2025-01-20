@@ -551,6 +551,8 @@ h4{
   //
   font-size: 10px;
   align-self: flex-end;
+  width:90%;
+  text-align: right;
 }
 
 .warning {
@@ -1124,6 +1126,38 @@ canvas {
  
 }
 
+.iconWithText {
+  display: flex;
+  align-items: center;
+}
+
+.iconStyle {
+  margin-right: 8px; // Adjust spacing between the icon and text as needed
+}
+
+.peoplePickerAndADDBtnflexContainer {
+  display: flex;
+  flex-wrap: wrap;
+
+  @media (max-width: 550px) {
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start;
+    gap:4px;   /* Stretch items to fill the container width */
+  }
+}
+
+.peoplePickerWrapper {
+ 
+  min-width: 50px; /* Set a minimum width */
+}
+
+
+@media (max-width:550px) {
+  .peoplePickerWrapper{
+    margin-left: 6px;
+  }
+  
+}
 
 
 

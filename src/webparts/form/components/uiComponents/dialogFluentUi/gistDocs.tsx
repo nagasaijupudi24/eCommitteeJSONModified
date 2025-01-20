@@ -83,3 +83,8 @@ const GistDocSubmitted: React.FC<{ isVisibleAlter: boolean; onCloseAlter: () => 
 };
 
 export default GistDocSubmitted;
+// The selected reviewer cannot be the same as existing Reviewers/ Approver/ Requester/ Current Actioner.
+// isOpen={!hidden}
+// isBlocking={true}
+// onDismiss={handleDialogBox}
+// styles={modalStyles}

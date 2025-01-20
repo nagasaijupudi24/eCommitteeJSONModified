@@ -65,6 +65,7 @@ export interface IFileDetails {
   Modified?: string;
   isSelected?: boolean;
 }
+
 const Cutsomstyles = mergeStyleSets({
   modal: {
     padding: "10px",
@@ -217,7 +218,6 @@ const ReviewerOrApproverSectionInViewForm = (props: any): any => {
             <ApproverAndReviewerTableInViewForm
               data={props.reviewerORApproverData}
               reOrderData={props.reOrderData}
-            
               type={props.type}
             />
           </div>
@@ -226,6 +226,383 @@ const ReviewerOrApproverSectionInViewForm = (props: any): any => {
     </div>
   );
 };
+
+const GeneralCommentsInViewForm = (props: any): any => {
+  const {
+    expandSections,
+    _checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest,
+    _currentUserEmail,
+  } = props;
+
+  return (_checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest() &&
+    _currentUserEmail !== props.state.createdByEmail) ||
+    props._checkRefereeAvailable() ? (
+    <div className={styles.sectionContainer}>
+      <button
+        className={styles.header}
+        onClick={() => props._onToggleSection(`generalComments`)}
+      >
+        <Text className={styles.sectionText}>General Comments</Text>
+        <IconButton
+          iconProps={{
+            iconName: expandSections.generalComments
+              ? "ChevronUp"
+              : "ChevronDown",
+          }}
+          title="Expand/Collapse"
+          ariaLabel="Expand/Collapse"
+          className={styles.chevronIcon}
+        />
+      </button>
+
+      {expandSections.generalComments && (
+        <div className={`${styles.expansionPanelInside}`}>
+          <div style={{ padding: "15px", paddingTop: "4px" }}>
+            <GeneralCommentsFluentUIGrid
+              handleCommentDataFuntion={props._getCommentData}
+              data={props.state.generalComments}
+              currentUserDetails={props.currentUserDetails}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  ) : (
+    ""
+  );
+};
+
+const ATRAssigneInViewForm = (props: any): any => {
+  const { expandSections } = props;
+  return (
+    props._checkCurrentUserIsAATRAssignee() &&
+    props._checkCurrentUserIsApproverType() && (
+      <div className={styles.sectionContainer}>
+        <button
+          className={styles.header}
+          onClick={() => props._onToggleSection(`atrAssignees`)}
+        >
+          <Text className={styles.sectionText}>ATR Assignees</Text>
+          <IconButton
+            iconProps={{
+              iconName: expandSections.atrAssignees
+                ? "ChevronUp"
+                : "ChevronDown",
+            }}
+            title="Expand/Collapse"
+            ariaLabel="Expand/Collapse"
+            className={styles.chevronIcon}
+          />
+        </button>
+        {expandSections.atrAssignees && (
+          <div
+            className={`${styles.expansionPanelInside}`}
+            style={{ overflowX: "scroll" }}
+          >
+            <div style={{ padding: "15px" }}>
+              <ATRAssignee
+                atrType={props.state.atrType}
+                getATRTypeOnChange={(type: any) => {
+                  props.setState({ atrType: type });
+                }}
+                clearAtrGridDataOnSelectionOFATRType={() => {
+                  props.setState({
+                    atrGridData: [],
+                    noteATRAssigneeDetails: [],
+                  });
+                }}
+                checkingCurrentATRCreatorisCurrentApproverOrNot={props._checkingCurrentATRCreatorisCurrentApproverOrNot()}
+                getATRJoinedComments={(data: any) => {
+                  props.setState({ atrJoinedComments: data });
+                }}
+                approverDetails={props.state.ApproverDetails}
+                currentATRCreatorDetails={props._currentUserEmail}
+                sp={props.sp}
+                context={props.context}
+                commentsData={props.state.generalComments}
+                artCommnetsGridData={props._getAtrCommentsGrid(
+                  props.state.atrGridData
+                )}
+                deletedGridData={(data: any) => {
+                  props.setState({ atrGridData: data });
+                }}
+                updategirdData={(data: any): void => {
+                  props.setState({ atrType: data.atrType });
+
+                  const currentAtrCreator = props.state.atrCreatorsList.filter(
+                    (each: any) =>
+                      each.atrCreatorEmail === props._currentUserEmail
+                  );
+
+                  const { assigneeDetails } = data;
+
+                  const currentApproverDetailsFromApproverDTO =
+                    props._getCurrentApproverDetailsFromApproverDTO();
+
+                  props.setState(
+                    (prevState: { noteATRAssigneeDetails: any }) => ({
+                      atrGridData: data.comments,
+
+                      noteATRAssigneeDetails: [
+                        ...prevState.noteATRAssigneeDetails,
+                        {
+                          atrType: data.atrType,
+                          atrAssigneeId: assigneeDetails.id,
+                          atrCreatorId: currentAtrCreator[0].atrCreatorId,
+                          atrCreatorEmail: currentAtrCreator[0].atrCreatorEmail,
+
+                          atrAssigneeEmailName: assigneeDetails.text,
+                          atrAssigneeEmail: assigneeDetails.email,
+                          approverEmailName:
+                            currentApproverDetailsFromApproverDTO[0]
+                              .approverEmailName,
+
+                          atrCreatorEmailName:
+                            currentAtrCreator[0].atrCreatorEmailName,
+
+                          createdDate: props._formatDateTime(new Date()),
+                          createdBy: props._currentUserEmail,
+                          modifiedDate: props._formatDateTime(new Date()),
+                          modifiedBy: props._currentUserEmail,
+                          statusMessage: null,
+                          atrId: "",
+                          noteApproverId:
+                            currentApproverDetailsFromApproverDTO[0].userId,
+                          approverType:
+                            currentApproverDetailsFromApproverDTO[0]
+                              .approverType,
+                          approverOrder:
+                            currentApproverDetailsFromApproverDTO[0]
+                              .approverOrder,
+                          approverStatus: 1,
+                          approverEmail:
+                            currentApproverDetailsFromApproverDTO[0]
+                              .approverEmail,
+                          noteApproverComments: "",
+                          strATRStatus: "Pending",
+                          atrStatus: 1,
+                          noteId: props._itemId,
+                        },
+                      ],
+                    })
+                  );
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  );
+};
+
+const CommentLogInViewForm = (props: any): any => {
+  const { expandSections } = props;
+  return (
+    <div className={styles.sectionContainer}>
+      <button
+        className={styles.header}
+        onClick={() => props._onToggleSection(`commentsLog`)}
+      >
+        <Text className={styles.sectionText}>Comments Log</Text>
+        <IconButton
+          iconProps={{
+            iconName: expandSections.commentsLog ? "ChevronUp" : "ChevronDown",
+          }}
+          title="Expand/Collapse"
+          ariaLabel="Expand/Collapse"
+          className={styles.chevronIcon}
+        />
+      </button>
+      {expandSections.commentsLog && (
+        <div className={`${styles.expansionPanelInside}`}>
+          <div style={{ padding: "15px", paddingTop: "4px" }}>
+            <CommentsLogTable
+              data={props.state.commentsLog}
+              type="commentsLog"
+              formType="view"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AttachSupportingDocumentsSection = (props: any): any => {
+  const { expandSections } = props;
+
+  return (props.state.currentApprover?.[0]?.approverEmail ||
+    props.state.currentApprover?.[0]?.EMail) === props._currentUserEmail ? (
+    <div className={styles.sectionContainer}>
+      <button
+        className={styles.header}
+        onClick={() => props._onToggleSection(`attachSupportingDocuments`)}
+      >
+        <Text className={styles.sectionText}>Attach Supporting Documents</Text>
+        <IconButton
+          iconProps={{
+            iconName: expandSections.attachSupportingDocuments
+              ? "ChevronUp"
+              : "ChevronDown",
+          }}
+          title="Expand/Collapse"
+          ariaLabel="Expand/Collapse"
+          className={styles.chevronIcon}
+        />
+      </button>
+      {expandSections.attachSupportingDocuments && (
+        <div
+          className={`${styles.expansionPanelInside}`}
+          style={{ width: "90%", margin: "0px" }}
+        >
+          <div style={{ padding: "15px", paddingTop: "4px" }}>
+            <SupportingDocumentsUploadFileComponent
+              errorData={props._getFileWithError}
+              typeOfDoc="supportingDocument"
+              onChange={props.handleSupportingFileChangeInViewForm}
+              accept=".xlsx,.pdf,.doc,.docx"
+              multiple={true}
+              maxFileSizeMB={25}
+              data={props.state.supportingFilesInViewForm}
+              addtionalData={props.state.supportingDocumentfiles}
+              cummulativeError={props._getCummulativeError}
+            />
+            <p
+              className={styles.message}
+              style={{ margin: "0px", textAlign: "right" }}
+            >
+              Allowed Formats (pdf,doc,docx,xlsx only) Upto 25MB max.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  ) : (
+    ""
+  );
+};
+
+
+const GistDocumentSectionInViewForm = (props:any):any=>{
+  const { expandSections } = props;
+
+  return props._checkingCurrentUserInSecretaryDTO() &&
+  props.state.statusNumber !== "5000" &&
+  props.state.statusNumber !== "8000" &&
+  props.state.statusNumber !== "4000" ? (
+    <div className={styles.sectionContainer}>
+      <button
+        className={styles.header}
+        onClick={() => props._onToggleSection(`gistDocuments`)}
+      >
+        <Text className={styles.sectionText}>Gist Document</Text>
+        <IconButton
+          iconProps={{
+            iconName: expandSections.gistDocuments
+              ? "ChevronUp"
+              : "ChevronDown",
+          }}
+          title="Expand/Collapse"
+          ariaLabel="Expand/Collapse"
+          className={styles.chevronIcon}
+        />
+      </button>
+      {expandSections.gistDocuments && (
+        <div
+          className={`${styles.expansionPanelInside}`}
+          style={{ width: "100%", margin: "0px" }}
+        >
+          <div style={{ padding: "6px", paddingTop: "4px" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                padding: "15px",
+                paddingTop: "4px",
+              }}
+            >
+              {props._checkingCurrentUserIsSecretaryDTO() ? (
+                <UploadFileComponent
+                  errorData={props._getFileWithError}
+                  typeOfDoc="gistDocument"
+                  onChange={props.handleGistDocuments}
+                  accept=".pdf,.doc,.docx "
+                  multiple={false}
+                  maxFileSizeMB={5}
+                  data={props.state.secretaryGistDocs}
+                  addtionalData={props.state.secretaryGistDocsList}
+                />
+              ) : (
+                props._checkingCurrentUserInSecretaryDTOAfterApproved() && (
+                 
+                  props._getGistDocumentViewsAsList())
+              )}
+              {props._checkingCurrentUserIsSecretaryDTO() && (
+                <p
+                  className={styles.message}
+                  style={{ margin: "0px", textAlign: "right" }}
+                >
+                  Allowed Formats (pdf,doc,docx,only) Upto 5MB max.
+                </p>
+              )}
+              {props._checkingCurrentUserAsApproverDTOInSecretaryDTO() && (
+                props._getGistDocumentViewsAsList()
+               
+              )}
+            </div>
+          </div>
+          {""}
+          <div />
+        </div>
+      )}
+    </div>
+  ) : (
+    ""
+  )
+
+
+}
+
+
+const WorkFlowLogInViewForm = (props:any)=>{
+  const { expandSections } = props;
+  return    <div className={styles.sectionContainer}>
+  <button
+    className={styles.header}
+    onClick={() => props._onToggleSection(`workflowLog`)}
+  >
+    <Text className={styles.sectionText}>Workflow Log</Text>
+    <IconButton
+      iconProps={{
+        iconName: expandSections.workflowLog
+          ? "ChevronUp"
+          : "ChevronDown",
+      }}
+      title="Expand/Collapse"
+      ariaLabel="Expand/Collapse"
+      className={styles.chevronIcon}
+    />
+  </button>
+  {expandSections.workflowLog && (
+    <div className={`${styles.expansionPanelInside}`}>
+      <div style={{ padding: "15px", paddingTop: "4px" }}>
+        <WorkFlowLogsTable
+          data={props.state.auditTrail}
+          type="Approver"
+        />
+      </div>
+    </div>
+  )}
+</div>
+
+}
+
+
+// const GistDocumentSection = (props:any):any=>{
+
+// }
 
 type FieldValueType = string | number | readonly string[];
 
@@ -845,7 +1222,6 @@ export default class ViewForm extends React.Component<
     const newATRGridData = JSON.parse(data)
 
       .map((each: any) => {
-      
         if (each.atrCreatorEmail === this._currentUserEmail) {
           this.setState({ atrType: each.atrType });
           return {
@@ -891,17 +1267,15 @@ export default class ViewForm extends React.Component<
     return item;
   };
 
+  private _requestedDate = (auditTrail: any): any => {
+    const AuditTrail = JSON.parse(auditTrail);
+    const requestSubmittedDate = AuditTrail.filter((each: any) =>
+      each.action.includes("Submitted")
+    )[0]?.createdDate;
 
-  private _requestedDate = (auditTrail:any):any =>{
-    const AuditTrail = JSON.parse(auditTrail)
-    const requestSubmittedDate = AuditTrail.filter(
-      (each:any)=>each.action.includes("Submitted")
-    )[0]?.createdDate
-
-    console.log(requestSubmittedDate)
-    return requestSubmittedDate
-
-  }
+    console.log(requestSubmittedDate);
+    return requestSubmittedDate;
+  };
 
   private _generateTableData = (item: any, purposeData: any[]) => {
     return [
@@ -1153,7 +1527,6 @@ export default class ViewForm extends React.Component<
         }
       });
 
-  
       return filterApproverData;
     }
 
@@ -1184,7 +1557,6 @@ export default class ViewForm extends React.Component<
     | boolean
     | null => {
     let result: boolean | null = null;
-   
 
     this.state.ApproverDetails.forEach((each: any) => {
       if (
@@ -1192,7 +1564,6 @@ export default class ViewForm extends React.Component<
           this._currentUserEmail &&
         each.approverOrder === this.state.ApproverOrder
       ) {
-        
         switch (this.state.statusNumber) {
           case "9000":
             result = false;
@@ -1215,7 +1586,7 @@ export default class ViewForm extends React.Component<
         }
       }
     });
-    
+
     return result;
   };
 
@@ -1257,12 +1628,8 @@ export default class ViewForm extends React.Component<
         .expand("Author", "Editor")()
         .then((res) => res);
 
-      
-
       if (this.state.statusNumber === "9000") {
-      
         const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
-         
           return file.Name.toLowerCase().includes(
             this._folderNameAfterApproved.toLowerCase()
           );
@@ -1273,62 +1640,48 @@ export default class ViewForm extends React.Component<
             const fileObj = this._getFileObj(values);
             tempFilesPdf.push(fileObj);
 
-        
             if (!this.state.pdfLink) {
               this.setState({ pdfLink: fileObj.fileUrl });
             }
           });
 
-          
           this.setState({ noteTofiles: tempFilesPdf });
         } else {
           const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
-           
             return !file.Name.toLowerCase().includes(
               this._folderNameAfterApproved.toLowerCase()
             );
           });
 
-          
           const tempFilesPdf: IFileDetails[] = [];
           filteredFolderItemsPdf.forEach((values) => {
             const fileObj = this._getFileObj(values);
             tempFilesPdf.push(fileObj);
 
-           
             if (!this.state.pdfLink) {
               this.setState({ pdfLink: fileObj.fileUrl });
             }
           });
 
-         
           this.setState({ noteTofiles: tempFilesPdf });
         }
-
-       
       } else {
-       
-
         const filteredFolderItemsPdf = folderItemsPdf.filter((file) => {
-         
           return !file.Name.toLowerCase().includes(
             this._folderNameAfterApproved.toLowerCase()
           );
         });
 
-       
         const tempFilesPdf: IFileDetails[] = [];
         filteredFolderItemsPdf.forEach((values) => {
           const fileObj = this._getFileObj(values);
           tempFilesPdf.push(fileObj);
 
-          
           if (!this.state.pdfLink) {
             this.setState({ pdfLink: fileObj.fileUrl });
           }
         });
 
-       
         this.setState({ noteTofiles: tempFilesPdf });
       }
 
@@ -1438,11 +1791,9 @@ export default class ViewForm extends React.Component<
     this.setState({ peoplePickerData: reOrderData });
   };
 
-  
-
   private _getAuditTrail = async (status: any) => {
     const item = await this._getItemDataSpList(this._itemId);
-    
+
     const auditTrail = JSON.parse(item.AuditTrail);
     if (status === "gistDocuments") {
       const auditLog = [
@@ -1506,8 +1857,6 @@ export default class ViewForm extends React.Component<
 
     try {
       for (const file of libraryName) {
-       
-
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
           .files.addUsingPath(file.name, file.content, {
@@ -1552,8 +1901,6 @@ export default class ViewForm extends React.Component<
   ) {
     try {
       for (const file of libraryName) {
-       
-
         await this.props.sp.web
           .getFolderByServerRelativePath(folderPath)
           .files.addUsingPath(file.name, file.content, {
@@ -1570,7 +1917,6 @@ export default class ViewForm extends React.Component<
       (each: any) => each.userId === this.state.currentApprover[0].id
     );
 
-   
     return currentApproverDetails;
   };
 
@@ -1585,10 +1931,7 @@ export default class ViewForm extends React.Component<
     const currentApproverDetailsFromApproverDTO =
       this._getCurrentApproverDetailsFromApproverDTO();
 
-    
-    
-
-    const defaultNoteATRAssigneeDetails =(stateValue:any)=> [
+    const defaultNoteATRAssigneeDetails = (stateValue: any) => [
       {
         atrType: "Default",
         atrAssigneeId: stateValue.createdByID,
@@ -1618,13 +1961,11 @@ export default class ViewForm extends React.Component<
         noteId: this._itemId,
       },
     ];
-    this.setState((prevState)=>{
-
-     
-      
+    this.setState((prevState) => {
       return {
-      noteATRAssigneeDetails: defaultNoteATRAssigneeDetails(prevState),
-    }});
+        noteATRAssigneeDetails: defaultNoteATRAssigneeDetails(prevState),
+      };
+    });
 
     return [
       ...this.state.noteATRAssigneeDetailsAllUser,
@@ -1634,7 +1975,6 @@ export default class ViewForm extends React.Component<
 
   private _updateATRRequest = async (currentApproverId: any): Promise<void> => {
     this.state.noteATRAssigneeDetails.map(async (each: any) => {
-      
       try {
         const auditLog = [
           {
@@ -1673,7 +2013,6 @@ export default class ViewForm extends React.Component<
           ATRType: this.state.atrType,
         };
 
-       
         await this.props.sp.web.lists
           .getByTitle("ATRRequests")
           .items.add(atrObj);
@@ -1723,8 +2062,6 @@ export default class ViewForm extends React.Component<
         ATRType: "Default",
       };
 
-    
-
       await this.props.sp.web.lists
         .getByTitle("ATRRequests")
         .items.add(defaultAtrObj);
@@ -1743,7 +2080,6 @@ export default class ViewForm extends React.Component<
         return each;
       }
     });
-
 
     return currentApproverdata[0];
   };
@@ -1822,7 +2158,6 @@ export default class ViewForm extends React.Component<
   ): Promise<any> => {
     let noteATRAssigneeDTO;
 
-    
     if (this._checkCurrentUserIsAATRAssignee()) {
       if (this.state.atrGridData.length > 0) {
         noteATRAssigneeDTO = JSON.stringify([
@@ -1856,8 +2191,11 @@ export default class ViewForm extends React.Component<
           : currentApproverDetail.userId,
       PreviousApproverId: previousApprover[0].userId,
 
-      NoteATRAssigneeDTO:  this._checkCurrentUserIsAATRAssignee() &&
-      this._checkCurrentUserIsApproverType()? noteATRAssigneeDTO:JSON.stringify([]),
+      NoteATRAssigneeDTO:
+        this._checkCurrentUserIsAATRAssignee() &&
+        this._checkCurrentUserIsApproverType()
+          ? noteATRAssigneeDTO
+          : JSON.stringify([]),
       PreviousActionerId: [(await this.props.sp?.web.currentUser())?.Id],
       startProcessing: true,
     };
@@ -1884,7 +2222,7 @@ export default class ViewForm extends React.Component<
     statusNumber: string
   ) => {
     const item = await this._getItemDataSpList(this._itemId);
- 
+
     const StatusNumber = item?.StatusNumber;
     this._closeDialog();
 
@@ -1933,11 +2271,16 @@ export default class ViewForm extends React.Component<
       try {
         const updateAuditTrial = await this._getAuditTrail(
           this._checkCurrentUserIsAATRAssignee() &&
-          this._checkCurrentUserIsApproverType() ? "Noted" : "Approved"
+            this._checkCurrentUserIsApproverType()
+            ? "Noted"
+            : "Approved"
         );
 
-        console.log(  this._checkCurrentUserIsAATRAssignee() &&
-        this._checkCurrentUserIsApproverType(),  "this._checkCurrentUserIsAATRAssignee() &&this._checkCurrentUserIsApproverType()")
+        console.log(
+          this._checkCurrentUserIsAATRAssignee() &&
+            this._checkCurrentUserIsApproverType(),
+          "this._checkCurrentUserIsAATRAssignee() &&this._checkCurrentUserIsApproverType()"
+        );
 
         const updateItems = await this._updateItemInHandleApproverBtn(
           modifyApproveDetails,
@@ -1954,8 +2297,8 @@ export default class ViewForm extends React.Component<
           .items.getById(this._itemId)
           .update(updateItems);
 
-          this._checkCurrentUserIsAATRAssignee() &&
-            this._checkCurrentUserIsApproverType() &&
+        this._checkCurrentUserIsAATRAssignee() &&
+          this._checkCurrentUserIsApproverType() &&
           (this.state.atrGridData.length > 0
             ? await this._updateATRRequest(currentApproverId)
             : await this._defaultUserAsATR(currentApproverId));
@@ -2077,11 +2420,9 @@ export default class ViewForm extends React.Component<
     const StatusNumber = item?.StatusNumber;
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-   
     const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
     const _CommentsLog =
       item.NoteApproverCommentsDTO !== null
@@ -2090,8 +2431,6 @@ export default class ViewForm extends React.Component<
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
-
-  
 
     if (StatusNumber === "8000") {
       this.setState({
@@ -2236,14 +2575,11 @@ export default class ViewForm extends React.Component<
         : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
-
-   
 
     if (
       StatusNumber !== "200" &&
@@ -2331,7 +2667,6 @@ export default class ViewForm extends React.Component<
           },
         ]),
       };
-     
 
       await this.props.sp.web.lists
         .getByTitle(this._listname)
@@ -2384,11 +2719,9 @@ export default class ViewForm extends React.Component<
         : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
 
-   
     if (currentUserId !== checkCurrentApproverIsCurrentUser) {
       this.setState({
         hideParellelActionAlertDialog: true,
@@ -2402,8 +2735,6 @@ export default class ViewForm extends React.Component<
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
-
-   
 
     if (_ApproverInfoDTOId.includes(currentUserId)) {
       this.setState({
@@ -2506,17 +2837,12 @@ export default class ViewForm extends React.Component<
         : [];
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
-   
 
     const currentUserId = (await this.props.sp?.web.currentUser())?.Id;
-
-    
 
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
-
-    
 
     if (
       StatusNumber !== "200" &&
@@ -2613,13 +2939,10 @@ export default class ViewForm extends React.Component<
     const StatusNumber = item?.StatusNumber;
 
     const checkCurrentApproverIsCurrentUser = item?.CurrentApproverId;
- 
 
     const _ApproverInfoDTOId = JSON.parse(item?.NoteApproversDTO).map(
       (each: any) => each.userId
     );
-
-    
 
     const _NoteReferrerDTO =
       item?.NoteReferrerDTO !== null ? JSON.parse(item?.NoteReferrerDTO) : [];
@@ -2627,9 +2950,9 @@ export default class ViewForm extends React.Component<
       _NoteReferrerDTO.length > 0
         ? _NoteReferrerDTO[_NoteReferrerDTO.length - 1].referrerId
         : null;
-   
+
     const _actionersIDs = [..._ApproverInfoDTOId, _refereeId];
-   
+
     const actionTakenOcurredOrNot = JSON.parse(item?.NoteApproversDTO)[0]
       .actionDate;
 
@@ -2726,7 +3049,7 @@ export default class ViewForm extends React.Component<
     this.setState({ isLoading: true });
     const item = await this._getItemDataSpList(this._itemId);
     const _ApproverDTO = JSON.parse(item?.NoteApproversDTO);
-   
+
     const _ReferDTO =
       item.NoteReferrerDTO !== null ? JSON.parse(item.NoteReferrerDTO) : [];
 
@@ -2771,8 +3094,6 @@ export default class ViewForm extends React.Component<
           return each;
         });
 
-      
-
         await this.props.sp.web.lists
           .getByTitle(this._listname)
           .items.getById(this._itemId)
@@ -2816,8 +3137,6 @@ export default class ViewForm extends React.Component<
 
       const updateCurrentApprover = (): any => {
         const upatedCurrentApprover = _ApproverDTO.filter((each: any) => {
-         
-
           if (each.status === "Pending") {
             return {
               ...this.state.peoplePickerSelectedDataWhileReferOrChangeApprover,
@@ -2883,7 +3202,6 @@ export default class ViewForm extends React.Component<
           return each;
         }
       });
-     
 
       const reviewerIds = modifyApproverDetails
         .filter((each: any) => each.approverType === "Reviewer")
@@ -2941,8 +3259,6 @@ export default class ViewForm extends React.Component<
     const checkActionDateIsUpdated = this.state.ApproverDetails.some(
       (each: any) => each.actionDate !== ""
     );
-
-   
 
     return checkActionDateIsUpdated;
   };
@@ -3173,7 +3489,7 @@ export default class ViewForm extends React.Component<
       });
 
       const filterCommentLogOFNotCurrentUser = this.state.commentsLog.filter(
-        (each: any) => each.commentedByEmail !== this._currentUserEmail
+        (each: any) => each.id !== id
       );
       this.setState({
         commentsData: updatingCommentData,
@@ -3231,14 +3547,16 @@ export default class ViewForm extends React.Component<
         commentsLog: returnValue(prevState.commentsLog),
         generalComments: returnValueGen(prevState.generalComments),
       }));
-      
     }
   };
 
   public _atrJoinedCommentsToDTO = (): void => {
     const joinedCommentsData = this.state.generalComments
       .filter((each: any) => !!each)
-      .map((each: any) => `${each?.pageNumber} ${each?.docReference} ${each?.comments}`)
+      .map(
+        (each: any) =>
+          `${each?.pageNumber} ${each?.docReference} ${each?.comments}`
+      )
       .join(", ");
 
     return joinedCommentsData;
@@ -3481,10 +3799,10 @@ export default class ViewForm extends React.Component<
     newObj[data[1]] = data[0];
 
     this.setState((prevState) => {
-      const newObj = { ...prevState.errorFilesList }; 
-      newObj[data[1]] = data[0]; 
-    
-      return { errorFilesList: newObj }; 
+      const newObj = { ...prevState.errorFilesList };
+      newObj[data[1]] = data[0];
+
+      return { errorFilesList: newObj };
     });
 
     if (
@@ -3504,24 +3822,27 @@ export default class ViewForm extends React.Component<
   };
 
   private _getAtrCommentsGrid = (data: any): any => {
-    console.log(data)
+    console.log(data);
     if (
-      this.state.currentApprover !== null &&
-      this.state.currentApprover[0]?.approverEmail ||this.state.currentApprover[0]?.EMail === this._currentUserEmail
+      (this.state.currentApprover !== null &&
+        this.state.currentApprover[0]?.approverEmail) ||
+      this.state.currentApprover[0]?.EMail === this._currentUserEmail
     ) {
-      const joinedCommentsData = this.state.generalComments .filter((each: any) => !!each)
-        .map((each: any) => `${each?.pageNumber} ${each?.docReference} ${each?.comments}`);
+      const joinedCommentsData = this.state.generalComments
+        .filter((each: any) => !!each)
+        .map(
+          (each: any) =>
+            `${each?.pageNumber} ${each?.docReference} ${each?.comments}`
+        );
 
-      console.log(joinedCommentsData)
+      console.log(joinedCommentsData);
 
       return data.map((each: any) => {
-        if (each.status ==='Completed'){
+        if (each.status === "Completed") {
           return each;
-
-        }else{
+        } else {
           return { ...each, comments: joinedCommentsData.join(", ") };
         }
-        
       });
     } else {
       return this.state.atrGridData;
@@ -3653,7 +3974,6 @@ export default class ViewForm extends React.Component<
   };
 
   private _getReferBackAndApproverStageButtons = () => {
-   
     return this.state.noteReferrerDTO.length > 0 &&
       this.state.noteReferrerDTO[this.state.noteReferrerDTO.length - 1]
         ?.referrerEmail === this._currentUserEmail &&
@@ -3737,7 +4057,6 @@ export default class ViewForm extends React.Component<
         sp={this.props.sp}
         context={this.props.context}
         fetchReferData={(data: any) => {
-         
           this.setState((prevState) => ({
             commentsData: [...prevState.commentsData, data],
             generalComments: [...prevState.commentsData, data],
@@ -3804,11 +4123,10 @@ export default class ViewForm extends React.Component<
         <Modal
           isOpen={this.state.hideParellelActionAlertDialog}
           onDismiss={() => {
-          
             this.setState((prevState) => ({
-              hideParellelActionAlertDialog: !prevState.hideParellelActionAlertDialog,
+              hideParellelActionAlertDialog:
+                !prevState.hideParellelActionAlertDialog,
             }));
-            
           }}
           isBlocking={true}
           containerClassName={Cutsomstyles.modal}
@@ -3821,7 +4139,6 @@ export default class ViewForm extends React.Component<
             <IconButton
               iconProps={{ iconName: "Cancel" }}
               onClick={() => {
-               
                 window.location.reload();
                 this.setState({ hideParellelActionAlertDialog: false });
               }}
@@ -4012,9 +4329,7 @@ export default class ViewForm extends React.Component<
           <h1
             className={`${styles.generalHeader} ${styles.viewFormHeaderSectionContainer}`}
           >
-            pending with:{" "}
-           
-            {this.state.currentApprover[0]?.Title}
+            pending with: {this.state.currentApprover[0]?.Title}
           </h1>
 
           <h1
@@ -4058,7 +4373,6 @@ export default class ViewForm extends React.Component<
                 state={this.state}
                 reviewerORApproverData={this.state.peoplePickerData}
                 reOrderData={this.reOrderData}
-              
                 type="Reviewer"
               />
               <ReviewerOrApproverSectionInViewForm
@@ -4069,519 +4383,104 @@ export default class ViewForm extends React.Component<
                 state={this.state}
                 reviewerORApproverData={this.state.peoplePickerApproverData}
                 reOrderData={this.reOrderData}
-                
                 type="Approver"
               />
 
-              {(this._checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest() &&
-                this._currentUserEmail !== this.state.createdByEmail) ||
-              this._checkRefereeAvailable() ? (
-                <div className={styles.sectionContainer}>
-                  <button
-                    className={styles.header}
-                    onClick={() => this._onToggleSection(`generalComments`)}
-                  >
-                    <Text className={styles.sectionText}>General Comments</Text>
-                    <IconButton
-                      iconProps={{
-                        iconName: expandSections.generalComments
-                          ? "ChevronUp"
-                          : "ChevronDown",
-                      }}
-                      title="Expand/Collapse"
-                      ariaLabel="Expand/Collapse"
-                      className={styles.chevronIcon}
-                    />
-                  </button>
+              {/* General Component  section*/}
 
-                  {expandSections.generalComments && (
-                    <div className={`${styles.expansionPanelInside}`}>
-                      <div style={{ padding: "15px", paddingTop: "4px" }}>
-                        <GeneralCommentsFluentUIGrid
-                          handleCommentDataFuntion={this._getCommentData}
-                          data={this.state.generalComments}
-                          currentUserDetails={
-                            this.props.context.pageContext.user
-                          }
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                ""
-              )}
+              <GeneralCommentsInViewForm
+                currentUserDetails={this.props.context.pageContext.user}
+                _getCommentData={this._getCommentData}
+                _onToggleSection={this._onToggleSection}
+                expandSections={expandSections}
+                _checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest={
+                  this
+                    ._checkCurrentUserIs_Approved_Refered_Reject_TheCurrentRequest
+                }
+                _currentUserEmail={this._currentUserEmail}
+                state={this.state}
+                _checkRefereeAvailable={this._checkRefereeAvailable}
+              />
 
-              {this._checkCurrentUserIsAATRAssignee() &&
-                this._checkCurrentUserIsApproverType() && (
-                  <div className={styles.sectionContainer}>
-                    <button
-                      className={styles.header}
-                      onClick={() => this._onToggleSection(`atrAssignees`)}
-                    >
-                      <Text className={styles.sectionText}>ATR Assignees</Text>
-                      <IconButton
-                        iconProps={{
-                          iconName: expandSections.atrAssignees
-                            ? "ChevronUp"
-                            : "ChevronDown",
-                        }}
-                        title="Expand/Collapse"
-                        ariaLabel="Expand/Collapse"
-                        className={styles.chevronIcon}
-                      />
-                    </button>
-                    {expandSections.atrAssignees && (
-                      <div
-                        className={`${styles.expansionPanelInside}`}
-                        style={{ overflowX: "scroll" }}
-                      >
-                        <div style={{ padding: "15px" }}>
-                          <ATRAssignee
-                            atrType={this.state.atrType}
-                            getATRTypeOnChange={(type: any) => {
-                              this.setState({ atrType: type });
-                            }}
-                            clearAtrGridDataOnSelectionOFATRType={() => {
-                              this.setState({
-                                atrGridData: [],
-                                noteATRAssigneeDetails: [],
-                              });
-                            }}
-                            checkingCurrentATRCreatorisCurrentApproverOrNot={this._checkingCurrentATRCreatorisCurrentApproverOrNot()}
-                            getATRJoinedComments={(data: any) => {
-                              this.setState({ atrJoinedComments: data });
-                            }}
-                            approverDetails={this.state.ApproverDetails}
-                            currentATRCreatorDetails={this._currentUserEmail}
-                            sp={this.props.sp}
-                            context={this.props.context}
-                            commentsData={this.state.generalComments}
-                            artCommnetsGridData={this._getAtrCommentsGrid(
-                              this.state.atrGridData
-                            )}
-                            deletedGridData={(data: any) => {
-                              this.setState({ atrGridData: data });
-                            }}
-                            updategirdData={(data: any): void => {
-                              this.setState({ atrType: data.atrType });
+              {/* ATR Section */}
 
-                              const currentAtrCreator =
-                                this.state.atrCreatorsList.filter(
-                                  (each: any) =>
-                                    each.atrCreatorEmail ===
-                                    this.props.context.pageContext.user.email
-                                );
+              <ATRAssigneInViewForm
+                _checkCurrentUserIsAATRAssignee={
+                  this._checkCurrentUserIsAATRAssignee
+                }
+                _checkCurrentUserIsApproverType={
+                  this._checkCurrentUserIsApproverType
+                }
+                _onToggleSection={this._onToggleSection}
+                expandSections={expandSections}
+                setState={(stateUpdate: any) => this.setState(stateUpdate)}
+                state={this.state}
+                _checkingCurrentATRCreatorisCurrentApproverOrNot={
+                  this._checkingCurrentATRCreatorisCurrentApproverOrNot
+                }
+                _currentUserEmail={this._currentUserEmail}
+                sp={this.props.sp}
+                context={this.props.context}
+                _getAtrCommentsGrid={this._getAtrCommentsGrid}
+                _getCurrentApproverDetailsFromApproverDTO={
+                  this._getCurrentApproverDetailsFromApproverDTO
+                }
+                _formatDateTime={this._formatDateTime}
+                _itemId={this._itemId}
+              />
 
-                              const { assigneeDetails } = data;
+              {/* Comments Log */}
 
-                              const currentApproverDetailsFromApproverDTO =
-                                this._getCurrentApproverDetailsFromApproverDTO();
+              <CommentLogInViewForm
+                _onToggleSection={this._onToggleSection}
+                expandSections={expandSections}
+                state={this.state}
+              />
+              {/* Attachment Section */}
 
-                            
+              <AttachSupportingDocumentsSection
+                _onToggleSection={this._onToggleSection}
+                expandSections={expandSections}
+                state={this.state}
+                _currentUserEmail={this._currentUserEmail}
+                handleSupportingFileChangeInViewForm={
+                  this.handleSupportingFileChangeInViewForm
+                }
+                _getFileWithError={this._getFileWithError}
+                _getCummulativeError={this._getCummulativeError}
+              />
 
-                              this.setState((prevState) => ({
-                                atrGridData: data.comments,
+                {/* Gist Document Section */}
 
-                                noteATRAssigneeDetails: [
-                                  ...prevState.noteATRAssigneeDetails,
-                                  {
-                                    atrType: data.atrType,
-                                    atrAssigneeId: assigneeDetails.id,
-                                    atrCreatorId:
-                                      currentAtrCreator[0].atrCreatorId,
-                                    atrCreatorEmail:
-                                      currentAtrCreator[0].atrCreatorEmail,
+             
 
-                                    atrAssigneeEmailName: assigneeDetails.text,
-                                    atrAssigneeEmail: assigneeDetails.email,
-                                    approverEmailName:
-                                      currentApproverDetailsFromApproverDTO[0]
-                                        .approverEmailName,
+             <GistDocumentSectionInViewForm
+             _checkingCurrentUserInSecretaryDTO ={this._checkingCurrentUserInSecretaryDTO}
+             _onToggleSection={this._onToggleSection}
+             expandSections={expandSections}
+             state={this.state}
+             _checkingCurrentUserIsSecretaryDTO={this._checkingCurrentUserIsSecretaryDTO}
+             _getFileWithError={this._getFileWithError}
+             handleGistDocuments = {this.handleGistDocuments}
+             _checkingCurrentUserInSecretaryDTOAfterApproved={this._checkingCurrentUserInSecretaryDTOAfterApproved}
+             _getGistDocumentViewsAsList={this._getGistDocumentViewsAsList}
+             _checkingCurrentUserAsApproverDTOInSecretaryDTO = {this._checkingCurrentUserAsApproverDTOInSecretaryDTO}
 
-                                    atrCreatorEmailName:
-                                      currentAtrCreator[0].atrCreatorEmailName,
 
-                                    createdDate: this._formatDateTime(
-                                      new Date()
-                                    ),
-                                    createdBy:
-                                      this.props.context.pageContext.user.email,
-                                    modifiedDate: this._formatDateTime(
-                                      new Date()
-                                    ),
-                                    modifiedBy:
-                                      this.props.context.pageContext.user.email,
-                                    statusMessage: null,
-                                    atrId: "",
-                                    noteApproverId:
-                                      currentApproverDetailsFromApproverDTO[0]
-                                        .userId,
-                                    approverType:
-                                      currentApproverDetailsFromApproverDTO[0]
-                                        .approverType,
-                                    approverOrder:
-                                      currentApproverDetailsFromApproverDTO[0]
-                                        .approverOrder,
-                                    approverStatus: 1,
-                                    approverEmail:
-                                      currentApproverDetailsFromApproverDTO[0]
-                                        .approverEmail,
-                                    noteApproverComments: "",
-                                    strATRStatus: "Pending",
-                                    atrStatus: 1,
-                                    noteId: this._itemId,
-                                  },
-                                ],
-                              }));
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
 
-              <div className={styles.sectionContainer}>
-                <button
-                  className={styles.header}
-                  onClick={() => this._onToggleSection(`commentsLog`)}
-                >
-                  <Text className={styles.sectionText}>Comments Log</Text>
-                  <IconButton
-                    iconProps={{
-                      iconName: expandSections.commentsLog
-                        ? "ChevronUp"
-                        : "ChevronDown",
-                    }}
-                    title="Expand/Collapse"
-                    ariaLabel="Expand/Collapse"
-                    className={styles.chevronIcon}
-                  />
-                </button>
-                {expandSections.commentsLog && (
-                  <div className={`${styles.expansionPanelInside}`}>
-                    <div style={{ padding: "15px", paddingTop: "4px" }}>
-                      <CommentsLogTable
-                        data={this.state.commentsLog}
-                        type="commentsLog"
-                        formType="view"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+             />
 
-              {(this.state.currentApprover?.[0]?.approverEmail ||
-                this.state.currentApprover?.[0]?.EMail) ===
-              this._currentUserEmail ? (
-                <div className={styles.sectionContainer}>
-                  <button
-                    className={styles.header}
-                    onClick={() =>
-                      this._onToggleSection(`attachSupportingDocuments`)
-                    }
-                  >
-                    <Text className={styles.sectionText}>
-                      Attach Supporting Documents
-                    </Text>
-                    <IconButton
-                      iconProps={{
-                        iconName: expandSections.attachSupportingDocuments
-                          ? "ChevronUp"
-                          : "ChevronDown",
-                      }}
-                      title="Expand/Collapse"
-                      ariaLabel="Expand/Collapse"
-                      className={styles.chevronIcon}
-                    />
-                  </button>
-                  {expandSections.attachSupportingDocuments && (
-                    <div
-                      className={`${styles.expansionPanelInside}`}
-                      style={{ width: "100%", margin: "0px" }}
-                    >
-                      <div style={{ padding: "15px", paddingTop: "4px" }}>
-                        <SupportingDocumentsUploadFileComponent
-                          errorData={this._getFileWithError}
-                          typeOfDoc="supportingDocument"
-                          onChange={this.handleSupportingFileChangeInViewForm}
-                          accept=".xlsx,.pdf,.doc,.docx"
-                          multiple={true}
-                          maxFileSizeMB={25}
-                          data={this.state.supportingFilesInViewForm}
-                          addtionalData={this.state.supportingDocumentfiles}
-                          cummulativeError={this._getCummulativeError}
-                        />
-                        <p
-                          className={styles.message}
-                          style={{ margin: "0px", textAlign: "right" }}
-                        >
-                          Allowed Formats (pdf,doc,docx,xlsx only) Upto 25MB
-                          max.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                ""
-              )}
+             {/* WorkFlow Log */}
 
-              {this._checkingCurrentUserInSecretaryDTO() &&
-              this.state.statusNumber !== "5000" &&
-              this.state.statusNumber !== "8000" &&
-              this.state.statusNumber !== "4000" ? (
-                <div className={styles.sectionContainer}>
-                  <button
-                    className={styles.header}
-                    onClick={() => this._onToggleSection(`gistDocuments`)}
-                  >
-                    <Text className={styles.sectionText}>Gist Document</Text>
-                    <IconButton
-                      iconProps={{
-                        iconName: expandSections.gistDocuments
-                          ? "ChevronUp"
-                          : "ChevronDown",
-                      }}
-                      title="Expand/Collapse"
-                      ariaLabel="Expand/Collapse"
-                      className={styles.chevronIcon}
-                    />
-                  </button>
-                  {expandSections.gistDocuments && (
-                    <div
-                      className={`${styles.expansionPanelInside}`}
-                      style={{ width: "100%", margin: "0px" }}
-                    >
-                      <div style={{ padding: "6px", paddingTop: "4px" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-start",
-                            padding: "15px",
-                            paddingTop: "4px",
-                          }}
-                        >
-                          {this._checkingCurrentUserIsSecretaryDTO() ? (
-                            <UploadFileComponent
-                              errorData={this._getFileWithError}
-                              typeOfDoc="gistDocument"
-                              onChange={this.handleGistDocuments}
-                              accept=".pdf,.doc,.docx "
-                              multiple={false}
-                              maxFileSizeMB={5}
-                              data={this.state.secretaryGistDocs}
-                              addtionalData={this.state.secretaryGistDocsList}
-                            />
-                          ) : (
-                            this._checkingCurrentUserInSecretaryDTOAfterApproved() && (
-                              <div
-                                style={{
-                                  padding: "6px",
-                                  border: "1px solid rgb(211, 211, 211)",
-                                  width: "100%",
-                                }}
-                              >
-                                <p>Gist Document</p>
-                                {this._checkingCurrentUserInSecretaryDTO() &&
-                                this.state.secretaryGistDocsList.length > 0 ? (
-                                  this.state.secretaryGistDocsList.map(
-                                    (file, index) => {
-                                      if (!file || !file.name) {
-                                        return null;
-                                      }
+             <WorkFlowLogInViewForm 
+               _onToggleSection={this._onToggleSection}
+               expandSections={expandSections}
+               state={this.state}
 
-                                      return (
-                                        <li
-                                          key={v4()}
-                                          style={{
-                                            width: "100%",
-                                            marginTop: "5px",
-                                          }}
-                                          className={`${styles.basicLi} ${styles.attachementli}`}
-                                        >
-                                          <div
-                                            className={`${styles.fileIconAndNameWithErrorContainer}`}
-                                          >
-                                            <img
-                                              alt="typeOfIconInGist1"
-                                              src={this._randomFileIcon(
-                                                file.name
-                                              )}
-                                              width={32}
-                                              height={32}
-                                            />
 
-                                            <a
-                                              data-interception="off"
-                                              className={styles.notePdfCustom}
-                                              href={
-                                                file.name
-                                                  .toLowerCase()
-                                                  .endsWith(".pdf")
-                                                  ? file.fileUrl
-                                                  : file.LinkingUri
-                                              }
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              style={{
-                                                marginTop: "9px",
-                                                paddingLeft: "4px",
-                                                textDecoration: "none",
-                                              }}
-                                            >
-                                              <span
-                                                style={{
-                                                  paddingBottom: "0px",
-                                                  marginBottom: "0px",
-                                                  paddingLeft: "4px",
-                                                }}
-                                              >
-                                                {file.name.length > 30
-                                                  ? `${file.name.slice(
-                                                      0,
-                                                      20
-                                                    )}...`
-                                                  : file.name}
-                                              </span>
-                                            </a>
-                                          </div>
-                                        </li>
-                                      );
-                                    }
-                                  )
-                                ) : (
-                                  <h4>No File Found</h4>
-                                )}
-                              </div>
-                            )
-                          )}
-                          {this._checkingCurrentUserIsSecretaryDTO() && (
-                            <p
-                              className={styles.message}
-                              style={{ margin: "0px", textAlign: "right" }}
-                            >
-                              Allowed Formats (pdf,doc,docx,only) Upto 5MB max.
-                            </p>
-                          )}
-                          {this._checkingCurrentUserAsApproverDTOInSecretaryDTO() && (
-                            <div
-                              style={{
-                                padding: "6px",
-                                border: "1px solid rgb(211, 211, 211)",
-                                width: "100%",
-                              }}
-                            >
-                              <p>Gist Document</p>
-                              {this.state.secretaryGistDocsList.length > 0 ? (
-                                this.state.secretaryGistDocsList.map(
-                                  (file, index) => {
-                                    if (!file || !file.name) {
-                                      return null;
-                                    }
+             />
 
-                                    return (
-                                      <li
-                                        key={v4()}
-                                        style={{
-                                          width: "100%",
-                                          marginTop: "5px",
-                                        }}
-                                        className={`${styles.basicLi} ${styles.attachementli}`}
-                                      >
-                                        <div
-                                          className={`${styles.fileIconAndNameWithErrorContainer}`}
-                                        >
-                                          <img
-                                            alt="typeOfIconInGist2"
-                                            src={this._randomFileIcon(
-                                              file.name
-                                            )}
-                                            width={32}
-                                            height={32}
-                                          />
-
-                                          <a
-                                            data-interception="off"
-                                            className={styles.notePdfCustom}
-                                            href={
-                                              file.name
-                                                .toLowerCase()
-                                                .endsWith(".pdf")
-                                                ? file.fileUrl
-                                                : file.LinkingUri
-                                            }
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                              marginTop: "9px",
-                                              paddingLeft: "4px",
-                                              textDecoration: "none",
-                                            }}
-                                          >
-                                            <span
-                                              style={{
-                                                paddingBottom: "0px",
-                                                marginBottom: "0px",
-                                                paddingLeft: "4px",
-                                              }}
-                                            >
-                                              {file.name.length > 30
-                                                ? `${file.name.slice(0, 20)}...`
-                                                : file.name}
-                                            </span>
-                                          </a>
-                                        </div>
-                                      </li>
-                                    );
-                                  }
-                                )
-                              ) : (
-                                <h4>No File Found</h4>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {""}
-                      <div />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                ""
-              )}
-
-              <div className={styles.sectionContainer}>
-                <button
-                  className={styles.header}
-                  onClick={() => this._onToggleSection(`workflowLog`)}
-                >
-                  <Text className={styles.sectionText}>Workflow Log</Text>
-                  <IconButton
-                    iconProps={{
-                      iconName: expandSections.workflowLog
-                        ? "ChevronUp"
-                        : "ChevronDown",
-                    }}
-                    title="Expand/Collapse"
-                    ariaLabel="Expand/Collapse"
-                    className={styles.chevronIcon}
-                  />
-                </button>
-                {expandSections.workflowLog && (
-                  <div className={`${styles.expansionPanelInside}`}>
-                    <div style={{ padding: "15px", paddingTop: "4px" }}>
-                      <WorkFlowLogsTable
-                        data={this.state.auditTrail}
-                        type="Approver"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+           
 
               <div className={styles.sectionContainer}>
                 <button
@@ -4612,7 +4511,8 @@ export default class ViewForm extends React.Component<
                       }}
                     >
                       <p className={styles.responsiveHeading}>
-                        Main Note Link :<a
+                        Main Note Link :
+                        <a
                           href={this.state.noteTofiles[0]?.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -4628,7 +4528,8 @@ export default class ViewForm extends React.Component<
                             className={styles.responsiveHeading}
                             style={{ minWidth: "150px" }}
                           >
-                            Word Documents :<a
+                            Word Documents :
+                            <a
                               href={this.state.wordDocumentfiles[0]?.LinkingUri}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -4800,10 +4701,90 @@ export default class ViewForm extends React.Component<
     );
   };
 
+  private _getGistDocumentViewsAsList = ():any=>{
+    return  <div
+    style={{
+      padding: "6px",
+      border: "1px solid rgb(211, 211, 211)",
+      width: "100%",
+    }}
+  >
+    <p>Gist Document</p>
+    {this._checkingCurrentUserInSecretaryDTO() &&
+    this.state.secretaryGistDocsList.length > 0 ? (
+      this.state.secretaryGistDocsList.map(
+        (file, index) => {
+          if (!file || !file.name) {
+            return null;
+          }
+
+          return (
+            <li
+              key={v4()}
+              style={{
+                width: "100%",
+                marginTop: "5px",
+              }}
+              className={`${styles.basicLi} ${styles.attachementli}`}
+            >
+              <div
+                className={`${styles.fileIconAndNameWithErrorContainer}`}
+              >
+                <img
+                  alt="typeOfIconInGist1"
+                  src={this._randomFileIcon(
+                    file.name
+                  )}
+                  width={32}
+                  height={32}
+                />
+
+                <a
+                  data-interception="off"
+                  className={styles.notePdfCustom}
+                  href={
+                    file.name
+                      .toLowerCase()
+                      .endsWith(".pdf")
+                      ? file.fileUrl
+                      : file.LinkingUri
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    marginTop: "9px",
+                    paddingLeft: "4px",
+                    textDecoration: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      paddingBottom: "0px",
+                      marginBottom: "0px",
+                      paddingLeft: "4px",
+                    }}
+                  >
+                    {file.name.length > 30
+                      ? `${file.name.slice(
+                          0,
+                          20
+                        )}...`
+                      : file.name}
+                  </span>
+                </a>
+              </div>
+            </li>
+          );
+        }
+      )
+    ) : (
+      <h4>No File Found</h4>
+    )}
+  </div>
+  }
+
   public render(): React.ReactElement<IViewFormProps> {
     console.log(this.state);
-
- 
 
     return (
       <div className={styles.viewForm}>

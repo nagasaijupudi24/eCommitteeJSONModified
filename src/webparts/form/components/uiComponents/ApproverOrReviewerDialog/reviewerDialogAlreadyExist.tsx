@@ -5,10 +5,8 @@ import {
   Modal,
   PrimaryButton,
   IconButton,
-  IIconProps,
-  IModalStyles,
-  Stack,
-  Text,
+  
+  mergeStyleSets,
  
 } from "@fluentui/react";
 
@@ -19,95 +17,89 @@ interface MyModalProps {
 }
 
 
-const closeIcon: IIconProps = { iconName: 'Cancel' };
-const okIcon: IIconProps = { iconName: 'ReplyMirrored' }; 
+
 
 const ReviewerExistModal: React.FC<MyModalProps> = ({
   hidden,
   handleDialogBox,
 }) => {
 
-  const headerStyles: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "8px 12px",
-    borderBottom: "1px solid #ddd", 
-  };
-
- 
-  const alertStyles: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px", 
-  };
-
-
-  const footerStyles: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "flex-end",
-    padding: "12px 16px",
-    borderTop: "1px solid #ddd", 
-  };
-
- 
-  const modalStyles: IModalStyles = {
-    main: {
-      width: "100%",
-      maxWidth: "290px", 
-      "@media (min-width: 768px)": {
-        maxWidth: "580px", 
+  const styles = mergeStyleSets({
+      modal: {
+        padding: '10px',
+        minWidth: '300px',
+        maxWidth: '80vw',
+        width: '100%',
+        '@media (min-width: 768px)': {
+          maxWidth: '580px', 
+        },
+        '@media (max-width: 767px)': {
+          maxWidth: '290px', 
+        },
+        margin: 'auto',
+        backgroundColor: 'white',
+        borderRadius: '4px',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.26)',
       },
-    },
-    root: "",
-    scrollableContent: "",
-    layer: "",
-    keyboardMoveIconContainer: "",
-    keyboardMoveIcon: ""
-  };
-
-  return (
-    <Modal
-      isOpen={!hidden}
-      isBlocking={true}
-      onDismiss={handleDialogBox}
-      styles={modalStyles}
-    >
-     
-      <div style={headerStyles}>
-        
-        <div style={alertStyles}>
-        <IconButton iconProps={{ iconName: 'info' }} />
-          <Text variant="large">Alert</Text>
-        </div>
-
+      header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
        
-        <IconButton
-          iconProps={closeIcon}
-          ariaLabel="Close modal"
-          onClick={handleDialogBox}
-        />
-      </div>
+        
+        borderBottom: '1px solid #ddd',
+        minHeight: "50px",
+      },
+      headerTitle: {
+        margin:'5px',
+        marginLeft:'5px',
+        fontSize:'16px',
+        fontWeight:'400'
+       },
+      body: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        padding: '20px 0',
+      },
+      footer: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: '20px',
+        borderTop: '1px solid #ddd', 
+        paddingTop: '10px',
+      },
+    });
+  
+    return (
+      <Modal
+        isOpen={!hidden}
+        onDismiss={handleDialogBox}
+        isBlocking={true}
+        containerClassName={styles.modal}
+      >
+        <div className={styles.header}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton iconProps={{ iconName: 'Info' }} />
+            <h4 className={styles.headerTitle}>Alert</h4>
+          </div>
+          <IconButton iconProps={{ iconName: 'Cancel' }} onClick={handleDialogBox} />
+        </div>
+        <div className={styles.body}>
+          <p>The selected reviewer cannot be the same as existing Reviewers/ Approver/ Requester/ Current Actioner.</p>
+        </div>
+        <div className={styles.footer}>
+          <PrimaryButton iconProps={{ iconName: 'ReplyMirrored' }} onClick={()=>{
+            handleDialogBox()
+            
+          }} text="OK" />
+        </div>
+      </Modal>
+    );
 
-   
-      <Stack tokens={{ padding: "16px" }} horizontalAlign="center" verticalAlign="center">
-        <Text style={{ margin: "16px 0", fontSize: "14px", textAlign: "center" }}>
-          The selected reviewer cannot be the same as existing Reviewers/ Approver/ Requester/ Current Actioner.
-        </Text>
-      </Stack>
-
-     
-      <div style={footerStyles}>
-        <PrimaryButton
-          text="OK"
-          iconProps={okIcon} 
-          onClick={handleDialogBox}
-          ariaLabel="Confirm action"
-        />
-      </div>
-    </Modal>
-  );
+ 
 };
 
 export default ReviewerExistModal;
